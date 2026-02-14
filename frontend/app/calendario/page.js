@@ -197,11 +197,7 @@ export default function CalendarPage() {
                         </option>
                     ))}
                 </select>
-                {!isPrivileged && maxVisibleDay < 15 && (
-                    <div style={{ fontSize: '0.85em', color: 'var(--color-text-light)', marginTop: '0.5rem', fontStyle: 'italic' }}>
-                        * I giorni successivi saranno sbloccati automaticamente.
-                    </div>
-                )}
+                {/* Nota sbloccata rimossa come da richiesta utente */}
             </div>
 
             <div className="calendar-content animate-fade-in">
