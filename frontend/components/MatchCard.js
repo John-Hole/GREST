@@ -25,7 +25,12 @@ export default function MatchCard({ match, onClick, isAdminOrOperator }) {
                 </div>
                 {match.location && (
                     <div className="match-location-subtitle">
-                        {match.location}
+                        📍 {match.location}
+                    </div>
+                )}
+                {match.referee && (
+                    <div className="match-location-subtitle">
+                        👮 {match.referee}
                     </div>
                 )}
             </div>

@@ -43,7 +43,6 @@ export default function UserManagement() {
 
             const data = await res.json();
             if (res.ok) {
-                setMsg({ type: 'success', text: 'Utente creato con successo!' });
                 setForm({ username: '', password: '', role: 'operator' });
                 fetchUsers();
             } else {

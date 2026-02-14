@@ -123,18 +123,37 @@
 }
 
 @media (max-width: 767px) {
+    .match-card {
+        padding: 0.75rem;
+    }
+
+    .match-header {
+        margin-bottom: 0.5rem;
+    }
+
+    .match-game-name {
+        font-size: 1.1em;
+        margin-bottom: 2px;
+    }
+
+    .match-location-subtitle {
+        font-size: 0.85em;
+    }
+
+    /* Manteniamo flex-direction: row (default) invece di column */
     .match-teams {
-        flex-direction: column;
-        gap: var(--spacing-xs);
+        gap: 4px;
+        margin-bottom: 0.5rem;
     }
 
-    .match-team.home,
-    .match-team.away {
-        justify-content: center;
-        text-align: center;
+    .match-team {
+        font-size: 0.9em;
     }
 
+    /* Riduciamo leggermente lo score box */
     .match-score {
-        font-size: 1.3em;
+        font-size: 1.2em;
+        min-width: 60px;
+        padding: 2px 6px;
     }
 }

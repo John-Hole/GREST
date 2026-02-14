@@ -216,7 +216,7 @@ table {
 }
 
 .section-title {
-    font-size: var(--font-size-classifica-title);
+    font-size: 1.5em;
     font-weight: var(--font-weight-bold);
     color: var(--color-primary-medium);
     margin-bottom: var(--spacing-md);
@@ -426,4 +426,69 @@ table {
 
 .animate-slide-up {
     animation: slideInUp 0.4s ease forwards;
+}
+
+/* Game Programming Compact Styles */
+.prog-card {
+    padding: var(--spacing-md);
+}
+
+.prog-header {
+    font-weight: bold;
+    font-size: 0.9em;
+    color: var(--color-primary-medium);
+    margin-bottom: 1rem;
+    border-bottom: 1px solid var(--color-border);
+    padding-bottom: 0.5rem;
+}
+
+.prog-label {
+    font-size: 0.9em;
+    color: var(--color-text-medium);
+    margin-bottom: 0.3rem;
+    display: block;
+}
+
+.prog-input {
+    width: 100%;
+}
+
+/* Row for Location & Referee */
+.prog-compact-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-md);
+}
+
+@media (max-width: 767px) {
+    .prog-card {
+        padding: 0.5rem !important;
+    }
+
+    .prog-header {
+        margin-bottom: 0.5rem;
+        padding-bottom: 0.25rem;
+        font-size: 0.8em;
+    }
+
+    .prog-form-group {
+        margin-bottom: 0.4rem;
+    }
+
+    .prog-label {
+        font-size: 0.75em;
+        margin-bottom: 0.1rem;
+    }
+
+    .prog-input {
+        font-size: 0.85em !important;
+        padding: 4px 6px;
+        height: auto;
+    }
+
+    /* Force compact row on mobile too */
+    .prog-compact-row {
+        gap: 0.5rem;
+        grid-template-columns: 1fr 1fr;
+    }
 }

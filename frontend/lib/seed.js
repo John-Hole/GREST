@@ -35,7 +35,8 @@ function seedDatabase(db) {
         insertTeam.run(team.name, team.color_hex);
     }
 
-    // Seed locations
+    // Seed locations (Initial locations removed as per user request)
+    /*
     const insertLocation = db.prepare(
         'INSERT OR IGNORE INTO locations (name) VALUES (?)'
     );
@@ -43,6 +44,7 @@ function seedDatabase(db) {
     for (const loc of initialLocations) {
         insertLocation.run(loc);
     }
+    */
 
     // Seed matches using round-robin algorithm
     const insertMatch = db.prepare(

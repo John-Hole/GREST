@@ -101,7 +101,7 @@ export default function AdminConfigPage() {
 
     return (
         <div className="config-page animate-fade-in">
-            <h1 className="page-title">Configurazione Torneo</h1>
+            <h1 className="page-title">Configurazione</h1>
 
             <div className="tabs">
                 <button className={`tab ${activeTab === 'dates' ? 'active' : ''}`} onClick={() => setActiveTab('dates')}>
@@ -118,7 +118,7 @@ export default function AdminConfigPage() {
             <div className="card">
                 {activeTab === 'dates' && (
                     <form onSubmit={saveDates}>
-                        <h2 className="section-title">Date del Torneo</h2>
+                        <h2 className="section-title">Date</h2>
                         <div className="grid-2">
                             {dates.map(date => (
                                 <div key={date.day_number} className="form-group">

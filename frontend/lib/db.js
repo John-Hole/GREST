@@ -13,6 +13,22 @@ export function getDb() {
     authToken: authToken,
   });
 
+  // Locations table
+  client.execute(`
+    CREATE TABLE IF NOT EXISTS locations (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL UNIQUE
+    )
+  `).catch(err => console.error(err));
+
+  // Referees table
+  client.execute(`
+    CREATE TABLE IF NOT EXISTS referees (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL UNIQUE
+    )
+  `).catch(err => console.error(err));
+
   globalThis.__db = client;
   return client;
 }

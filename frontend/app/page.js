@@ -103,7 +103,7 @@ export default function Home() {
             m.day === last.day && m.timeSlot === last.timeSlot
           );
           currentDay = last.day;
-          slotTitle = `Fine Torneo (${formatSlotTitle(last.timeSlot)})`;
+          slotTitle = `Fine Giochi (${formatSlotTitle(last.timeSlot)})`;
         }
       }
 

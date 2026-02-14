@@ -2,13 +2,13 @@ import '../styles/design-tokens.css';
 import '../styles/globals.css';
 import { AuthProvider } from '@/components/AuthProvider';
 import { ToastProvider } from '@/components/Toast';
+import { NavProvider } from '@/components/NavContext';
 import Navbar from '@/components/Navbar';
 import Sidebar from '@/components/Sidebar';
-import BottomNav from '@/components/BottomNav';
 
 export const metadata = {
-  title: 'Grest PSG Tournament',
-  description: 'Sistema gestione torneo Grest PSG',
+  title: 'Grest PSG',
+  description: 'Sistema gestione Grest PSG',
 };
 
 export default function RootLayout({ children }) {
@@ -22,14 +22,15 @@ export default function RootLayout({ children }) {
       <body>
         <AuthProvider>
           <ToastProvider>
-            <div className="app-container">
-              <Navbar />
-              <Sidebar />
-              <main className="main-content">
-                {children}
-              </main>
-              <BottomNav />
-            </div>
+            <NavProvider>
+              <div className="app-container">
+                <Navbar />
+                <Sidebar />
+                <main className="main-content">
+                  {children}
+                </main>
+              </div>
+            </NavProvider>
           </ToastProvider>
         </AuthProvider>
       </body>
