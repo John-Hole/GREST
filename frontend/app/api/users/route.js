@@ -65,10 +65,18 @@ export async function PUT(request) {
     try {
         await requireAdmin();
         const body = await request.json();
-        const { id, password, role } = body;
+        let { id, password, role } = body;
+
+        console.log(`PUT /api/users called for ID: ${id}, Role update: ${role}, Password update: ${!!password}`);
 
         if (!id) {
             return NextResponse.json({ message: 'ID mancante' }, { status: 400 });
+        }
+
+        // Ensure ID is integer
+        const userId = parseInt(id, 10);
+        if (isNaN(userId)) {
+            return NextResponse.json({ message: 'ID non valido' }, { status: 400 });
         }
 
         const db = getDb();
@@ -82,6 +90,7 @@ export async function PUT(request) {
             const hash = await bcrypt.hash(password, 10);
             updates.push("password_hash = ?");
             params.push(hash);
+            console.log(`Password hash generated for user ${userId}`);
         }
 
         if (role) {
@@ -97,12 +106,18 @@ export async function PUT(request) {
             return NextResponse.json({ message: 'Nessun dato da aggiornare' }, { status: 400 });
         }
 
-        params.push(id);
+        params.push(userId);
 
-        await db.execute({
+        const result = await db.execute({
             sql: `UPDATE users SET ${updates.join(", ")} WHERE id = ?`,
             args: params
         });
+
+        console.log(`Update execution result: rowsAffected=${result.rowsAffected}`);
+
+        if (result.rowsAffected === 0) {
+            return NextResponse.json({ message: 'Utente non trovato o nessuna modifica' }, { status: 404 });
+        }
 
         return NextResponse.json({ success: true });
     } catch (error) {
