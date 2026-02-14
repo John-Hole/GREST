@@ -61,6 +61,7 @@ function generatePeriodMatchesWithDiversity(teams, timeSlots, recentPairings, gl
 
 /**
  * Try to assign teams to fields for a single time slot, avoiding recent pairings
+ * and ensuring field rotation.
  */
 function tryAssignSlotWithDiversity(teams, fields, teamFieldAssignment, slot, matches, recentPairings, periodPairings, globalPairingCounts, attempts = 0) {
     const MAX_ATTEMPTS = 500;
@@ -68,10 +69,11 @@ function tryAssignSlotWithDiversity(teams, fields, teamFieldAssignment, slot, ma
     if (attempts > MAX_ATTEMPTS) {
         // Fallback: just assign randomly
         const shuffled = shuffle([...teams]);
+        const slotMatches = [];
         for (let f = 0; f < fields.length; f++) {
             const home = shuffled[f * 2];
             const away = shuffled[f * 2 + 1];
-            matches.push({
+            slotMatches.push({
                 timeSlot: slot,
                 field: fields[f],
                 home,
@@ -85,20 +87,37 @@ function tryAssignSlotWithDiversity(teams, fields, teamFieldAssignment, slot, ma
             periodPairings.add(key);
             globalPairingCounts.set(key, (globalPairingCounts.get(key) || 0) + 1);
         }
+        // Ensure deterministic order by field index
+        slotMatches.sort((a, b) => a.field - b.field);
+        matches.push(...slotMatches);
         return true;
     }
 
-    // Get available teams
+    // Get available teams (teams that played less than 3 times in this period)
     const availableTeams = teams.filter(t => teamFieldAssignment.get(t).length < 3);
 
     if (availableTeams.length < 6) {
         return tryAssignSlotWithDiversity(teams, fields, teamFieldAssignment, slot, matches, recentPairings, periodPairings, globalPairingCounts, attempts + 1);
     }
 
-    // Try to create 3 pairings, preferring less-used pairs
-    let bestPairings = null;
+    let bestMatches = null;
     let bestScore = -Infinity;
-    let bestFieldAssignment = null;
+
+    // Helper to get all permutations
+    const getPermutations = (arr) => {
+        if (arr.length <= 1) return [arr];
+        const result = [];
+        for (let i = 0; i < arr.length; i++) {
+            const char = arr[i];
+            const remaining = arr.slice(0, i).concat(arr.slice(i + 1));
+            for (let p of getPermutations(remaining)) {
+                result.push([char].concat(p));
+            }
+        }
+        return result;
+    };
+
+    const fieldPermutations = getPermutations([...fields]);
 
     for (let attempt = 0; attempt < 100; attempt++) {
         const shuffled = shuffle(availableTeams);
@@ -108,72 +127,64 @@ function tryAssignSlotWithDiversity(teams, fields, teamFieldAssignment, slot, ma
             [shuffled[4], shuffled[5]]
         ];
 
-        // Try to find valid field assignments for these pairings
-        const shuffledFields = shuffle([...fields]);
-        let fieldsValid = true;
-
-        for (let i = 0; i < candidatePairings.length; i++) {
-            const [home, away] = candidatePairings[i];
-            const field = shuffledFields[i];
-
-            if (teamFieldAssignment.get(home).includes(field) ||
-                teamFieldAssignment.get(away).includes(field)) {
-                fieldsValid = false;
+        // Try to find ANY valid field assignment for these pairings
+        let validPermutation = null;
+        for (const p of fieldPermutations) {
+            let ok = true;
+            for (let i = 0; i < candidatePairings.length; i++) {
+                const [home, away] = candidatePairings[i];
+                const field = p[i];
+                if (teamFieldAssignment.get(home).includes(field) ||
+                    teamFieldAssignment.get(away).includes(field)) {
+                    ok = false;
+                    break;
+                }
+            }
+            if (ok) {
+                validPermutation = p;
                 break;
             }
         }
 
-        if (!fieldsValid) continue;
+        if (!validPermutation) continue;
 
         // Score this set of pairings
         let score = 0;
-
         for (const [home, away] of candidatePairings) {
             const key = getPairingKey(home, away);
-
-            // Strong penalty for recent pairings
-            if (recentPairings.has(key)) {
-                score -= 1000;
-            }
-
-            // Penalty for pairings already in this period
-            if (periodPairings.has(key)) {
-                score -= 500;
-            }
-
-            // Prefer pairings that haven't been used as much
+            if (recentPairings.has(key)) score -= 1000;
+            if (periodPairings.has(key)) score -= 500;
             const count = globalPairingCounts.get(key) || 0;
             score -= count * 10;
         }
 
         if (score > bestScore) {
             bestScore = score;
-            bestPairings = candidatePairings;
-            bestFieldAssignment = shuffledFields;
+            const currentMatches = [];
+            for (let i = 0; i < candidatePairings.length; i++) {
+                currentMatches.push({
+                    timeSlot: slot,
+                    field: validPermutation[i],
+                    home: candidatePairings[i][0],
+                    away: candidatePairings[i][1]
+                });
+            }
+            bestMatches = currentMatches;
         }
     }
 
-    if (bestPairings === null) {
-        // Couldn't find valid assignment, try again with different teams
+    if (bestMatches === null) {
         return tryAssignSlotWithDiversity(teams, fields, teamFieldAssignment, slot, matches, recentPairings, periodPairings, globalPairingCounts, attempts + 1);
     }
 
-    // Commit the assignment
-    for (let i = 0; i < bestPairings.length; i++) {
-        const [home, away] = bestPairings[i];
-        const field = bestFieldAssignment[i];
+    // Commit best matches (sorted by field for UI stability)
+    bestMatches.sort((a, b) => a.field - b.field);
+    for (const m of bestMatches) {
+        matches.push(m);
+        teamFieldAssignment.get(m.home).push(m.field);
+        teamFieldAssignment.get(m.away).push(m.field);
 
-        matches.push({
-            timeSlot: slot,
-            field,
-            home,
-            away
-        });
-
-        teamFieldAssignment.get(home).push(field);
-        teamFieldAssignment.get(away).push(field);
-
-        const key = getPairingKey(home, away);
+        const key = getPairingKey(m.home, m.away);
         recentPairings.add(key);
         periodPairings.add(key);
         globalPairingCounts.set(key, (globalPairingCounts.get(key) || 0) + 1);
@@ -189,13 +200,11 @@ const TEAMS = [1, 2, 3, 4, 5, 6];
 
 function generateAllMatches() {
     const allMatches = [];
-    const globalPairingCounts = new Map(); // Track total pairing counts
+    const globalPairingCounts = new Map();
 
     for (let day = 1; day <= 15; day++) {
-        // Track recent pairings (last 6 slots = 1 period)
         const recentPairings = new Set();
 
-        // Generate morning matches
         const morningMatches = generatePeriodMatchesWithDiversity(
             TEAMS,
             TIME_SLOTS_MORNING,
@@ -203,10 +212,8 @@ function generateAllMatches() {
             globalPairingCounts
         );
 
-        // Clear recent for afternoon (but keep global counts)
         recentPairings.clear();
 
-        // Generate afternoon matches
         const afternoonMatches = generatePeriodMatchesWithDiversity(
             TEAMS,
             TIME_SLOTS_AFTERNOON,
@@ -214,7 +221,7 @@ function generateAllMatches() {
             globalPairingCounts
         );
 
-        // Combine and format
+        // Matches are already sorted by field within each slot by tryAssignSlotWithDiversity
         [...morningMatches, ...afternoonMatches].forEach(m => {
             allMatches.push({
                 day,

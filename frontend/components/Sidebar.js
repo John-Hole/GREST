@@ -108,8 +108,8 @@ export default function Sidebar() {
                                 className={`sidebar-link ${isActive('/admin/impostazioni') ? 'active' : ''}`}
                                 onClick={closeSidebar}
                             >
-                                <span className="sidebar-link-icon">⚙️</span>
-                                <span className="sidebar-link-label">Impostazioni</span>
+                                <span className="sidebar-link-icon">📋</span>
+                                <span className="sidebar-link-label">Liste</span>
                             </Link>
 
                             <Link

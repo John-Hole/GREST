@@ -51,7 +51,7 @@ export default function ImpostazioniPage() {
 
     return (
         <div className="impostazioni-page animate-fade-in">
-            <h1 className="page-title">⚙️ Impostazioni</h1>
+            <h1 className="page-title">📋 Liste</h1>
 
             {msg && (
                 <div className={`notification ${msg.type === 'error' ? 'notification-error' : 'notification-success'}`} style={{ marginBottom: '1.5rem' }}>
@@ -59,7 +59,7 @@ export default function ImpostazioniPage() {
                 </div>
             )}
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', maxWidth: '1200px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem', maxWidth: '1200px' }}>
                 {/* Locations Management */}
                 <div className="card" style={{ padding: '2rem' }}>
                     <h2 style={{ fontSize: '1.3em', marginBottom: '1.5rem', color: 'var(--color-primary-medium)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -131,11 +131,14 @@ export default function ImpostazioniPage() {
                                         onClick={async () => {
                                             if (confirm(`Eliminare "${loc.name}"?`)) {
                                                 try {
-                                                    await fetch(`/api/locations?id=${loc.id}`, { method: 'DELETE' });
+                                                    const res = await fetch(`/api/locations?id=${loc.id}`, { method: 'DELETE' });
+                                                    if (!res.ok) throw new Error('Errore durante l\'eliminazione');
                                                     fetchLocations();
+                                                    setMsg({ type: 'success', text: 'Luogo eliminato' });
                                                     setTimeout(() => setMsg(null), 3000);
                                                 } catch (e) {
                                                     console.error(e);
+                                                    alert('Impossibile eliminare il luogo. Riprova.');
                                                 }
                                             }
                                         }}
@@ -229,11 +232,14 @@ export default function ImpostazioniPage() {
                                         onClick={async () => {
                                             if (confirm(`Eliminare "${ref.name}"?`)) {
                                                 try {
-                                                    await fetch(`/api/referees?id=${ref.id}`, { method: 'DELETE' });
+                                                    const res = await fetch(`/api/referees?id=${ref.id}`, { method: 'DELETE' });
+                                                    if (!res.ok) throw new Error('Errore durante l\'eliminazione');
                                                     fetchReferees();
+                                                    setMsg({ type: 'success', text: 'Arbitro eliminato' });
                                                     setTimeout(() => setMsg(null), 3000);
                                                 } catch (e) {
                                                     console.error(e);
+                                                    alert('Impossibile eliminare l\'arbitro. Riprova.');
                                                 }
                                             }
                                         }}

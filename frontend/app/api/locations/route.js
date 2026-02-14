@@ -49,3 +49,25 @@ export async function POST(request) {
         return NextResponse.json({ message: 'Error creating location' }, { status: 500 });
     }
 }
+
+export async function DELETE(request) {
+    try {
+        const { searchParams } = new URL(request.url);
+        const id = searchParams.get('id');
+
+        if (!id) {
+            return NextResponse.json({ message: 'ID required' }, { status: 400 });
+        }
+
+        const db = getDb();
+        await db.execute({
+            sql: 'DELETE FROM locations WHERE id = ?',
+            args: [id]
+        });
+
+        return NextResponse.json({ message: 'Location deleted' }, { status: 200 });
+    } catch (error) {
+        console.error('Error deleting location:', error);
+        return NextResponse.json({ message: 'Error deleting location' }, { status: 500 });
+    }
+}

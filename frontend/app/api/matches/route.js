@@ -23,7 +23,7 @@ export async function GET(request) {
             params.push(day);
         }
 
-        query += ' ORDER BY m.day ASC, m.time_slot ASC, m.location ASC';
+        query += ' ORDER BY m.day ASC, m.time_slot ASC, m.id ASC';
 
         const { rows: matches } = await db.execute({
             sql: query,

@@ -24,6 +24,41 @@ export default function CalendarPage() {
     const [editingMatch, setEditingMatch] = useState(null);
     const [isSaving, setIsSaving] = useState(false);
     const [isExporting, setIsExporting] = useState(false);
+    const [showTimes, setShowTimes] = useState(true);
+
+    useEffect(() => {
+        const check = () => setShowTimes(localStorage.getItem('showTurnTimes') !== 'false');
+        check();
+        window.addEventListener('storage', check);
+        return () => window.removeEventListener('storage', check);
+    }, []);
+
+    // Calcolo Giorno Corrente e Visibilità
+    // Usa start date da env o default a oggi
+    const startDateStr = process.env.NEXT_PUBLIC_TOURNAMENT_START_DATE;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const startDate = startDateStr ? new Date(startDateStr) : new Date();
+    startDate.setHours(0, 0, 0, 0);
+
+    const diffTime = today - startDate;
+    // Calcola giorno corrente (1-based)
+    const currentTournamentDay = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
+
+    const isPrivileged = user && (user.role === 'admin' || user.role === 'operator');
+
+    // Se admin vede tutto (15). Se user, vede fino a oggi (min 1, max 15).
+    const maxVisibleDay = isPrivileged ? 15 : Math.max(1, Math.min(currentTournamentDay, 15));
+
+    // Filtro i giorni disponibili per il selettore
+    const visibleDays = tournamentDays.filter(d => d <= maxVisibleDay);
+
+    // Se l'utente è su un giorno futuro (es. refresh), riportalo all'ultimo visibile
+    useEffect(() => {
+        if (!loading && selectedDay > maxVisibleDay) {
+            setSelectedDay(maxVisibleDay);
+        }
+    }, [selectedDay, maxVisibleDay, loading]);
 
     useEffect(() => {
         fetchMatches();
@@ -131,17 +166,42 @@ export default function CalendarPage() {
                 </button>
             </div>
 
-            <div className="tabs">
-                {tournamentDays.map(day => (
-                    <button
-                        key={day}
-                        className={`tab ${selectedDay === day ? 'active' : ''}`}
-                        onClick={() => setSelectedDay(day)}
-                    >
-                        Giorno {day}
-                    </button>
-                ))}
-                {/* Mobile: maybe use select if too many tabs? CSS overflow handles tabs usually */}
+            <div className="day-selector-container" style={{ marginBottom: '1.5rem' }}>
+                <label htmlFor="day-select" style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold', color: 'var(--color-text-dark)' }}>
+                    Seleziona Giorno:
+                </label>
+                <select
+                    id="day-select"
+                    value={selectedDay}
+                    onChange={(e) => setSelectedDay(Number(e.target.value))}
+                    style={{
+                        width: '100%',
+                        padding: '0.8rem',
+                        fontSize: '1.1rem',
+                        border: '2px solid var(--color-primary)',
+                        borderRadius: 'var(--radius-sm)',
+                        backgroundColor: 'white',
+                        color: 'var(--color-text-dark)',
+                        cursor: 'pointer',
+                        outline: 'none',
+                        appearance: 'none', /* Custom arrow would be nice but default is ok */
+                        backgroundImage: 'url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23FF8C42%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E")',
+                        backgroundRepeat: 'no-repeat',
+                        backgroundPosition: 'right 0.7rem top 50%',
+                        backgroundSize: '0.65rem auto'
+                    }}
+                >
+                    {visibleDays.map(day => (
+                        <option key={day} value={day}>
+                            Giorno {day} {day === currentTournamentDay && !isPrivileged ? '(Oggi)' : ''}
+                        </option>
+                    ))}
+                </select>
+                {!isPrivileged && maxVisibleDay < 15 && (
+                    <div style={{ fontSize: '0.85em', color: 'var(--color-text-light)', marginTop: '0.5rem', fontStyle: 'italic' }}>
+                        * I giorni successivi saranno sbloccati automaticamente.
+                    </div>
+                )}
             </div>
 
             <div className="calendar-content animate-fade-in">
@@ -152,7 +212,7 @@ export default function CalendarPage() {
 
                     return (
                         <div key={slot} className="time-slot-section">
-                            <div className="time-slot-header">Turno {MORNING_SLOTS.indexOf(slot) + 1} mattina</div>
+                            <div className="time-slot-header">Turno {MORNING_SLOTS.indexOf(slot) + 1} mattina {showTimes ? <span style={{ fontWeight: 'normal', fontSize: '0.9em', marginLeft: '0.5rem', color: 'var(--color-text-medium)' }}>({slot})</span> : ''}</div>
                             <div className="grid-3 matches-grid">
                                 {slotMatches.map(match => (
                                     <MatchCard
@@ -174,7 +234,7 @@ export default function CalendarPage() {
 
                     return (
                         <div key={slot} className="time-slot-section">
-                            <div className="time-slot-header">Turno {AFTERNOON_SLOTS.indexOf(slot) + 1} pomeriggio</div>
+                            <div className="time-slot-header">Turno {AFTERNOON_SLOTS.indexOf(slot) + 1} pomeriggio {showTimes ? <span style={{ fontWeight: 'normal', fontSize: '0.9em', marginLeft: '0.5rem', color: 'var(--color-text-medium)' }}>({slot})</span> : ''}</div>
                             <div className="grid-3 matches-grid">
                                 {slotMatches.map(match => (
                                     <MatchCard

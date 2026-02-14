@@ -46,7 +46,7 @@ const formatSlotTitle = (timeSlot) => {
     '15:30': 'Turno 2 pomeriggio',
     '16:00': 'Turno 3 pomeriggio'
   };
-  return mapping[timeSlot] || 'Prossimo Turno';
+  return mapping[timeSlot] ? `${mapping[timeSlot]} (${timeSlot})` : 'Prossimo Turno';
 };
 
 export default function Home() {
