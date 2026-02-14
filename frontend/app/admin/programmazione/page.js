@@ -11,12 +11,12 @@ export default function ProgrammazionePage() {
     const router = useRouter();
 
     useEffect(() => {
-        if (!isLoading && (!user || user.role !== 'admin')) {
+        if (!isLoading && (!user || !['admin', 'admin_giochi'].includes(user.role))) {
             // router.push('/'); 
         }
-    }, [user, isLoading]);
+    }, [user, isLoading, router]);
 
-    if (isLoading || (user?.role !== 'admin')) {
+    if (isLoading || !['admin', 'admin_giochi'].includes(user?.role)) {
         if (!isLoading) return <div className="empty-state">🚫 Accesso Negato</div>;
         return <div className="spinner-container" style={{ textAlign: 'center', padding: '50px' }}><div className="spinner"></div></div>;
     }

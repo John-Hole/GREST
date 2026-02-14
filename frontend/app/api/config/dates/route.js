@@ -1,10 +1,10 @@
 import { NextResponse } from 'next/server';
 import { getDb } from '@/lib/db';
-import { requireAdmin } from '@/lib/auth';
+import { requireAdminGiochi } from '@/lib/auth';
 
 export async function GET() {
     try {
-        const user = await requireAdmin();
+        const user = await requireAdminGiochi();
         const db = getDb();
         const { rows: config } = await db.execute('SELECT * FROM tournament_config ORDER BY day_number ASC');
         return NextResponse.json(config);
@@ -15,7 +15,7 @@ export async function GET() {
 
 export async function PUT(request) {
     try {
-        const user = await requireAdmin();
+        const user = await requireAdminGiochi();
         const { dates } = await request.json();
 
         const db = getDb();

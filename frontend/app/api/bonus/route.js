@@ -1,10 +1,10 @@
 import { NextResponse } from 'next/server';
 import { getDb } from '@/lib/db';
-import { requireAdmin } from '@/lib/auth';
+import { requireArbitro } from '@/lib/auth';
 
 export async function GET() {
     try {
-        const user = await requireAdmin();
+        const user = await requireArbitro();
         const db = getDb();
 
         // Return joined data
@@ -27,7 +27,7 @@ export async function GET() {
 
 export async function POST(request) {
     try {
-        const user = await requireAdmin();
+        const user = await requireArbitro();
         const { teamId, points, reason, day } = await request.json();
 
         if (!teamId || !reason || !day) {

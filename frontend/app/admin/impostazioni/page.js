@@ -12,13 +12,13 @@ export default function ImpostazioniPage() {
     const [msg, setMsg] = useState(null);
 
     useEffect(() => {
-        if (!isLoading && (!user || user.role !== 'admin')) {
+        if (!isLoading && (!user || !['admin', 'admin_giochi'].includes(user.role))) {
             // router.push('/');
         }
-    }, [user, isLoading]);
+    }, [user, isLoading, router]);
 
     useEffect(() => {
-        if (user?.role === 'admin') {
+        if (['admin', 'admin_giochi'].includes(user?.role)) {
             fetchLocations();
             fetchReferees();
         }
@@ -44,7 +44,7 @@ export default function ImpostazioniPage() {
         }
     };
 
-    if (isLoading || (user?.role !== 'admin')) {
+    if (isLoading || !['admin', 'admin_giochi'].includes(user?.role)) {
         if (!isLoading) return <div className="empty-state">🚫 Accesso Negato</div>;
         return <div className="spinner-container" style={{ textAlign: 'center', padding: '50px' }}><div className="spinner"></div></div>;
     }

@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 
 export default function UserManagement() {
     const [users, setUsers] = useState([]);
-    const [form, setForm] = useState({ username: '', password: '', role: 'operator' });
+    const [form, setForm] = useState({ username: '', password: '', role: 'arbitro' });
     const [loading, setLoading] = useState(false);
     const [msg, setMsg] = useState(null);
 
@@ -43,7 +43,7 @@ export default function UserManagement() {
 
             const data = await res.json();
             if (res.ok) {
-                setForm({ username: '', password: '', role: 'operator' });
+                setForm({ username: '', password: '', role: 'arbitro' });
                 fetchUsers();
             } else {
                 setMsg({ type: 'error', text: data.message || 'Errore durante la creazione.' });
@@ -52,6 +52,24 @@ export default function UserManagement() {
             setMsg({ type: 'error', text: 'Errore di connessione.' });
         } finally {
             setLoading(false);
+        }
+    };
+
+    const getRoleBadgeClass = (role) => {
+        switch (role) {
+            case 'admin': return 'badge-primary';
+            case 'admin_giochi': return 'badge-success';
+            case 'arbitro': return 'badge-info';
+            default: return 'badge-secondary';
+        }
+    };
+
+    const getRoleLabel = (role) => {
+        switch (role) {
+            case 'admin': return 'Admin Totale';
+            case 'admin_giochi': return 'Admin Giochi';
+            case 'arbitro': return 'Arbitro';
+            default: return role;
         }
     };
 
@@ -91,8 +109,9 @@ export default function UserManagement() {
                         onChange={handleChange}
                         className="input-field"
                     >
-                        <option value="operator">Operatore</option>
-                        <option value="admin">Admin</option>
+                        <option value="arbitro">Arbitro</option>
+                        <option value="admin_giochi">Admin Giochi</option>
+                        <option value="admin">Admin Totale</option>
                     </select>
                 </div>
                 <button type="submit" className="btn btn-primary" disabled={loading}>
@@ -120,8 +139,8 @@ export default function UserManagement() {
                             <tr key={user.id}>
                                 <td>{user.username}</td>
                                 <td>
-                                    <span className={`badge ${user.role === 'admin' ? 'badge-primary' : 'badge-secondary'}`}>
-                                        {user.role}
+                                    <span className={`badge ${getRoleBadgeClass(user.role)}`}>
+                                        {getRoleLabel(user.role)}
                                     </span>
                                 </td>
                                 <td>{new Date(user.created_at).toLocaleDateString()}</td>

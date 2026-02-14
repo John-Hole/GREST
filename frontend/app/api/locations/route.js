@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getDb } from '@/lib/db';
 import { z } from 'zod';
+import { requireAdminGiochi } from '@/lib/auth';
 
 const locationSchema = z.object({
     name: z.string().min(1, "Location name is required"),
@@ -19,6 +20,7 @@ export async function GET() {
 
 export async function POST(request) {
     try {
+        await requireAdminGiochi();
         const body = await request.json();
         const validation = locationSchema.safeParse(body);
 
@@ -45,6 +47,9 @@ export async function POST(request) {
 
         return NextResponse.json({ id: Number(result.lastInsertRowid), name }, { status: 201 });
     } catch (error) {
+        if (error.message === 'Forbidden' || error.message === 'Unauthorized') {
+            return NextResponse.json({ message: error.message }, { status: 403 });
+        }
         console.error('Error creating location:', error);
         return NextResponse.json({ message: 'Error creating location' }, { status: 500 });
     }
@@ -52,6 +57,7 @@ export async function POST(request) {
 
 export async function DELETE(request) {
     try {
+        await requireAdminGiochi();
         const { searchParams } = new URL(request.url);
         const id = searchParams.get('id');
 
@@ -67,6 +73,9 @@ export async function DELETE(request) {
 
         return NextResponse.json({ message: 'Location deleted' }, { status: 200 });
     } catch (error) {
+        if (error.message === 'Forbidden' || error.message === 'Unauthorized') {
+            return NextResponse.json({ message: error.message }, { status: 403 });
+        }
         console.error('Error deleting location:', error);
         return NextResponse.json({ message: 'Error deleting location' }, { status: 500 });
     }

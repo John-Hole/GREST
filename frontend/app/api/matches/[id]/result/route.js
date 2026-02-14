@@ -1,10 +1,10 @@
 import { NextResponse } from 'next/server';
 import { getDb } from '@/lib/db';
-import { requireOperatorOrAdmin } from '@/lib/auth';
+import { requireArbitro } from '@/lib/auth';
 
 export async function PUT(request, { params }) {
     try {
-        const user = await requireOperatorOrAdmin();
+        const user = await requireArbitro();
         const id = (await params).id;
         const { scoreHome, scoreAway, refereeNotes } = await request.json();
 

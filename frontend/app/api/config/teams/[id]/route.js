@@ -1,10 +1,10 @@
 import { NextResponse } from 'next/server';
 import { getDb } from '@/lib/db';
-import { requireAdmin } from '@/lib/auth';
+import { requireAdminGiochi } from '@/lib/auth';
 
 export async function PUT(request, { params }) {
     try {
-        const user = await requireAdmin();
+        const user = await requireAdminGiochi();
         const id = (await params).id;
         const { name, colorHex } = await request.json();
 

@@ -54,9 +54,19 @@ async function requireAdmin() {
     return user;
 }
 
-async function requireOperatorOrAdmin() {
+async function requireAdminGiochi() {
     const user = await requireAuth();
-    if (user.role !== 'admin' && user.role !== 'operator') {
+    // admin_giochi or higher (admin)
+    if (user.role !== 'admin' && user.role !== 'admin_giochi') {
+        throw new Error('Forbidden');
+    }
+    return user;
+}
+
+async function requireArbitro() {
+    const user = await requireAuth();
+    // arbitro or higher (admin_giochi, admin)
+    if (user.role !== 'admin' && user.role !== 'admin_giochi' && user.role !== 'arbitro') {
         throw new Error('Forbidden');
     }
     return user;
@@ -76,7 +86,8 @@ module.exports = {
     getAuthUser,
     requireAuth,
     requireAdmin,
-    requireOperatorOrAdmin,
+    requireAdminGiochi,
+    requireArbitro,
     createTokenCookie,
     clearTokenCookie,
     COOKIE_NAME,

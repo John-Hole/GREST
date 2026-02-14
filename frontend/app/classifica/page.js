@@ -42,28 +42,27 @@ export default function ClassificaPage() {
 
     // Recalculate standings based on range
     const filteredStandings = standings.map(team => {
-        // Create a shallow copy to not mutate state
         const newTeam = { ...team };
-
-        // Calculate totals for the specific range
         let rangeTotal = 0;
-        let rangeBonus = 0;
+        let rangeGoalsFor = 0;
+        let rangeGoalsAgainst = 0;
 
         if (newTeam.dailyPoints) {
+            // We need to find matches for this team in the range to calculate goalDiff properly
+            // BUT the API currently only sends dailyPoints. 
+            // WAIT, the API sends match data? No, standings/route.js sends summarized team data.
+            // If I want range-specific goalDiff, I'd need match-level data on the client OR an API update.
+            // However, common practice in these tournaments is: 
+            // Weekly points are for the week, but Goal Diff can be global or range-specific.
+            // If the user wants "Settimana 1", they likely want stats for that period.
+            // Since I can't calculate range goals without matches, I will show points of the week
+            // but keep goalDiff global for sorting, UNLESS I fetch matches too.
+            // BUT wait, looking at standings/route.js, it ONLY summarizes.
+            // Let's assume for now we use global goalDiff as tie-breaker even for weeks,
+            // or I just stick to points. 
+            // OPTIMIZATION: I'll accept that for now rangeTotal is the key.
             for (let day = start; day <= end; day++) {
                 rangeTotal += (newTeam.dailyPoints[day] || 0);
-                // Note: dailyPoints already includes bonus. 
-                // We don't have separate dailyBonus in this structure easily accessible without parsing.
-                // But 'bonusMalusTotal' in API is global.
-                // However, StandingsTable displays 'bonusMalusTotal'. 
-                // If we want range-specific bonus, we'd need that info.
-                // For now, let's just update 'totalPoints' which is the main ranking metric.
-                // 'bonusMalusTotal' will remain global or we need to fetch bonus details.
-                // API `dailyPoints` includes bonus. So `rangeTotal` is correct points-wise.
-                // But the "Bonus" column in table usually shows the aggregate bonus.
-                // If user filters S1, maybe they want S1 bonuses?
-                // The API doesn't give daily breakdown of bonuses separately in the team object, only total.
-                // I'll keep bonusMalusTotal as global for now, or just not display it/display global.
             }
         }
 
@@ -71,9 +70,9 @@ export default function ClassificaPage() {
         return newTeam;
     }).sort((a, b) => {
         if (b.totalPoints !== a.totalPoints) return b.totalPoints - a.totalPoints;
-        // Goal diff etc would need finding matches in range... too complex for client-only without more data.
-        // Fallback to global stats for tie-breakers? Or just total points.
-        return 0;
+        // Tie-breaker: Global stats since we don't have range-specific matches here
+        if (b.goalDiff !== a.goalDiff) return b.goalDiff - a.goalDiff;
+        return b.goalsFor - a.goalsFor;
     });
 
     if (loading) {
@@ -82,19 +81,38 @@ export default function ClassificaPage() {
 
     return (
         <div className="classifica-page animate-fade-in">
-            <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                <h1 className="page-title" style={{ margin: 0 }}>Classifica</h1>
-                <select
-                    value={viewMode}
-                    onChange={(e) => setViewMode(e.target.value)}
-                    className="select-styled"
-                    style={{ width: 'auto', minWidth: '150px' }}
-                >
-                    <option value="general">Generale (1-15)</option>
-                    <option value="s1">Settimana 1</option>
-                    <option value="s2">Settimana 2</option>
-                    <option value="s3">Settimana 3</option>
-                </select>
+            <div className="page-header" style={{ marginBottom: '2rem' }}>
+                <h1 className="page-title" style={{ marginBottom: '1.5rem' }}>Classifica Torneo</h1>
+
+                <div className="filter-tabs" style={{
+                    display: 'flex',
+                    gap: '0.5rem',
+                    overflowX: 'auto',
+                    paddingBottom: '0.5rem',
+                    marginBottom: '1rem'
+                }}>
+                    {[
+                        { id: 'general', label: 'Generale' },
+                        { id: 's1', label: 'Settimana 1' },
+                        { id: 's2', label: 'Settimana 2' },
+                        { id: 's3', label: 'Settimana 3' }
+                    ].map(tab => (
+                        <button
+                            key={tab.id}
+                            onClick={() => setViewMode(tab.id)}
+                            className={`btn ${viewMode === tab.id ? 'btn-primary' : 'btn-secondary'}`}
+                            style={{
+                                whiteSpace: 'nowrap',
+                                padding: '0.6rem 1.2rem',
+                                borderRadius: 'var(--radius-md)',
+                                fontSize: '0.9rem',
+                                fontWeight: '600'
+                            }}
+                        >
+                            {tab.label}
+                        </button>
+                    ))}
+                </div>
             </div>
 
             <StandingsTable

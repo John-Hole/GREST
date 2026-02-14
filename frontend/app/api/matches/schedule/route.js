@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getDb } from '@/lib/db';
 import { z } from 'zod';
+import { requireAdminGiochi } from '@/lib/auth';
 
 const updateMatchSchema = z.object({
     id: z.number(),
@@ -14,6 +15,7 @@ const updateMatchSchema = z.object({
 
 export async function PUT(request) {
     try {
+        await requireAdminGiochi();
         const body = await request.json();
         const db = getDb();
 
@@ -48,6 +50,9 @@ export async function PUT(request) {
 
         return NextResponse.json({ message: 'Matches updated successfully', count: items.length });
     } catch (error) {
+        if (error.message === 'Forbidden' || error.message === 'Unauthorized') {
+            return NextResponse.json({ message: error.message }, { status: 403 });
+        }
         console.error('Error updating matches:', error);
         return NextResponse.json({ message: 'Error updating matches' }, { status: 500 });
     }

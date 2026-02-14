@@ -81,45 +81,53 @@ export default function Sidebar() {
                         <span className="sidebar-link-label">Classifica</span>
                     </Link>
 
-                    {user && user.role === 'admin' && (
+                    {user && (
                         <>
                             <div className="sidebar-divider" />
 
-                            <Link
-                                href="/bonus"
-                                className={`sidebar-link ${isActive('/bonus') ? 'active' : ''}`}
-                                onClick={closeSidebar}
-                            >
-                                <span className="sidebar-link-icon">➕</span>
-                                <span className="sidebar-link-label">Bonus/Malus</span>
-                            </Link>
+                            {['admin', 'admin_giochi', 'arbitro'].includes(user.role) && (
+                                <Link
+                                    href="/bonus"
+                                    className={`sidebar-link ${isActive('/bonus') ? 'active' : ''}`}
+                                    onClick={closeSidebar}
+                                >
+                                    <span className="sidebar-link-icon">➕</span>
+                                    <span className="sidebar-link-label">Bonus/Malus</span>
+                                </Link>
+                            )}
 
-                            <Link
-                                href="/admin/programmazione"
-                                className={`sidebar-link ${isActive('/admin/programmazione') ? 'active' : ''}`}
-                                onClick={closeSidebar}
-                            >
-                                <span className="sidebar-link-icon">🎮</span>
-                                <span className="sidebar-link-label">Programmazione</span>
-                            </Link>
+                            {['admin', 'admin_giochi'].includes(user.role) && (
+                                <>
+                                    <Link
+                                        href="/admin/programmazione"
+                                        className={`sidebar-link ${isActive('/admin/programmazione') ? 'active' : ''}`}
+                                        onClick={closeSidebar}
+                                    >
+                                        <span className="sidebar-link-icon">🎮</span>
+                                        <span className="sidebar-link-label">Programmazione</span>
+                                    </Link>
 
-                            <Link
-                                href="/admin/impostazioni"
-                                className={`sidebar-link ${isActive('/admin/impostazioni') ? 'active' : ''}`}
-                                onClick={closeSidebar}
-                            >
-                                <span className="sidebar-link-icon">📋</span>
-                                <span className="sidebar-link-label">Liste</span>
-                            </Link>
+                                    <Link
+                                        href="/admin/impostazioni"
+                                        className={`sidebar-link ${isActive('/admin/impostazioni') ? 'active' : ''}`}
+                                        onClick={closeSidebar}
+                                    >
+                                        <span className="sidebar-link-icon">📋</span>
+                                        <span className="sidebar-link-label">Liste</span>
+                                    </Link>
+                                </>
+                            )}
 
-                            <Link
-                                href="/admin"
-                                className={`sidebar-link ${isActive('/admin') ? 'active' : ''}`}
-                                onClick={closeSidebar}
-                            >
-                                <span className="sidebar-link-icon">👥</span>
-                                <span className="sidebar-link-label">Utenti</span>
-                            </Link>
+                            {user.role === 'admin' && (
+                                <Link
+                                    href="/admin"
+                                    className={`sidebar-link ${isActive('/admin') ? 'active' : ''}`}
+                                    onClick={closeSidebar}
+                                >
+                                    <span className="sidebar-link-icon">👥</span>
+                                    <span className="sidebar-link-label">Utenti</span>
+                                </Link>
+                            )}
                         </>
                     )}
                 </nav>
@@ -130,7 +138,11 @@ export default function Sidebar() {
                             <div className="sidebar-user-info">
                                 <div className="user-details">
                                     <span className="username">{user.username}</span>
-                                    <span className="role-badge">{user.role}</span>
+                                    <span className="role-badge">
+                                        {user.role === 'admin' ? 'Admin Totale' :
+                                            user.role === 'admin_giochi' ? 'Admin Giochi' :
+                                                user.role === 'arbitro' ? 'Arbitro' : ''}
+                                    </span>
                                 </div>
                                 <button className="logout-btn" onClick={handleLogout} title="Esci">
                                     🚪 Esci

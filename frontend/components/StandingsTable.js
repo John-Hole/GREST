@@ -21,7 +21,8 @@ export default function StandingsTable({ standings, isAdmin = false, startDay = 
                                     G{useRelativeDays ? ((d - 1) % 5 + 1) : d}
                                 </th>
                             ))}
-                            <th className="col-total">Tot</th>
+                            <th className="col-dr" title="Differenza Reti">DR</th>
+                            <th className="col-total">Punti</th>
                             {isAdmin && <th className="col-bonus">Bonus</th>}
                         </tr>
                     </thead>
@@ -47,6 +48,9 @@ export default function StandingsTable({ standings, isAdmin = false, startDay = 
                                         {team.dailyPoints[d] || 0}
                                     </td>
                                 ))}
+                                <td className={`day-points ${team.goalDiff > 0 ? 'positive' : team.goalDiff < 0 ? 'negative' : ''}`} style={{ fontWeight: '500' }}>
+                                    {team.goalDiff > 0 ? `+${team.goalDiff}` : team.goalDiff}
+                                </td>
                                 <td className="total-points">{team.totalPoints}</td>
                                 {isAdmin && (
                                     <td className={`bonus-col ${team.bonusMalusTotal > 0 ? 'positive' : team.bonusMalusTotal < 0 ? 'negative' : ''}`}>

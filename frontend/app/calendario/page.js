@@ -45,9 +45,9 @@ export default function CalendarPage() {
     // Calcola giorno corrente (1-based)
     const currentTournamentDay = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
 
-    const isPrivileged = user && (user.role === 'admin' || user.role === 'operator');
+    const isPrivileged = user && ['admin', 'admin_giochi', 'arbitro'].includes(user.role);
 
-    // Se admin vede tutto (15). Se user, vede fino a oggi (min 1, max 15).
+    // Se admin o simili vede tutto (15). Se user, vede fino a oggi (min 1, max 15).
     const maxVisibleDay = isPrivileged ? 15 : Math.max(1, Math.min(currentTournamentDay, 15));
 
     // Filtro i giorni disponibili per il selettore
@@ -143,7 +143,7 @@ export default function CalendarPage() {
         }, 100);
     };
 
-    const canEdit = user && (user.role === 'admin' || user.role === 'operator');
+    const canEdit = user && ['admin', 'admin_giochi', 'arbitro'].includes(user.role);
 
     const getMatchesForSlot = (timeSlot) => {
         return matches.filter(m => m.timeSlot === timeSlot);

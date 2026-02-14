@@ -22,10 +22,11 @@ export default function BonusPage() {
     const [submitting, setSubmitting] = useState(false);
 
     useEffect(() => {
-        if (!authLoading && (!user || user.role !== 'admin')) {
+        const allowedRoles = ['admin', 'admin_giochi', 'arbitro'];
+        if (!authLoading && (!user || !allowedRoles.includes(user.role))) {
             // Simple client-side protection
             // router.push('/'); // Or just render access denied
-        } else if (user?.role === 'admin') {
+        } else if (user && allowedRoles.includes(user.role)) {
             fetchData();
         }
     }, [user, authLoading]);
@@ -90,9 +91,9 @@ export default function BonusPage() {
         }
     };
 
-    if (authLoading || (user?.role !== 'admin')) {
-        if (!authLoading && user?.role !== 'admin') {
-            return <div className="empty-state">🚫 Accesso Negato. Area riservata agli amministratori.</div>;
+    if (authLoading || !['admin', 'admin_giochi', 'arbitro'].includes(user?.role)) {
+        if (!authLoading && !['admin', 'admin_giochi', 'arbitro'].includes(user?.role)) {
+            return <div className="empty-state">🚫 Accesso Negato. Area riservata agli amministratori o arbitri.</div>;
         }
         return <div className="spinner-container" style={{ textAlign: 'center', padding: '50px' }}><div className="spinner"></div></div>;
     }
