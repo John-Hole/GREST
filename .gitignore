@@ -1,0 +1,26 @@
+# Ambiente e credenziali
+.env
+credentials.json
+token.json
+tournament.db*
+
+# File intermedi
+.tmp/
+
+# Node
+node_modules/
+.next/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/

@@ -1,0 +1,157 @@
+/* Standings Table Styles */
+
+.standings-container {
+    background: var(--color-bg-card);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+    margin-bottom: var(--spacing-md);
+}
+
+.table-responsive {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.standings-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 600px;
+    /* Ensure scrolling on small screens */
+}
+
+.standings-table th,
+.standings-table td {
+    padding: var(--spacing-sm);
+    text-align: center;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.standings-table th {
+    background: rgba(255, 236, 179, 0.3);
+    /* Subtle yellow header */
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-medium);
+    font-size: var(--font-size-small);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+}
+
+/* Specific Columns */
+.col-pos {
+    width: 50px;
+}
+
+.col-team {
+    width: auto;
+    text-align: left;
+}
+
+.col-day {
+    width: 40px;
+}
+
+.col-total {
+    width: 60px;
+}
+
+.col-bonus {
+    width: 60px;
+}
+
+.standings-table td {
+    font-size: var(--font-size-body);
+    color: var(--color-text-dark);
+}
+
+/* Position Badges */
+.pos-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    font-weight: var(--font-weight-bold);
+    font-size: var(--font-size-small);
+    color: var(--color-text-medium);
+    background: #f0f0f0;
+}
+
+.pos-1 {
+    background: #FFD700;
+    color: #fff;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.pos-2 {
+    background: #C0C0C0;
+    color: #fff;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.pos-3 {
+    background: #CD7F32;
+    color: #fff;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+/* Team Name Cell */
+.team-name-cell {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    font-weight: var(--font-weight-medium);
+    text-align: left;
+}
+
+.team-color-dot {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+/* Points Cells */
+.day-points {
+    color: var(--color-text-light);
+    font-size: 0.9em;
+}
+
+.total-points {
+    font-weight: var(--font-weight-bold);
+    color: var(--color-primary-dark);
+    font-size: 1.1em;
+}
+
+/* Bonus Column */
+.bonus-col {
+    font-weight: var(--font-weight-semibold);
+    font-size: 0.9em;
+}
+
+.bonus-col.positive {
+    color: var(--color-success);
+}
+
+.bonus-col.negative {
+    color: var(--color-error);
+}
+
+/* Responsive adjustments */
+@media (max-width: 767px) {
+
+    .standings-table th,
+    .standings-table td {
+        padding: var(--spacing-xs);
+        font-size: var(--font-size-small);
+    }
+
+    .team-color-dot {
+        width: 8px;
+        height: 8px;
+    }
+}

@@ -1,0 +1,71 @@
+/* Design Tokens - Grest PSG Tournament */
+
+:root {
+  /* Colors */
+  --color-primary: #FFB84D;
+  --color-primary-medium: #FF8C42;
+  --color-primary-dark: #E07A30;
+
+  /* Backgrounds - FORCED LIGHT THEME */
+  --color-bg-main: #FFFFFF;
+  --color-bg-card: #FFFFFF;
+  --color-bg-navbar: #FFE082;
+  /* Stronger yellow/orange for navbar */
+  --color-bg-sidebar: #FFF8E1;
+  /* Lighter yellow for sidebar */
+
+  --color-secondary-light: #FFE8D1;
+
+  /* Text */
+  --color-text-dark: #2C2C2C;
+  --color-text-medium: #555555;
+  --color-text-light: #888888;
+
+  /* Functional */
+  --color-success: #27AE60;
+  --color-error: #E74C3C;
+  --color-warning: #F39C12;
+  --color-info: #3498DB;
+  --color-border: #E0E0E0;
+
+  /* Typography */
+  --font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  --font-size-hero: 2.2em;
+  --font-size-section: 2em;
+  --font-size-subtitle: 1.1em;
+  --font-size-location: 1.4em;
+  --font-size-classifica-title: 1.9em;
+  --font-size-classifica-item: 1.25em;
+  --font-size-menu: 1.1em;
+  --font-size-team: 1.05em;
+  --font-size-body: 0.95em;
+  --font-size-small: 0.85em;
+
+  --font-weight-bold: 700;
+  --font-weight-semibold: 600;
+  --font-weight-medium: 500;
+  --font-weight-regular: 400;
+
+  /* Spacing */
+  --spacing-xs: 0.5rem;
+  --spacing-sm: 1rem;
+  --spacing-md: 1.5rem;
+  --spacing-lg: 2rem;
+  --spacing-xl: 3rem;
+
+  /* Border Radius */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+
+  /* Shadows */
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.15);
+  --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.2);
+
+  /* Layout */
+  --sidebar-width: 240px;
+  --navbar-height: 64px;
+  --bottom-nav-height: 64px;
+  --content-max-width: 1200px;
+}

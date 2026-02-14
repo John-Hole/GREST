@@ -1,0 +1,429 @@
+/* Global Styles - Grest PSG Tournament */
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: var(--font-family);
+    font-size: var(--font-size-body);
+    color: var(--color-text-dark);
+    background-color: var(--color-bg-main);
+    line-height: 1.6;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+    color: var(--color-primary-medium);
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+a:hover {
+    color: var(--color-primary-dark);
+}
+
+button {
+    cursor: pointer;
+    font-family: var(--font-family);
+    border: none;
+    outline: none;
+    transition: all 0.2s ease;
+}
+
+input,
+select,
+textarea {
+    font-family: var(--font-family);
+    font-size: var(--font-size-body);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    padding: var(--spacing-xs) var(--spacing-sm);
+    background: var(--color-bg-card);
+    color: var(--color-text-dark);
+    transition: border-color 0.2s;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(255, 184, 77, 0.2);
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+/* App Layout */
+.app-container {
+    display: flex;
+    min-height: 100vh;
+    padding-top: var(--navbar-height);
+}
+
+.main-content {
+    flex: 1;
+    max-width: var(--content-max-width);
+    margin: 0 auto;
+    padding: var(--spacing-lg);
+    width: 100%;
+}
+
+@media (min-width: 1024px) {
+    .app-container {
+        padding-left: var(--sidebar-width);
+    }
+}
+
+@media (max-width: 767px) {
+    .main-content {
+        padding: var(--spacing-sm);
+        padding-bottom: calc(var(--bottom-nav-height) + var(--spacing-lg));
+    }
+}
+
+/* Page Headers */
+.page-title {
+    font-size: var(--font-size-section);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-primary-medium);
+    margin-bottom: var(--spacing-lg);
+}
+
+.page-subtitle {
+    font-size: var(--font-size-subtitle);
+    color: var(--color-text-medium);
+    margin-bottom: var(--spacing-md);
+}
+
+/* Cards */
+.card {
+    background: var(--color-bg-card);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+    padding: var(--spacing-md);
+    transition: box-shadow 0.2s;
+}
+
+.card:hover {
+    box-shadow: var(--shadow-md);
+}
+
+/* Buttons */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-xs);
+    padding: var(--spacing-xs) var(--spacing-md);
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-body);
+    font-weight: var(--font-weight-semibold);
+    transition: all 0.2s ease;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-primary {
+    background: var(--color-primary);
+    color: #fff;
+}
+
+.btn-primary:hover {
+    background: var(--color-primary-medium);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+}
+
+.btn-success {
+    background: var(--color-success);
+    color: #fff;
+}
+
+.btn-success:hover {
+    background: #219a52;
+    transform: translateY(-1px);
+}
+
+.btn-danger {
+    background: var(--color-error);
+    color: #fff;
+}
+
+.btn-danger:hover {
+    background: #c0392b;
+    transform: translateY(-1px);
+}
+
+.btn-secondary {
+    background: var(--color-bg-card);
+    color: var(--color-text-dark);
+    border: 1px solid var(--color-border);
+}
+
+.btn-secondary:hover {
+    background: var(--color-secondary-light);
+}
+
+.btn-sm {
+    padding: 4px 12px;
+    font-size: var(--font-size-small);
+}
+
+/* Grids */
+.grid-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--spacing-md);
+}
+
+.grid-2 {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-md);
+}
+
+@media (max-width: 1023px) {
+    .grid-3 {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 767px) {
+
+    .grid-3,
+    .grid-2 {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Section */
+.section {
+    margin-bottom: var(--spacing-xl);
+}
+
+.section-title {
+    font-size: var(--font-size-classifica-title);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-primary-medium);
+    margin-bottom: var(--spacing-md);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+}
+
+/* Badges */
+.badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2px 10px;
+    border-radius: 20px;
+    font-size: var(--font-size-small);
+    font-weight: var(--font-weight-semibold);
+}
+
+.badge-gold {
+    background: linear-gradient(135deg, #FFD700, #FFA500);
+    color: #fff;
+}
+
+.badge-silver {
+    background: linear-gradient(135deg, #C0C0C0, #A0A0A0);
+    color: #fff;
+}
+
+.badge-bronze {
+    background: linear-gradient(135deg, #CD7F32, #A0522D);
+    color: #fff;
+}
+
+.badge-success {
+    background: rgba(39, 174, 96, 0.15);
+    color: var(--color-success);
+}
+
+.badge-pending {
+    background: rgba(136, 136, 136, 0.15);
+    color: var(--color-text-medium);
+}
+
+/* Team Color Dot */
+.team-color-dot {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    margin-right: 6px;
+    vertical-align: middle;
+    border: 2px solid rgba(0, 0, 0, 0.1);
+}
+
+/* Form Groups */
+.form-group {
+    margin-bottom: var(--spacing-md);
+}
+
+.form-group label {
+    display: block;
+    font-weight: var(--font-weight-semibold);
+    margin-bottom: var(--spacing-xs);
+    color: var(--color-text-dark);
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+}
+
+/* Loading Spinner */
+.spinner {
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    border: 3px solid var(--color-border);
+    border-radius: 50%;
+    border-top-color: var(--color-primary);
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Dropdown */
+.dropdown {
+    position: relative;
+}
+
+.dropdown-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    min-width: 250px;
+    background: var(--color-bg-card);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
+    padding: var(--spacing-md);
+    z-index: 1000;
+    border: 1px solid var(--color-border);
+}
+
+/* Tabs */
+.tabs {
+    display: flex;
+    gap: 2px;
+    margin-bottom: var(--spacing-lg);
+    border-bottom: 2px solid var(--color-border);
+}
+
+.tab {
+    padding: var(--spacing-xs) var(--spacing-md);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-medium);
+    background: transparent;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px;
+    transition: all 0.2s;
+}
+
+.tab:hover {
+    color: var(--color-primary-medium);
+}
+
+.tab.active {
+    color: var(--color-primary-medium);
+    border-bottom-color: var(--color-primary-medium);
+}
+
+/* Select styled */
+.select-styled {
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 16px;
+    padding-right: 36px;
+}
+
+/* Hero Title */
+.hero-title {
+    font-size: var(--font-size-hero);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-primary-medium);
+    text-align: center;
+    margin-bottom: var(--spacing-lg);
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: var(--spacing-xl);
+    color: var(--color-text-medium);
+}
+
+.empty-state-icon {
+    font-size: 3em;
+    margin-bottom: var(--spacing-sm);
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(100px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.4s ease forwards;
+}
+
+.animate-slide-up {
+    animation: slideInUp 0.4s ease forwards;
+}

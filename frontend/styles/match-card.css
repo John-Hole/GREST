@@ -1,0 +1,140 @@
+/* Match Card Styles */
+
+.match-card {
+    background: var(--color-bg-card);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+    padding: var(--spacing-md);
+    transition: all 0.2s ease;
+    cursor: default;
+    border: 1px solid var(--color-border);
+}
+
+.match-card:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+}
+
+.match-card.clickable {
+    cursor: pointer;
+}
+
+.match-card.clickable:hover {
+    border-color: var(--color-primary);
+}
+
+/* Match Card Header */
+.match-header {
+    text-align: center;
+    margin-bottom: var(--spacing-sm);
+}
+
+.match-game-name {
+    font-size: var(--font-size-location);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-primary-medium);
+    margin-bottom: 4px;
+}
+
+.match-location-subtitle {
+    font-size: var(--font-size-small);
+    color: var(--color-text-medium);
+    font-weight: var(--font-weight-regular);
+}
+
+.match-teams {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-sm);
+}
+
+.match-team {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: var(--font-size-team);
+    font-weight: var(--font-weight-semibold);
+    flex: 1;
+}
+
+.match-team.home {
+    justify-content: flex-end;
+    text-align: right;
+}
+
+.match-team.away {
+    justify-content: flex-start;
+    text-align: left;
+}
+
+.match-score {
+    font-size: 1.5em;
+    font-weight: var(--font-weight-bold);
+    color: var(--color-text-dark);
+    min-width: 70px;
+    text-align: center;
+    padding: 4px 8px;
+    border-radius: var(--radius-sm);
+    background: var(--color-bg-main);
+}
+
+.match-score.pending {
+    color: var(--color-text-medium);
+    font-weight: var(--font-weight-regular);
+}
+
+.match-status {
+    text-align: center;
+    margin-top: var(--spacing-xs);
+}
+
+.match-notes {
+    margin-top: var(--spacing-xs);
+    font-size: var(--font-size-small);
+    color: var(--color-text-medium);
+    font-style: italic;
+    text-align: center;
+}
+
+/* Time Slot Header */
+.time-slot-header {
+    font-size: var(--font-size-subtitle);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-text-dark);
+    margin: var(--spacing-md) 0 var(--spacing-sm);
+    padding: var(--spacing-xs) var(--spacing-sm);
+    background: var(--color-secondary-light);
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+}
+
+/* Period Header */
+.period-header {
+    font-size: var(--font-size-classifica-title);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-primary-medium);
+    margin: var(--spacing-lg) 0 var(--spacing-md);
+    padding-bottom: var(--spacing-xs);
+    border-bottom: 2px solid var(--color-primary);
+}
+
+@media (max-width: 767px) {
+    .match-teams {
+        flex-direction: column;
+        gap: var(--spacing-xs);
+    }
+
+    .match-team.home,
+    .match-team.away {
+        justify-content: center;
+        text-align: center;
+    }
+
+    .match-score {
+        font-size: 1.3em;
+    }
+}
