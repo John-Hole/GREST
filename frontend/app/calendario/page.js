@@ -25,6 +25,7 @@ export default function CalendarPage() {
     const [isSaving, setIsSaving] = useState(false);
     const [isExporting, setIsExporting] = useState(false);
     const [showTimes, setShowTimes] = useState(true);
+    const [selectedDayDate, setSelectedDayDate] = useState('');
 
     useEffect(() => {
         const check = () => setShowTimes(localStorage.getItem('showTurnTimes') !== 'false');
@@ -62,9 +63,24 @@ export default function CalendarPage() {
 
     useEffect(() => {
         fetchMatches();
-        // Also fetch config dates to populate dropdown properly?
-        // For now we assume 1-5 days as per spec "5 configurazioni date"
+        fetchDayDate(selectedDay);
     }, [selectedDay]);
+
+    const fetchDayDate = async (day) => {
+        try {
+            const res = await fetch('/api/config/dates');
+            const dates = await res.json();
+            const current = dates.find(d => d.day_number === day);
+            if (current && current.real_date) {
+                const d = new Date(current.real_date);
+                setSelectedDayDate(d.toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric' }));
+            } else {
+                setSelectedDayDate('');
+            }
+        } catch (err) {
+            console.error(err);
+        }
+    };
 
     const fetchMatches = async () => {
         setLoading(true);
@@ -259,21 +275,24 @@ export default function CalendarPage() {
                 id="calendar-export-container"
                 style={{
                     position: 'absolute',
-                    top: '-9999px',
-                    left: '-9999px',
-                    width: '800px',
-                    padding: '40px',
-                    backgroundColor: 'white',
-                    fontFamily: 'Inter, sans-serif',
-                    color: '#1a1a2e',
-                    overflow: 'hidden',
-                    maxHeight: '0',
-                    maxWidth: '0'
+                    top: '-10000px',
+                    left: '0',
+                    width: '850px',
+                    padding: '50px',
+                    backgroundColor: '#ffffff',
+                    fontFamily: "'Inter', sans-serif",
+                    color: '#2c3e50',
+                    borderRadius: '16px',
+                    boxShadow: '0 10px 30px rgba(0,0,0,0.1)',
                 }}
             >
-                <div style={{ textAlign: 'center', marginBottom: '30px', borderBottom: '2px solid #ff9500', paddingBottom: '15px' }}>
-                    <h1 style={{ margin: 0, color: '#ff9500', fontSize: '2.5rem' }}>Programma Giornata {selectedDay}</h1>
-                    <p style={{ margin: '5px 0 0', color: '#666', fontSize: '1.2rem' }}>GREST 2025</p>
+                <div style={{ textAlign: 'center', marginBottom: '40px', borderBottom: '3px solid var(--color-primary, #FFB84D)', paddingBottom: '20px' }}>
+                    <h1 style={{ margin: 0, color: '#E07A30', fontSize: '3rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1px' }}>Programma Giornata {selectedDay}</h1>
+                    <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', marginTop: '10px', alignItems: 'center' }}>
+                        <p style={{ margin: 0, color: '#555', fontSize: '1.4rem', fontWeight: '600' }}>{selectedDayDate || ''}</p>
+                        <span style={{ color: '#ccc', fontSize: '1.4rem' }}>|</span>
+                        <p style={{ margin: 0, color: '#E07A30', fontSize: '1.4rem', fontWeight: '700' }}>GREST 2026</p>
+                    </div>
                 </div>
 
                 {/* Morning Section */}
@@ -348,8 +367,8 @@ export default function CalendarPage() {
                     </div>
                 </div>
 
-                <div style={{ marginTop: '40px', textAlign: 'center', fontSize: '0.8rem', color: '#aaa', borderTop: '1px solid #eee', paddingTop: '10px' }}>
-                    Generato automaticamente dal gestionale GREST 2025
+                <div style={{ marginTop: '50px', textAlign: 'center', fontSize: '0.9rem', color: '#888', borderTop: '2px solid #f0f0f0', paddingTop: '20px', fontStyle: 'italic' }}>
+                    Generato automaticamente dal sistema gestionale GREST 2026
                 </div>
             </div>
         </div>
