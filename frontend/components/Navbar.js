@@ -8,8 +8,29 @@ import '../styles/navbar.css';
 
 export default function Navbar() {
     const [currentDay, setCurrentDay] = useState(null);
+    const [isDark, setIsDark] = useState(false);
     const { toggleSidebar } = useNav();
     const pathname = usePathname();
+
+    useEffect(() => {
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark') {
+            setIsDark(true);
+            document.documentElement.classList.add('dark');
+        }
+    }, []);
+
+    const toggleTheme = () => {
+        const newDark = !isDark;
+        setIsDark(newDark);
+        if (newDark) {
+            document.documentElement.classList.add('dark');
+            localStorage.setItem('theme', 'dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+            localStorage.setItem('theme', 'light');
+        }
+    };
 
     useEffect(() => {
         async function fetchDay() {
@@ -45,7 +66,12 @@ export default function Navbar() {
 
             <div className="navbar-right">
                 {currentDay && (
-                    <div className="navbar-day">
+                    <div 
+                        className="navbar-day" 
+                        onDoubleClick={toggleTheme}
+                        style={{ cursor: 'pointer', userSelect: 'none' }}
+                        title="Doppio clic per cambiare tema"
+                    >
                         Giornata {currentDay}
                     </div>
                 )}

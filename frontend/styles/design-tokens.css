@@ -69,3 +69,33 @@
   --bottom-nav-height: 64px;
   --content-max-width: 1200px;
 }
+
+/* Dark Mode Overrides */
+.dark {
+  --color-bg-main: #121212;
+  --color-bg-card: #1E1E1E;
+  --color-bg-navbar: #2C2C2C;
+  --color-bg-sidebar: #1A1A1A;
+  --color-secondary-light: #333333;
+  
+  --color-text-dark: #F5F5F5;
+  --color-text-medium: #CCCCCC;
+  --color-text-light: #999999;
+  
+  --color-border: #444444;
+  
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.6);
+}
+
+/* Global transitions for theme switching */
+body {
+  transition: background-color 0.3s ease, color 0.3s ease;
+  background-color: var(--color-bg-main);
+  color: var(--color-text-dark);
+}
+
+.card, .navbar, .sidebar, .input-field, .btn {
+  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+}

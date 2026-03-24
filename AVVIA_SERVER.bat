@@ -9,8 +9,9 @@ echo Installazione pacchetti mancanti (se necessario)...
 call npm install
 echo.
 
-echo Avvio ambiente di sviluppo...
-echo Apri http://localhost:3000 nel browser
+echo Avvio ambiente di sviluppo (accessibile da altri dispositivi)...
+echo Apri http://localhost:3000 nel browser di questo PC
+echo Accedi dal Raspberry all'indirizzo: http://192.168.1.4:3000
 echo.
-call npm run dev
+call npm run dev -- -H 0.0.0.0
 pause

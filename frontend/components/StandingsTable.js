@@ -21,7 +21,6 @@ export default function StandingsTable({ standings, isAdmin = false, startDay = 
                                     G{useRelativeDays ? ((d - 1) % 5 + 1) : d}
                                 </th>
                             ))}
-                            <th className="col-dr" title="Differenza Reti">DR</th>
                             <th className="col-total">Punti</th>
                             {isAdmin && <th className="col-bonus">Bonus</th>}
                         </tr>
@@ -48,9 +47,6 @@ export default function StandingsTable({ standings, isAdmin = false, startDay = 
                                         {team.dailyPoints[d] || 0}
                                     </td>
                                 ))}
-                                <td className={`day-points ${team.goalDiff > 0 ? 'positive' : team.goalDiff < 0 ? 'negative' : ''}`} style={{ fontWeight: '500' }}>
-                                    {team.goalDiff > 0 ? `+${team.goalDiff}` : team.goalDiff}
-                                </td>
                                 <td className="total-points">{team.totalPoints}</td>
                                 {isAdmin && (
                                     <td className={`bonus-col ${team.bonusMalusTotal > 0 ? 'positive' : team.bonusMalusTotal < 0 ? 'negative' : ''}`}>
@@ -61,7 +57,7 @@ export default function StandingsTable({ standings, isAdmin = false, startDay = 
                         ))}
                         {standings.length === 0 && (
                             <tr>
-                                <td colSpan={days.length + (isAdmin ? 4 : 3)} style={{ textAlign: 'center', padding: '2rem' }}>
+                                <td colSpan={days.length + (isAdmin ? 3 : 2)} style={{ textAlign: 'center', padding: '2rem' }}>
                                     Nessuna squadra in classifica
                                 </td>
                             </tr>
