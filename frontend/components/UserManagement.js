@@ -147,7 +147,7 @@ export default function UserManagement() {
     return (
         <div className="user-management animate-fade-in">
             {/* Create User Section */}
-            <div className="card mb-8">
+            <div className="card" style={{ marginBottom: '2rem' }}>
                 <h2 className="section-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                     <span>➕</span> Crea Nuovo Utente
                 </h2>
@@ -221,7 +221,7 @@ export default function UserManagement() {
                         </thead>
                         <tbody>
                             {users.map((user, idx) => (
-                                <tr key={user.id} style={{ borderBottom: '1px solid var(--color-border)', background: idx % 2 === 0 ? 'white' : 'var(--color-bg-main)' }}>
+                                <tr key={user.id} style={{ borderBottom: '1px solid var(--color-border)', background: idx % 2 === 0 ? 'var(--color-bg-card)' : 'var(--color-bg-main)' }}>
                                     <td style={{ padding: '0.8rem 1rem', fontWeight: '500', borderRight: '1px solid var(--color-border)' }}>{user.username}</td>
                                     <td style={{ padding: '0.8rem 1rem', borderRight: '1px solid var(--color-border)' }}>
                                         <span className={`badge ${getRoleBadgeClass(user.role)}`}>
@@ -237,7 +237,7 @@ export default function UserManagement() {
                                                 className="btn-icon"
                                                 title="Cambia Password"
                                                 onClick={() => openPasswordModal(user)}
-                                                style={{ background: 'var(--color-secondary-light)', color: 'var(--color-secondary-dark)', padding: '0.5rem', borderRadius: '6px', border: '1px solid var(--color-border)' }}
+                                                style={{ background: 'var(--color-secondary-light)', color: 'var(--color-primary-dark)', padding: '0.5rem', borderRadius: '6px', border: '1px solid var(--color-border)' }}
                                             >
                                                 🔑
                                             </button>
@@ -247,7 +247,7 @@ export default function UserManagement() {
                                                     className="btn-icon"
                                                     title="Elimina Utente"
                                                     onClick={() => handleDelete(user)}
-                                                    style={{ background: '#fee2e2', color: '#dc2626', padding: '0.5rem', borderRadius: '6px', border: '1px solid #fecaca' }}
+                                                    style={{ background: 'rgba(220, 38, 38, 0.1)', color: '#ef4444', padding: '0.5rem', borderRadius: '6px', border: '1px solid rgba(220, 38, 38, 0.2)' }}
                                                 >
                                                     🗑️
                                                 </button>

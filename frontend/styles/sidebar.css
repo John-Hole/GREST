@@ -111,7 +111,7 @@
     padding: 10px 12px;
     border: 1.5px solid var(--color-primary);
     border-radius: var(--radius-md);
-    background-color: #FFFFFF;
+    background-color: var(--color-bg-card);
     transition: all 0.2s ease;
 }
 
