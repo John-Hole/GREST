@@ -17,6 +17,7 @@ export default function CalendarPage() {
     const [matches, setMatches] = useState([]);
     const [loading, setLoading] = useState(true);
     const [selectedDay, setSelectedDay] = useState(1);
+    const [currentTournamentDay, setCurrentTournamentDay] = useState(1);
     const [tournamentDays, setTournamentDays] = useState(Array.from({ length: 15 }, (_, i) => i + 1));
 
     // Modal state
@@ -34,17 +35,18 @@ export default function CalendarPage() {
         return () => window.removeEventListener('storage', check);
     }, []);
 
-    // Calcolo Giorno Corrente e Visibilità
-    // Usa start date da env o default a oggi
-    const startDateStr = process.env.NEXT_PUBLIC_TOURNAMENT_START_DATE;
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const startDate = startDateStr ? new Date(startDateStr) : new Date();
-    startDate.setHours(0, 0, 0, 0);
-
-    const diffTime = today - startDate;
-    // Calcola giorno corrente (1-based)
-    const currentTournamentDay = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
+    useEffect(() => {
+        const fetchCurrentDay = async () => {
+            try {
+                const res = await fetch('/api/config/current-day');
+                const data = await res.json();
+                setCurrentTournamentDay(data.day || 1);
+            } catch (e) {
+                console.error(e);
+            }
+        };
+        fetchCurrentDay();
+    }, []);
 
     const isPrivileged = user && ['admin', 'admin_giochi', 'arbitro'].includes(user.role);
 

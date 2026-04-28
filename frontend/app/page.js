@@ -64,47 +64,48 @@ export default function Home() {
 
   const fetchData = useCallback(async () => {
     try {
-      // 1. Fetch matches
+      // 1. Fetch current day
+      const dayRes = await fetch('/api/config/current-day');
+      const dayData = await dayRes.json();
+      const currentDay = dayData.day || 1;
+
+      // 2. Fetch matches
       const matchesRes = await fetch('/api/matches');
       const allMatches = await matchesRes.json();
 
       // Smart Turn Selection based on current time
       const targetSlot = getCurrentTimeSlot();
-      const firstScheduled = allMatches.find(m => m.status === 'scheduled');
 
       let targetMatches = [];
       let slotTitle = '';
-      let currentDay = 1;
 
-      if (firstScheduled) {
-        // Use the day from first scheduled match as reference for "current day"
-        currentDay = firstScheduled.day;
+      // Try to get matches for current day + target time slot
+      targetMatches = allMatches.filter(m =>
+        m.day === currentDay && m.timeSlot === targetSlot
+      );
 
-        // Try to get matches for current day + target time slot
-        targetMatches = allMatches.filter(m =>
-          m.day === currentDay && m.timeSlot === targetSlot
-        );
-
-        // If no matches found for target slot, fallback to first scheduled
-        if (targetMatches.length === 0) {
+      // If no matches found for target slot, fallback to the first scheduled match of the CURRENT DAY
+      if (targetMatches.length === 0) {
+        const firstScheduledToday = allMatches.find(m => m.day === currentDay && m.status === 'scheduled');
+        if (firstScheduledToday) {
           targetMatches = allMatches.filter(m =>
-            m.day === firstScheduled.day && m.timeSlot === firstScheduled.timeSlot
+            m.day === currentDay && m.timeSlot === firstScheduledToday.timeSlot
           );
-          slotTitle = formatSlotTitle(firstScheduled.timeSlot);
+          slotTitle = formatSlotTitle(firstScheduledToday.timeSlot);
         } else {
-          // Successfully found matches for target slot
-          slotTitle = formatSlotTitle(targetSlot);
+          // If no scheduled matches today, just show the last matches of the day (e.g. 16:00)
+          const lastMatchesToday = allMatches.filter(m => m.day === currentDay);
+          if (lastMatchesToday.length > 0) {
+              const lastSlot = lastMatchesToday[lastMatchesToday.length - 1].timeSlot;
+              targetMatches = lastMatchesToday.filter(m => m.timeSlot === lastSlot);
+              slotTitle = `Fine Giochi (${formatSlotTitle(lastSlot)})`;
+          } else {
+              slotTitle = 'Nessuna partita';
+          }
         }
       } else {
-        // No scheduled matches, show last matches
-        const last = allMatches[allMatches.length - 1];
-        if (last) {
-          targetMatches = allMatches.filter(m =>
-            m.day === last.day && m.timeSlot === last.timeSlot
-          );
-          currentDay = last.day;
-          slotTitle = `Fine Giochi (${formatSlotTitle(last.timeSlot)})`;
-        }
+        // Successfully found matches for target slot
+        slotTitle = formatSlotTitle(targetSlot);
       }
 
       const weekNum = Math.ceil(currentDay / 5);
