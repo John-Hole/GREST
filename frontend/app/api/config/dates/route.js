@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { getDb } from '@/lib/db';
 import { requireAdminGiochi } from '@/lib/auth';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
     try {
         const user = await requireAdminGiochi();
