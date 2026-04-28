@@ -47,10 +47,17 @@ export default function Navbar() {
 
     const isActive = (path) => pathname === path;
 
+    const handleLogoClick = () => {
+        // Only toggle sidebar on mobile/tablet view where sidebar is hidden by default
+        if (typeof window !== 'undefined' && window.innerWidth <= 1023) {
+            toggleSidebar();
+        }
+    };
+
     return (
         <nav className="navbar">
             <div className="navbar-left">
-                <button className="navbar-logo-btn" onClick={toggleSidebar} aria-label="Menu">
+                <button className="navbar-logo-btn" onClick={handleLogoClick} aria-label="Menu">
                     Grest <span>PSG</span>
                 </button>
             </div>
