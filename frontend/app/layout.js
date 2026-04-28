@@ -9,6 +9,22 @@ import Sidebar from '@/components/Sidebar';
 export const metadata = {
   title: 'Grest PSG',
   description: 'Sistema gestione Grest PSG',
+  manifest: '/manifest.json',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'Grest PSG',
+  },
+  formatDetection: {
+    telephone: false,
+  },
+};
+
+export const viewport = {
+  themeColor: '#1565C0',
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
 };
 
 export default function RootLayout({ children }) {
