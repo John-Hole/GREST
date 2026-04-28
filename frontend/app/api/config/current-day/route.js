@@ -4,22 +4,26 @@ import { getDb } from '@/lib/db';
 export async function GET() {
     try {
         const db = getDb();
+        
+        // Ottieni la data di oggi formattata come YYYY-MM-DD nel fuso orario italiano
+        const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Europe/Rome' });
 
-        // Find the day of the first 'scheduled' match
-        const { rows: firstScheduled } = await db.execute("SELECT day FROM matches WHERE status = 'scheduled' ORDER BY day ASC, time_slot ASC LIMIT 1");
+        // Trova l'ultima giornata la cui data reale è <= a oggi
+        const { rows } = await db.execute({
+            sql: "SELECT day_number FROM tournament_config WHERE real_date <= ? ORDER BY real_date DESC LIMIT 1",
+            args: [today]
+        });
 
-        if (firstScheduled.length > 0) {
-            return NextResponse.json({ day: firstScheduled[0].day });
+        if (rows.length > 0) {
+            return NextResponse.json({ day: rows[0].day_number });
         }
 
-        // Fallback: If no scheduled matches, get the day of the very last match
-        const { rows: lastMatch } = await db.execute("SELECT day FROM matches ORDER BY day DESC, time_slot DESC LIMIT 1");
-
-        if (lastMatch.length > 0) {
-            return NextResponse.json({ day: lastMatch[0].day });
+        // Se oggi è prima dell'inizio del torneo, ritorna il giorno 1
+        const { rows: firstDay } = await db.execute("SELECT day_number FROM tournament_config ORDER BY real_date ASC LIMIT 1");
+        if (firstDay.length > 0) {
+             return NextResponse.json({ day: firstDay[0].day_number });
         }
 
-        // Final fallback
         return NextResponse.json({ day: 1 });
     } catch (error) {
         console.error('Error in current-day API:', error);
