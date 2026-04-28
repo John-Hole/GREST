@@ -200,7 +200,7 @@ export default function CalendarPage() {
                         fontSize: '1.1rem',
                         border: '2px solid var(--color-primary)',
                         borderRadius: 'var(--radius-sm)',
-                        backgroundColor: 'white',
+                        backgroundColor: 'var(--color-bg-card)',
                         color: 'var(--color-text-dark)',
                         cursor: 'pointer',
                         outline: 'none',
