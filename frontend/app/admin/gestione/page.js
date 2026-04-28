@@ -51,7 +51,10 @@ export default function GestioneTorneo() {
             });
 
             if (res.ok) {
-                setMsg({ type: 'success', text: 'Data di inizio salvata e calendario ricalcolato con successo!' });
+                setMsg({ type: 'success', text: 'Data di inizio salvata e calendario ricalcolato con successo! Ricaricamento...' });
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1500);
             } else {
                 const data = await res.json();
                 setMsg({ type: 'error', text: data.message || 'Errore durante il salvataggio' });
