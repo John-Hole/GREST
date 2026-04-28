@@ -29,6 +29,15 @@ export function getDb() {
     )
   `).catch(err => console.error(err));
 
+  // Briefings table
+  client.execute(`
+    CREATE TABLE IF NOT EXISTS briefings (
+      day_number INTEGER PRIMARY KEY,
+      content TEXT NOT NULL,
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+  `).catch(err => console.error(err));
+
   globalThis.__db = client;
   return client;
 }
