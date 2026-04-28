@@ -1,20 +1,18 @@
 /* Design Tokens - Grest PSG Tournament */
 
 :root {
-  /* Colors */
-  --color-primary: #FFB84D;
-  --color-primary-medium: #FF8C42;
-  --color-primary-dark: #E07A30;
+  /* Colors - Tema 3 Colori (Bianco, Celeste, Blu Marcato) */
+  --color-primary: #1565C0; /* Blu marcato per dettagli e linee */
+  --color-primary-medium: #1976D2; /* Blu leggermente più chiaro per bottoni/hover */
+  --color-primary-dark: #0D47A1; /* Blu scurissimo */
 
   /* Backgrounds - FORCED LIGHT THEME */
-  --color-bg-main: #FFFFFF;
+  --color-bg-main: #FFFFFF; /* Bianco principale */
   --color-bg-card: #FFFFFF;
-  --color-bg-navbar: #FFE082;
-  /* Stronger yellow/orange for navbar */
-  --color-bg-sidebar: #FFF8E1;
-  /* Lighter yellow for sidebar */
+  --color-bg-navbar: #E3F2FD; /* Celeste per banner/spazi secondari */
+  --color-bg-sidebar: #E3F2FD; /* Celeste per banner/spazi secondari */
 
-  --color-secondary-light: #FFE8D1;
+  --color-secondary-light: #BBDEFB; /* Celeste un po' più carico per selezioni/hover */
 
   /* Text */
   --color-text-dark: #2C2C2C;
