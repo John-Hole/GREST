@@ -40,7 +40,9 @@ export default function CalendarPage() {
             try {
                 const res = await fetch('/api/config/current-day');
                 const data = await res.json();
-                setCurrentTournamentDay(data.day || 1);
+                const day = data.day || 1;
+                setCurrentTournamentDay(day);
+                setSelectedDay(day);
             } catch (e) {
                 console.error(e);
             }
