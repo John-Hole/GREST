@@ -7,16 +7,15 @@
     right: 0;
     height: var(--navbar-height);
     background: var(--color-bg-navbar);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    /* Updated to yellow shade */
+    box-shadow: var(--shadow-sm);
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding: 0 var(--spacing-lg);
     z-index: 200;
     /* Above sidebar overlay */
-    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    border-bottom: 3px solid var(--color-primary);
 }
 
 .navbar-left {

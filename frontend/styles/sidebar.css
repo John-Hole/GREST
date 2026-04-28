@@ -7,14 +7,13 @@
     bottom: 0;
     width: var(--sidebar-width);
     background: var(--color-bg-sidebar);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.03);
+    /* Updated to light yellow */
+    box-shadow: var(--shadow-sm);
     padding: var(--spacing-md) 0;
     z-index: 150;
     overflow-y: auto;
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    border-right: 1px solid rgba(0, 0, 0, 0.05);
+    border-right: 1px solid var(--color-border);
     display: flex;
     flex-direction: column;
 }
