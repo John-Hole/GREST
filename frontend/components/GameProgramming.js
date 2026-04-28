@@ -6,7 +6,6 @@ import AutocompleteInput from './AutocompleteInput';
 
 export default function GameProgramming() {
     const [selectedDay, setSelectedDay] = useState(1);
-    const [realDate, setRealDate] = useState('');
     const [days, setDays] = useState([]);
     const [loading, setLoading] = useState(false);
     const [msg, setMsg] = useState(null);
@@ -61,25 +60,8 @@ export default function GameProgramming() {
     useEffect(() => {
         if (selectedDay) {
             loadDayData(selectedDay);
-            fetchDayDate(selectedDay);
         }
     }, [selectedDay]);
-
-    const fetchDayDate = async (day) => {
-        try {
-            const res = await fetch('/api/config/dates');
-            const dates = await res.json();
-            const current = dates.find(d => d.day_number === day);
-            if (current && current.real_date) {
-                // Previene errori se la data non è nel formato YYYY-MM-DD
-                setRealDate(current.real_date.split('T')[0]);
-            } else {
-                setRealDate('');
-            }
-        } catch (err) {
-            console.error(err);
-        }
-    };
 
     const fetchLocations = async () => {
         try {
@@ -246,14 +228,7 @@ export default function GameProgramming() {
             if (!updateRes.ok) {
                 setMsg({ type: 'error', text: 'Errore nel salvataggio.' });
             } else {
-                // Salva anche la data
-                await fetch('/api/config/dates', {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ dates: [{ dayNumber: selectedDay, realDate: realDate }] })
-                });
-
-                setMsg({ type: 'success', text: 'Programmazione e data salvate!' });
+                setMsg({ type: 'success', text: 'Programmazione salvata!' });
                 loadDayData(selectedDay);
             }
         } catch (err) {
@@ -364,17 +339,6 @@ export default function GameProgramming() {
                                 <option key={d} value={d}>Giorno {d}</option>
                             ))}
                         </select>
-
-                        <div className="flex items-center gap-2" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                            <label style={{ fontWeight: '500', fontSize: '0.9em' }}>Data Effettiva:</label>
-                            <input
-                                type="date"
-                                value={realDate}
-                                onChange={(e) => setRealDate(e.target.value)}
-                                className="input-field"
-                                style={{ width: 'auto' }}
-                            />
-                        </div>
 
                         <button
                             className="btn btn-primary"

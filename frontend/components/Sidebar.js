@@ -119,14 +119,25 @@ export default function Sidebar() {
                             )}
 
                             {user.role === 'admin' && (
-                                <Link
-                                    href="/admin"
-                                    className={`sidebar-link ${isActive('/admin') ? 'active' : ''}`}
-                                    onClick={closeSidebar}
-                                >
-                                    <span className="sidebar-link-icon">👥</span>
-                                    <span className="sidebar-link-label">Utenti</span>
-                                </Link>
+                                <>
+                                    <Link
+                                        href="/admin"
+                                        className={`sidebar-link ${isActive('/admin') ? 'active' : ''}`}
+                                        onClick={closeSidebar}
+                                    >
+                                        <span className="sidebar-link-icon">👥</span>
+                                        <span className="sidebar-link-label">Utenti</span>
+                                    </Link>
+
+                                    <Link
+                                        href="/admin/gestione"
+                                        className={`sidebar-link ${isActive('/admin/gestione') ? 'active' : ''}`}
+                                        onClick={closeSidebar}
+                                    >
+                                        <span className="sidebar-link-icon">⚙️</span>
+                                        <span className="sidebar-link-label">Gestione</span>
+                                    </Link>
+                                </>
                             )}
                         </>
                     )}

@@ -73,8 +73,9 @@ function seedDatabase(db) {
     let count = 1;
 
     while (count <= 15) {
-        // Simple logic: Skip Sunday (0). You can adjust to skip Saturday (6) if needed.
-        if (current.getDay() !== 0) {
+        // Skip Sunday (0) and Saturday (6)
+        const dayOfWeek = current.getDay();
+        if (dayOfWeek !== 0 && dayOfWeek !== 6) {
             dates.push({
                 day_number: count,
                 real_date: current.toISOString().split('T')[0]
