@@ -157,7 +157,7 @@ export default function UserManagement() {
                     gap: '1rem', 
                     gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', 
                     alignItems: 'flex-end' 
-                }}>
+                }} autoComplete="off">
                     <div className="form-group" style={{ marginBottom: 0 }}>
                         <label>Username</label>
                         <input
@@ -168,6 +168,7 @@ export default function UserManagement() {
                             required
                             className="input-field"
                             placeholder="Nuovo username"
+                            autoComplete="off"
                         />
                     </div>
                     <div className="form-group" style={{ marginBottom: 0 }}>
@@ -181,6 +182,7 @@ export default function UserManagement() {
                             minLength={6}
                             className="input-field"
                             placeholder="Min. 6 caratteri"
+                            autoComplete="new-password"
                         />
                     </div>
                     <div className="form-group" style={{ marginBottom: 0 }}>
@@ -275,7 +277,7 @@ export default function UserManagement() {
 
             {/* Password Change Modal */}
             {pwdModalOpen && (
-                <div className="modal-overlay" onClick={() => setPwdModalOpen(false)}>
+                <div className="modal-overlay" onClick={() => setPwdModalOpen(false)} style={{ backdropFilter: 'none', WebkitBackdropFilter: 'none' }}>
                     <div className="modal" onClick={(e) => e.stopPropagation()}>
                         <h2 className="modal-title">Cambia Password</h2>
                         <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
