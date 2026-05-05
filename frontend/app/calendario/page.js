@@ -231,13 +231,6 @@ export default function CalendarPage() {
                     >
                         {isExporting ? '...' : '📅 Totale'}
                     </button>
-                    <button
-                        className="btn btn-primary"
-                        onClick={() => handleAction('share', 'totale')}
-                        disabled={isExporting}
-                    >
-                        {isExporting ? '...' : '📲 Condividi'}
-                    </button>
                 </div>
             </div>
 
