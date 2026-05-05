@@ -53,6 +53,18 @@ export default function GameProgramming() {
         // Generate days 1-15
         const d = Array.from({ length: 15 }, (_, i) => i + 1);
         setDays(d);
+        
+        const fetchInitialDay = async () => {
+            try {
+                const res = await fetch('/api/config/current-day');
+                const data = await res.json();
+                if (data.day) setSelectedDay(data.day);
+            } catch (err) {
+                console.error('Error fetching current day', err);
+            }
+        };
+
+        fetchInitialDay();
         fetchLocations();
         fetchReferees();
     }, []);

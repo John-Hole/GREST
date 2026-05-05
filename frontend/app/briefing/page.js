@@ -22,9 +22,8 @@ export default function BriefingPage() {
                 // Fetch current day
                 const res = await fetch('/api/config/current-day');
                 const data = await res.json();
-                const current = data.day || 1;
-                // Default to previous day, min 1
-                setSelectedDay(Math.max(1, current - 1));
+                const current = data.realDay || 1;
+                setSelectedDay(current);
             } catch (e) {
                 console.error(e);
             }

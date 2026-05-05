@@ -7,28 +7,37 @@ export async function GET() {
     try {
         const db = getDb();
         
-        // Ottieni la data di oggi formattata come YYYY-MM-DD nel fuso orario italiano
-        const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Europe/Rome' });
+        const now = new Date();
+        const todayStr = now.toLocaleDateString('en-CA', { timeZone: 'Europe/Rome' });
 
-        // Trova l'ultima giornata la cui data reale è <= a oggi
         const { rows } = await db.execute({
             sql: "SELECT day_number FROM tournament_config WHERE real_date <= ? ORDER BY real_date DESC LIMIT 1",
-            args: [today]
+            args: [todayStr]
         });
 
+        let realDay = 1;
         if (rows.length > 0) {
-            return NextResponse.json({ day: rows[0].day_number });
+            realDay = rows[0].day_number;
+        } else {
+            const { rows: firstDay } = await db.execute("SELECT day_number FROM tournament_config ORDER BY real_date ASC LIMIT 1");
+            if (firstDay.length > 0) {
+                realDay = firstDay[0].day_number;
+            }
         }
 
-        // Se oggi è prima dell'inizio del torneo, ritorna il giorno 1
-        const { rows: firstDay } = await db.execute("SELECT day_number FROM tournament_config ORDER BY real_date ASC LIMIT 1");
-        if (firstDay.length > 0) {
-             return NextResponse.json({ day: firstDay[0].day_number });
+        // Logica activeDay: se sono passate le 17:00, proponi già la giornata successiva
+        let activeDay = realDay;
+        const hours = now.getHours();
+        if (hours >= 17) {
+            activeDay = Math.min(realDay + 1, 15);
         }
 
-        return NextResponse.json({ day: 1 });
+        return NextResponse.json({ 
+            day: activeDay,  // Per compatibilità con i componenti esistenti che usano "day"
+            realDay: realDay // Per componenti come il briefing che devono restare sul giorno corrente
+        });
     } catch (error) {
         console.error('Error in current-day API:', error);
-        return NextResponse.json({ day: 1 });
+        return NextResponse.json({ day: 1, realDay: 1 });
     }
 }

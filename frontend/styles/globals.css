@@ -113,14 +113,12 @@ table {
 .card {
     background: var(--color-bg-card);
     border-radius: var(--radius-md);
-    box-shadow: var(--shadow-sm);
+    box-shadow: var(--shadow-md);
     padding: var(--spacing-md);
     transition: box-shadow 0.2s;
 }
 
-.card:hover {
-    box-shadow: var(--shadow-md);
-}
+/* Card:hover rimosso come da richiesta utente */
 
 /* Buttons */
 .btn {

@@ -152,8 +152,13 @@ export default function UserManagement() {
                     <span>➕</span> Crea Nuovo Utente
                 </h2>
 
-                <form onSubmit={handleCreateSubmit} style={{ display: 'grid', gap: '1.5rem', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', alignItems: 'end' }}>
-                    <div className="form-group">
+                <form onSubmit={handleCreateSubmit} style={{ 
+                    display: 'grid', 
+                    gap: '1rem', 
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', 
+                    alignItems: 'flex-end' 
+                }}>
+                    <div className="form-group" style={{ marginBottom: 0 }}>
                         <label>Username</label>
                         <input
                             type="text"
@@ -165,7 +170,7 @@ export default function UserManagement() {
                             placeholder="Nuovo username"
                         />
                     </div>
-                    <div className="form-group">
+                    <div className="form-group" style={{ marginBottom: 0 }}>
                         <label>Password Iniziale</label>
                         <input
                             type="password"
@@ -178,7 +183,7 @@ export default function UserManagement() {
                             placeholder="Min. 6 caratteri"
                         />
                     </div>
-                    <div className="form-group">
+                    <div className="form-group" style={{ marginBottom: 0 }}>
                         <label>Ruolo</label>
                         <select
                             name="role"
@@ -191,7 +196,7 @@ export default function UserManagement() {
                             <option value="admin">Admin Totale</option>
                         </select>
                     </div>
-                    <button type="submit" className="btn btn-primary" disabled={loading} style={{ height: '48px' }}>
+                    <button type="submit" className="btn btn-primary" disabled={loading} style={{ height: '42px' }}>
                         {loading ? 'Caricamento...' : 'Crea Utente'}
                     </button>
                 </form>
