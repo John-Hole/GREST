@@ -174,6 +174,25 @@ export default function Home() {
     <div className="home-page">
 
       <section className="section animate-slide-up" style={{ animationDelay: '0.1s' }}>
+        <div className="section-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+          <h2 className="section-title">
+            <span>🏆</span> Classifica (Settimana {Math.ceil((weekRange.start) / 5)})
+          </h2>
+          <Link href="/classifica" className="btn btn-secondary btn-sm">
+            Completa
+          </Link>
+        </div>
+
+        <StandingsTable
+          standings={standings}
+          isAdmin={user?.role === 'admin'}
+          startDay={weekRange.start}
+          endDay={weekRange.end}
+          useRelativeDays={true}
+        />
+      </section>
+
+      <section className="section animate-slide-up" style={{ animationDelay: '0.2s' }}>
         <div className="section-header">
           <h2 className="section-title">
             {currentTimeSlot || 'Prossimo Turno'}
@@ -194,25 +213,6 @@ export default function Home() {
         ) : (
           <div className="empty-state">Nessuna partita in programma</div>
         )}
-      </section>
-
-      <section className="section animate-slide-up" style={{ animationDelay: '0.2s' }}>
-        <div className="section-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-          <h2 className="section-title">
-            <span>🏆</span> Classifica (Settimana {Math.ceil((weekRange.start) / 5)})
-          </h2>
-          <Link href="/classifica" className="btn btn-secondary btn-sm">
-            Completa
-          </Link>
-        </div>
-
-        <StandingsTable
-          standings={standings}
-          isAdmin={user?.role === 'admin'}
-          startDay={weekRange.start}
-          endDay={weekRange.end}
-          useRelativeDays={true}
-        />
       </section>
 
       <MatchEditModal

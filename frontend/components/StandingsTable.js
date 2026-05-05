@@ -16,12 +16,12 @@ export default function StandingsTable({ standings, isAdmin = false, startDay = 
                         <tr>
                             <th className="col-pos">Pos</th>
                             <th className="col-team">Squadra</th>
+                            <th className="col-total">Punti</th>
                             {days.map(d => (
                                 <th key={d} className="col-day">
                                     G{useRelativeDays ? ((d - 1) % 5 + 1) : d}
                                 </th>
                             ))}
-                            <th className="col-total">Punti</th>
                             {isAdmin && <th className="col-bonus">Bonus</th>}
                         </tr>
                     </thead>
@@ -42,12 +42,12 @@ export default function StandingsTable({ standings, isAdmin = false, startDay = 
                                         {team.teamName}
                                     </div>
                                 </td>
+                                <td className="total-points">{team.totalPoints}</td>
                                 {days.map(d => (
                                     <td key={d} className="day-points">
                                         {team.dailyPoints[d] || 0}
                                     </td>
                                 ))}
-                                <td className="total-points">{team.totalPoints}</td>
                                 {isAdmin && (
                                     <td className={`bonus-col ${team.bonusMalusTotal > 0 ? 'positive' : team.bonusMalusTotal < 0 ? 'negative' : ''}`}>
                                         {team.bonusMalusTotal > 0 ? `+${team.bonusMalusTotal}` : team.bonusMalusTotal}

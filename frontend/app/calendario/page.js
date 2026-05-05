@@ -134,29 +134,61 @@ export default function CalendarPage() {
             setIsSaving(false);
         }
     };
-    const handleExport = async () => {
+    const handleAction = async (action, part) => {
         setIsExporting(true);
-        // Small delay to ensure render updates if needed
         setTimeout(async () => {
             try {
+                const morningEl = document.getElementById('export-morning-section');
+                const afternoonEl = document.getElementById('export-afternoon-section');
+                
+                // Hide parts we don't want
+                if (part === 'mattina' && afternoonEl) afternoonEl.style.display = 'none';
+                if (part === 'pomeriggio' && morningEl) morningEl.style.display = 'none';
+
                 const element = document.getElementById('calendar-export-container');
                 if (!element) return;
 
                 const canvas = await html2canvas(element, {
-                    scale: 2, // Higher resolution
+                    scale: 2,
                     backgroundColor: '#ffffff',
-                    useCORS: true // Handle external potential images
+                    useCORS: true
                 });
 
-                const link = document.createElement('a');
-                link.download = `programma-giorno-${selectedDay}.png`;
-                link.href = canvas.toDataURL('image/png');
-                link.click();
+                // Restore
+                if (afternoonEl) afternoonEl.style.display = 'block';
+                if (morningEl) morningEl.style.display = 'block';
 
-                showToast({ type: 'success', message: 'Programma esportato con successo!' });
+                if (action === 'download') {
+                    const link = document.createElement('a');
+                    link.download = `programma-giorno-${selectedDay}-${part}.png`;
+                    link.href = canvas.toDataURL('image/png');
+                    link.click();
+                    showToast({ type: 'success', message: `Programma ${part} esportato con successo!` });
+                } else if (action === 'share') {
+                    canvas.toBlob(async (blob) => {
+                        const file = new File([blob], `programma-giorno-${selectedDay}-${part}.png`, { type: 'image/png' });
+                        if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+                            try {
+                                await navigator.share({
+                                    files: [file],
+                                    title: `Programma Giorno ${selectedDay} - ${part}`,
+                                });
+                            } catch (err) {
+                                console.error('Share error:', err);
+                            }
+                        } else {
+                            // Fallback
+                            const link = document.createElement('a');
+                            link.download = `programma-giorno-${selectedDay}-${part}.png`;
+                            link.href = URL.createObjectURL(blob);
+                            link.click();
+                            showToast({ type: 'success', message: `Scaricato (condivisione non supportata dal browser).` });
+                        }
+                    }, 'image/png');
+                }
             } catch (err) {
                 console.error('Export error:', err);
-                showToast({ type: 'error', message: 'Errore generico durante l\'esportazione.' });
+                showToast({ type: 'error', message: 'Errore generico.' });
             } finally {
                 setIsExporting(false);
             }
@@ -175,15 +207,38 @@ export default function CalendarPage() {
 
     return (
         <div className="calendar-page">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '10px' }}>
                 <h1 className="page-title" style={{ marginBottom: 0 }}>Calendario Partite</h1>
-                <button
-                    className="btn btn-secondary"
-                    onClick={handleExport}
-                    disabled={isExporting}
-                >
-                    {isExporting ? 'Esportazione...' : '🖼️ Esporta PNG'}
-                </button>
+                <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                    <button
+                        className="btn btn-secondary"
+                        onClick={() => handleAction('download', 'mattina')}
+                        disabled={isExporting}
+                    >
+                        {isExporting ? '...' : '☀️ Mattina'}
+                    </button>
+                    <button
+                        className="btn btn-secondary"
+                        onClick={() => handleAction('download', 'pomeriggio')}
+                        disabled={isExporting}
+                    >
+                        {isExporting ? '...' : '🌙 Pome'}
+                    </button>
+                    <button
+                        className="btn btn-secondary"
+                        onClick={() => handleAction('download', 'totale')}
+                        disabled={isExporting}
+                    >
+                        {isExporting ? '...' : '📅 Totale'}
+                    </button>
+                    <button
+                        className="btn btn-primary"
+                        onClick={() => handleAction('share', 'totale')}
+                        disabled={isExporting}
+                    >
+                        {isExporting ? '...' : '📲 Condividi'}
+                    </button>
+                </div>
             </div>
 
             <div className="day-selector-container" style={{ marginBottom: '1.5rem' }}>
@@ -300,7 +355,7 @@ export default function CalendarPage() {
                 </div>
 
                 {/* Morning Section */}
-                <div style={{ marginBottom: '30px' }}>
+                <div id="export-morning-section" style={{ marginBottom: '30px' }}>
                     <h2 style={{ background: '#f5f5f7', padding: '10px 15px', borderRadius: '8px', color: '#333', borderLeft: '5px solid #ff9500' }}>
                         Mattina (11:00 - 12:30)
                     </h2>
@@ -336,7 +391,7 @@ export default function CalendarPage() {
                 </div>
 
                 {/* Afternoon Section */}
-                <div>
+                <div id="export-afternoon-section">
                     <h2 style={{ background: '#f5f5f7', padding: '10px 15px', borderRadius: '8px', color: '#333', borderLeft: '5px solid #007aff' }}>
                         Pomeriggio (15:00 - 16:30)
                     </h2>
