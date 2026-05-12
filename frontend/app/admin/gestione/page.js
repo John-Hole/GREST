@@ -74,7 +74,7 @@ export default function GestioneTorneo() {
 
     return (
         <div className="container" style={{ padding: '2rem' }}>
-            <h1 style={{ fontSize: '2rem', color: 'var(--color-primary)', marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <h1 style={{ fontSize: '2rem', color: 'var(--color-primary)', marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '0.5rem', whiteSpace: 'nowrap' }}>
                 <span>⚙️</span> Gestione Torneo
             </h1>
 
