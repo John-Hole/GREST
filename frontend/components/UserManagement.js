@@ -7,16 +7,14 @@ import '../styles/modal.css';
 export default function UserManagement() {
     const [users, setUsers] = useState([]);
 
-    // Create Form State
-    const [form, setForm] = useState({ username: '', password: '', role: 'arbitro' });
+    // Create Form State (nome + cognome instead of username + password)
+    const [form, setForm] = useState({ nome: '', cognome: '', role: 'arbitro' });
     const [loading, setLoading] = useState(false);
     const [msg, setMsg] = useState(null);
 
-    // Password Update Modal State
-    const [pwdModalOpen, setPwdModalOpen] = useState(false);
-    const [selectedUser, setSelectedUser] = useState(null);
-    const [newPassword, setNewPassword] = useState('');
-    const [modalMsg, setModalMsg] = useState(null);
+    // Credentials Display Modal (after creation or password reset)
+    const [credentialsModal, setCredentialsModal] = useState(null);
+    // { type: 'created' | 'reset', username: '...', temporaryPassword: '...' }
 
     useEffect(() => {
         fetchUsers();
@@ -52,10 +50,14 @@ export default function UserManagement() {
 
             const data = await res.json();
             if (res.ok) {
-                setForm({ username: '', password: '', role: 'arbitro' });
+                setForm({ nome: '', cognome: '', role: 'arbitro' });
                 fetchUsers();
-                setMsg({ type: 'success', text: 'Utente creato con successo!' });
-                setTimeout(() => setMsg(null), 3000);
+                // Show credentials modal
+                setCredentialsModal({
+                    type: 'created',
+                    username: data.username,
+                    temporaryPassword: data.temporaryPassword
+                });
             } else {
                 setMsg({ type: 'error', text: data.message || 'Errore durante la creazione.' });
             }
@@ -84,45 +86,34 @@ export default function UserManagement() {
         }
     };
 
-    const openPasswordModal = (user) => {
-        setSelectedUser(user);
-        setNewPassword('');
-        setModalMsg(null);
-        setPwdModalOpen(true);
-    };
-
-    const handlePasswordUpdate = async (e) => {
-        e.preventDefault();
-        if (!selectedUser) return;
-
-        // Basic Check
-        if (newPassword.length < 6) {
-            setModalMsg({ type: 'error', text: 'La password deve essere di almeno 6 caratteri.' });
-            return;
-        }
+    const handleResetPassword = async (user) => {
+        if (!confirm(`Reset password per "${user.username}"?\nVerrà generata una nuova password temporanea.`)) return;
 
         try {
             const res = await fetch('/api/users', {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    id: selectedUser.id,
-                    password: newPassword
+                    id: user.id,
+                    resetPassword: true
                 })
             });
 
             const data = await res.json();
 
             if (res.ok) {
-                setPwdModalOpen(false);
-                setSelectedUser(null);
-                setMsg({ type: 'success', text: `Password aggiornata per ${selectedUser.username}` });
-                setTimeout(() => setMsg(null), 3000);
+                fetchUsers();
+                // Show credentials modal with new temporary password
+                setCredentialsModal({
+                    type: 'reset',
+                    username: user.username,
+                    temporaryPassword: data.temporaryPassword
+                });
             } else {
-                setModalMsg({ type: 'error', text: data.message || 'Errore aggiornamento password.' });
+                setMsg({ type: 'error', text: data.message || 'Errore reset password.' });
             }
         } catch (err) {
-            setModalMsg({ type: 'error', text: 'Errore di connessione.' });
+            setMsg({ type: 'error', text: 'Errore di connessione.' });
         }
     };
 
@@ -155,34 +146,35 @@ export default function UserManagement() {
                 <form onSubmit={handleCreateSubmit} style={{ 
                     display: 'grid', 
                     gap: '1rem', 
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', 
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', 
                     alignItems: 'flex-end' 
                 }} autoComplete="off">
                     <div className="form-group" style={{ marginBottom: 0 }}>
-                        <label>Username</label>
+                        <label>Nome</label>
                         <input
                             type="text"
-                            name="username"
-                            value={form.username}
+                            name="nome"
+                            value={form.nome}
                             onChange={handleChange}
                             required
+                            minLength={2}
                             className="input-field"
-                            placeholder="Nuovo username"
+                            placeholder="es. Mario"
                             autoComplete="off"
                         />
                     </div>
                     <div className="form-group" style={{ marginBottom: 0 }}>
-                        <label>Password Iniziale</label>
+                        <label>Cognome</label>
                         <input
-                            type="password"
-                            name="password"
-                            value={form.password}
+                            type="text"
+                            name="cognome"
+                            value={form.cognome}
                             onChange={handleChange}
                             required
-                            minLength={6}
+                            minLength={2}
                             className="input-field"
-                            placeholder="Min. 6 caratteri"
-                            autoComplete="new-password"
+                            placeholder="es. Rossi"
+                            autoComplete="off"
                         />
                     </div>
                     <div className="form-group" style={{ marginBottom: 0 }}>
@@ -202,6 +194,10 @@ export default function UserManagement() {
                         {loading ? 'Caricamento...' : 'Crea Utente'}
                     </button>
                 </form>
+
+                <p style={{ marginTop: '0.75rem', fontSize: '0.85em', color: 'var(--color-text-light)' }}>
+                    Lo username verrà generato come <strong>Nome.Cognome</strong> e la password sarà temporanea.
+                </p>
             </div>
 
             {msg && (
@@ -222,6 +218,7 @@ export default function UserManagement() {
                             <tr style={{ background: 'var(--color-bg-main)', borderBottom: '2px solid var(--color-border)' }}>
                                 <th style={{ padding: '1rem', textAlign: 'left', borderRight: '1px solid var(--color-border)' }}>Username</th>
                                 <th style={{ padding: '1rem', textAlign: 'left', borderRight: '1px solid var(--color-border)' }}>Ruolo</th>
+                                <th style={{ padding: '1rem', textAlign: 'left', borderRight: '1px solid var(--color-border)' }}>Stato</th>
                                 <th style={{ padding: '1rem', textAlign: 'left', borderRight: '1px solid var(--color-border)' }}>Creato il</th>
                                 <th style={{ padding: '1rem', textAlign: 'center' }}>Azioni</th>
                             </tr>
@@ -235,6 +232,13 @@ export default function UserManagement() {
                                             {getRoleLabel(user.role)}
                                         </span>
                                     </td>
+                                    <td style={{ padding: '0.8rem 1rem', borderRight: '1px solid var(--color-border)' }}>
+                                        {user.must_change_password ? (
+                                            <span className="badge badge-warning">⏳ Pwd temporanea</span>
+                                        ) : (
+                                            <span className="badge badge-success">✅ Attivo</span>
+                                        )}
+                                    </td>
                                     <td style={{ padding: '0.8rem 1rem', color: 'var(--color-text-medium)', fontSize: '0.9em', borderRight: '1px solid var(--color-border)' }}>
                                         {new Date(user.created_at).toLocaleDateString()}
                                     </td>
@@ -242,8 +246,8 @@ export default function UserManagement() {
                                         <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem' }}>
                                             <button
                                                 className="btn-icon"
-                                                title="Cambia Password"
-                                                onClick={() => openPasswordModal(user)}
+                                                title="Reset Password"
+                                                onClick={() => handleResetPassword(user)}
                                                 style={{ background: 'var(--color-secondary-light)', color: 'var(--color-primary-dark)', padding: '0.5rem', borderRadius: '6px', border: '1px solid var(--color-border)' }}
                                             >
                                                 🔑
@@ -265,7 +269,7 @@ export default function UserManagement() {
                             ))}
                             {users.length === 0 && (
                                 <tr>
-                                    <td colSpan="4" style={{ textAlign: 'center', padding: '2rem', color: 'var(--color-text-medium)' }}>
+                                    <td colSpan="5" style={{ textAlign: 'center', padding: '2rem', color: 'var(--color-text-medium)' }}>
                                         Nessun utente trovato
                                     </td>
                                 </tr>
@@ -275,45 +279,38 @@ export default function UserManagement() {
                 </div>
             </div>
 
-            {/* Password Change Modal */}
-            {pwdModalOpen && (
-                <div className="modal-overlay" onClick={() => setPwdModalOpen(false)} style={{ backdropFilter: 'none', WebkitBackdropFilter: 'none' }}>
+            {/* Credentials Display Modal */}
+            {credentialsModal && (
+                <div className="modal-overlay" onClick={() => setCredentialsModal(null)} style={{ backdropFilter: 'none', WebkitBackdropFilter: 'none' }}>
                     <div className="modal" onClick={(e) => e.stopPropagation()}>
-                        <h2 className="modal-title">Cambia Password</h2>
-                        <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
-                            Utente: <strong>{selectedUser?.username}</strong>
+                        <h2 className="modal-title">
+                            {credentialsModal.type === 'created' ? '✅ Utente Creato' : '🔑 Password Resettata'}
+                        </h2>
+
+                        <div className="credentials-display" style={{ marginBottom: '1.5rem' }}>
+                            <div className="cred-label">Username</div>
+                            <div className="cred-value">{credentialsModal.username}</div>
+                            
+                            <hr className="cred-divider" />
+                            
+                            <div className="cred-label">Password Temporanea</div>
+                            <div className="cred-value">{credentialsModal.temporaryPassword}</div>
+
+                            <div className="cred-warning">
+                                ⚠️ Comunica queste credenziali all&apos;utente.<br />
+                                Dovrà cambiare la password al primo accesso.
+                            </div>
                         </div>
 
-                        {modalMsg && (
-                            <div className={`notification ${modalMsg.type === 'error' ? 'notification-error' : 'notification-success'}`} style={{ padding: '0.5rem', marginBottom: '1rem', fontSize: '0.9em' }}>
-                                {modalMsg.text}
-                            </div>
-                        )}
-
-                        <form onSubmit={handlePasswordUpdate}>
-                            <div className="form-group" style={{ marginBottom: '1.5rem' }}>
-                                <label>Nuova Password</label>
-                                <input
-                                    type="password"
-                                    value={newPassword}
-                                    onChange={(e) => setNewPassword(e.target.value)}
-                                    placeholder="Minimo 6 caratteri"
-                                    className="input-field"
-                                    required
-                                    minLength={6}
-                                    autoFocus
-                                />
-                            </div>
-
-                            <div className="modal-actions">
-                                <button type="button" className="btn btn-secondary" onClick={() => setPwdModalOpen(false)}>
-                                    Annulla
-                                </button>
-                                <button type="submit" className="btn btn-primary">
-                                    Salva Password
-                                </button>
-                            </div>
-                        </form>
+                        <div className="modal-actions">
+                            <button
+                                className="btn btn-primary"
+                                onClick={() => setCredentialsModal(null)}
+                                style={{ width: '100%' }}
+                            >
+                                Ho Capito, Chiudi
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}

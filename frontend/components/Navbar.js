@@ -37,7 +37,7 @@ export default function Navbar() {
             try {
                 const res = await fetch('/api/config/current-day');
                 const data = await res.json();
-                setCurrentDay(data.day);
+                setCurrentDay(data.giornataCorrente);
             } catch (err) {
                 console.error('Error fetching current day:', err);
             }

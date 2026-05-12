@@ -78,7 +78,7 @@ table {
     flex: 1;
     max-width: var(--content-max-width);
     margin: 0 auto;
-    padding: var(--spacing-lg);
+    padding: var(--spacing-md);
     width: 100%;
 }
 
@@ -210,7 +210,7 @@ table {
 
 /* Section */
 .section {
-    margin-bottom: var(--spacing-xl);
+    margin-bottom: var(--spacing-lg);
 }
 
 .section-title {
@@ -489,4 +489,109 @@ table {
         gap: 0.5rem;
         grid-template-columns: 1fr 1fr;
     }
+}
+
+/* Force Password Change Overlay */
+.force-pwd-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    animation: fadeIn 0.3s ease;
+}
+
+.force-pwd-card {
+    background: var(--color-bg-card);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    padding: var(--spacing-lg);
+    width: 90%;
+    max-width: 420px;
+    animation: slideInUp 0.4s ease;
+}
+
+.force-pwd-icon {
+    text-align: center;
+    font-size: 3em;
+    margin-bottom: var(--spacing-sm);
+}
+
+.force-pwd-title {
+    text-align: center;
+    font-size: 1.4em;
+    font-weight: var(--font-weight-bold);
+    color: var(--color-primary-medium);
+    margin-bottom: var(--spacing-xs);
+}
+
+.force-pwd-subtitle {
+    text-align: center;
+    color: var(--color-text-medium);
+    margin-bottom: var(--spacing-md);
+    font-size: var(--font-size-body);
+}
+
+/* Credentials Display (for user creation / password reset) */
+.credentials-display {
+    background: var(--color-bg-navbar);
+    border: 2px solid var(--color-primary);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-md);
+    text-align: center;
+}
+
+.credentials-display .cred-label {
+    font-size: var(--font-size-small);
+    color: var(--color-text-medium);
+    margin-bottom: 0.25rem;
+}
+
+.credentials-display .cred-value {
+    font-size: 1.3em;
+    font-weight: var(--font-weight-bold);
+    color: var(--color-primary-dark);
+    font-family: 'Consolas', 'Monaco', monospace;
+    letter-spacing: 1px;
+    user-select: all;
+    padding: 0.25rem 0;
+}
+
+.credentials-display .cred-divider {
+    border: none;
+    border-top: 1px solid var(--color-border);
+    margin: 0.75rem 0;
+}
+
+.credentials-display .cred-warning {
+    font-size: var(--font-size-small);
+    color: var(--color-warning);
+    margin-top: 0.75rem;
+    font-weight: var(--font-weight-medium);
+}
+
+/* Badge for temporary password status */
+.badge-warning {
+    background: rgba(243, 156, 18, 0.15);
+    color: var(--color-warning);
+}
+
+.badge-primary {
+    background: rgba(21, 101, 192, 0.15);
+    color: var(--color-primary);
+}
+
+.badge-info {
+    background: rgba(52, 152, 219, 0.15);
+    color: var(--color-info);
+}
+
+.badge-secondary {
+    background: rgba(136, 136, 136, 0.15);
+    color: var(--color-text-medium);
 }

@@ -5,6 +5,7 @@ import { ToastProvider } from '@/components/Toast';
 import { NavProvider } from '@/components/NavContext';
 import Navbar from '@/components/Navbar';
 import Sidebar from '@/components/Sidebar';
+import ForcePasswordChangeWrapper from '@/components/ForcePasswordChangeWrapper';
 
 export const metadata = {
   title: 'Grest PSG',
@@ -46,6 +47,7 @@ export default function RootLayout({ children }) {
                   {children}
                 </main>
               </div>
+              <ForcePasswordChangeWrapper />
             </NavProvider>
           </ToastProvider>
         </AuthProvider>

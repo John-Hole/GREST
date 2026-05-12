@@ -38,6 +38,11 @@ export function getDb() {
     )
   `).catch(err => console.error(err));
 
+  // Migration: add must_change_password column if it doesn't exist
+  client.execute(`
+    ALTER TABLE users ADD COLUMN must_change_password INTEGER DEFAULT 0
+  `).catch(() => { /* Column already exists, ignore */ });
+
   globalThis.__db = client;
   return client;
 }

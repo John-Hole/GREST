@@ -8,6 +8,7 @@ const AuthContext = createContext({
     login: async (username, password) => { },
     logout: async () => { },
     isLoading: true,
+    clearMustChangePassword: () => { },
 });
 
 export const useAuth = () => useContext(AuthContext);
@@ -70,8 +71,13 @@ export function AuthProvider({ children }) {
         }
     };
 
+    // Called after the user successfully changes their temporary password
+    const clearMustChangePassword = () => {
+        setUser(prev => prev ? { ...prev, mustChangePassword: false } : null);
+    };
+
     return (
-        <AuthContext.Provider value={{ user, login, logout, isLoading }}>
+        <AuthContext.Provider value={{ user, login, logout, isLoading, clearMustChangePassword }}>
             {children}
         </AuthContext.Provider>
     );

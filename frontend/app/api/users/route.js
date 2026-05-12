@@ -4,9 +4,27 @@ import { z } from 'zod';
 import bcrypt from 'bcryptjs';
 import { requireAdmin } from '@/lib/auth';
 
-const userSchema = z.object({
-    username: z.string().min(3, "Username must be at least 3 characters"),
-    password: z.string().min(6, "Password must be at least 6 characters"),
+// --- Utility: genera password temporanea leggibile ---
+// Esclusi: I, l, O, 0, 1 per evitare confusione visiva
+function generateTempPassword(length = 6) {
+    const chars = 'ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
+    let result = '';
+    for (let i = 0; i < length; i++) {
+        result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return result;
+}
+
+// --- Utility: formatta Nome.Cognome ---
+function formatUsername(nome, cognome) {
+    const capitalize = (s) => s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
+    return `${capitalize(nome.trim())}.${capitalize(cognome.trim())}`;
+}
+
+// Schema per creazione utente (nome + cognome invece di username + password)
+const createUserSchema = z.object({
+    nome: z.string().min(2, "Nome deve essere almeno 2 caratteri"),
+    cognome: z.string().min(2, "Cognome deve essere almeno 2 caratteri"),
     role: z.enum(['admin', 'admin_giochi', 'arbitro'], "Ruolo non valido"),
 });
 
@@ -15,7 +33,7 @@ export async function GET() {
         await requireAdmin();
         const db = getDb();
         // Exclude password_hash
-        const { rows: users } = await db.execute('SELECT id, username, role, created_at FROM users ORDER BY username ASC');
+        const { rows: users } = await db.execute('SELECT id, username, role, must_change_password, created_at FROM users ORDER BY username ASC');
         return NextResponse.json(users);
     } catch (error) {
         if (error.message === 'Forbidden' || error.message === 'Unauthorized') {
@@ -30,32 +48,50 @@ export async function POST(request) {
     try {
         await requireAdmin();
         const body = await request.json();
-        const validation = userSchema.safeParse(body);
+        const validation = createUserSchema.safeParse(body);
 
         if (!validation.success) {
             return NextResponse.json({ error: validation.error.format() }, { status: 400 });
         }
 
-        const { username, password, role } = validation.data;
+        const { nome, cognome, role } = validation.data;
         const db = getDb();
 
-        // Check if user exists
-        const { rows: existingRows } = await db.execute({
-            sql: 'SELECT id FROM users WHERE username = ?',
-            args: [username]
-        });
-        if (existingRows.length > 0) {
-            return NextResponse.json({ message: 'Username already taken' }, { status: 409 });
+        // Genera username base Nome.Cognome
+        let baseUsername = formatUsername(nome, cognome);
+        let username = baseUsername;
+
+        // Controlla duplicati e aggiungi numero incrementale se necessario
+        let counter = 1;
+        while (true) {
+            const { rows: existingRows } = await db.execute({
+                sql: 'SELECT id FROM users WHERE username = ?',
+                args: [username]
+            });
+            if (existingRows.length === 0) break;
+            counter++;
+            username = `${baseUsername}${counter}`;
         }
 
-        const passwordHash = await bcrypt.hash(password, 10);
+        // Genera password temporanea
+        const tempPassword = generateTempPassword(6);
+        const passwordHash = await bcrypt.hash(tempPassword, 10);
+
         const result = await db.execute({
-            sql: 'INSERT INTO users (username, password_hash, role) VALUES (?, ?, ?)',
+            sql: 'INSERT INTO users (username, password_hash, role, must_change_password) VALUES (?, ?, ?, 1)',
             args: [username, passwordHash, role]
         });
 
-        return NextResponse.json({ id: Number(result.lastInsertRowid), username, role }, { status: 201 });
+        return NextResponse.json({
+            id: Number(result.lastInsertRowid),
+            username,
+            temporaryPassword: tempPassword,
+            role
+        }, { status: 201 });
     } catch (error) {
+        if (error.message === 'Forbidden' || error.message === 'Unauthorized') {
+            return NextResponse.json({ message: error.message }, { status: 403 });
+        }
         console.error('Error creating user:', error);
         return NextResponse.json({ message: 'Error creating user' }, { status: 500 });
     }
@@ -65,9 +101,9 @@ export async function PUT(request) {
     try {
         await requireAdmin();
         const body = await request.json();
-        let { id, password, role } = body;
+        let { id, resetPassword, role } = body;
 
-        console.log(`PUT /api/users called for ID: ${id}, Role update: ${role}, Password update: ${!!password}`);
+        console.log(`PUT /api/users called for ID: ${id}, Role update: ${role}, Reset password: ${!!resetPassword}`);
 
         if (!id) {
             return NextResponse.json({ message: 'ID mancante' }, { status: 400 });
@@ -82,15 +118,16 @@ export async function PUT(request) {
         const db = getDb();
         const updates = [];
         const params = [];
+        let tempPassword = null;
 
-        if (password) {
-            if (password.length < 6) {
-                return NextResponse.json({ message: 'Password troppo corta (min 6 car.)' }, { status: 400 });
-            }
-            const hash = await bcrypt.hash(password, 10);
+        if (resetPassword) {
+            // Genera nuova password temporanea
+            tempPassword = generateTempPassword(6);
+            const hash = await bcrypt.hash(tempPassword, 10);
             updates.push("password_hash = ?");
             params.push(hash);
-            console.log(`Password hash generated for user ${userId}`);
+            updates.push("must_change_password = 1");
+            console.log(`Temporary password generated for user ${userId}`);
         }
 
         if (role) {
@@ -119,7 +156,12 @@ export async function PUT(request) {
             return NextResponse.json({ message: 'Utente non trovato o nessuna modifica' }, { status: 404 });
         }
 
-        return NextResponse.json({ success: true });
+        const response = { success: true };
+        if (tempPassword) {
+            response.temporaryPassword = tempPassword;
+        }
+
+        return NextResponse.json(response);
     } catch (error) {
         if (error.message === 'Forbidden' || error.message === 'Unauthorized') {
             return NextResponse.json({ message: error.message }, { status: 403 });

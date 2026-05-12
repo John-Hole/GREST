@@ -25,10 +25,8 @@
     overflow: hidden;
     cursor: pointer;
 
-    /* Glassmorphism */
-    background: rgba(255, 255, 255, 0.88);
-    backdrop-filter: blur(16px) saturate(180%);
-    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    /* Glassmorphism removed blur */
+    background: rgba(255, 255, 255, 0.95);
     box-shadow:
         0 8px 32px rgba(0, 0, 0, 0.08),
         0 2px 8px rgba(0, 0, 0, 0.04),
@@ -42,22 +40,22 @@
 
 /* ─── Type-specific accents ─── */
 .toast.success {
-    box-shadow: inset 4px 0 0 0 #34c759, 0 8px 32px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.6);
     background: linear-gradient(135deg, rgba(52, 199, 89, 0.08), rgba(255, 255, 255, 0.88));
 }
 
 .toast.error {
-    box-shadow: inset 4px 0 0 0 #ff3b30, 0 8px 32px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.6);
     background: linear-gradient(135deg, rgba(255, 59, 48, 0.08), rgba(255, 255, 255, 0.88));
 }
 
 .toast.warning {
-    box-shadow: inset 4px 0 0 0 #ff9500, 0 8px 32px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.6);
     background: linear-gradient(135deg, rgba(255, 149, 0, 0.08), rgba(255, 255, 255, 0.88));
 }
 
 .toast.info {
-    box-shadow: inset 4px 0 0 0 #007aff, 0 8px 32px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.6);
     background: linear-gradient(135deg, rgba(0, 122, 255, 0.08), rgba(255, 255, 255, 0.88));
 }
 
@@ -128,9 +126,10 @@
 .toast-progress {
     position: absolute;
     bottom: 0;
-    left: 4px; /* Starts after the inset shadow */
+    left: 0;
+    right: 0;
     height: 3px;
-    border-radius: 0 0 14px 14px;
+    opacity: 0.6;
     animation: progressShrink var(--toast-duration, 4s) linear forwards;
 }
 
@@ -156,16 +155,16 @@
 }
 
 .toast.success:hover {
-    box-shadow: inset 4px 0 0 0 #34c759, 0 12px 40px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.6);
 }
 .toast.error:hover {
-    box-shadow: inset 4px 0 0 0 #ff3b30, 0 12px 40px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.6);
 }
 .toast.warning:hover {
-    box-shadow: inset 4px 0 0 0 #ff9500, 0 12px 40px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.6);
 }
 .toast.info:hover {
-    box-shadow: inset 4px 0 0 0 #007aff, 0 12px 40px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.6);
 }
 
 .toast:hover .toast-progress {
@@ -182,13 +181,11 @@
     0% {
         opacity: 0;
         transform: translateX(80px) scale(0.92);
-        filter: blur(4px);
     }
 
     100% {
         opacity: 1;
         transform: translateX(0) scale(1);
-        filter: blur(0);
     }
 }
 
@@ -196,13 +193,11 @@
     0% {
         opacity: 1;
         transform: translateX(0) scale(1);
-        filter: blur(0);
     }
 
     100% {
         opacity: 0;
         transform: translateX(60px) scale(0.95);
-        filter: blur(3px);
     }
 }
 

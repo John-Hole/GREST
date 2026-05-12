@@ -14,6 +14,7 @@ export async function GET() {
                 id: user.userId,
                 username: user.username,
                 role: user.role,
+                mustChangePassword: !!user.mustChangePassword,
             },
         });
     } catch (error) {

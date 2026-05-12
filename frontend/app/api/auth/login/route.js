@@ -22,11 +22,14 @@ export async function POST(request) {
             return NextResponse.json({ message: 'Credenziali non valide' }, { status: 401 });
         }
 
-        // Create JWT
+        const mustChangePassword = !!(user.must_change_password);
+
+        // Create JWT (include mustChangePassword flag)
         const token = await signToken({
             userId: user.id,
             username: user.username,
             role: user.role,
+            mustChangePassword,
         });
 
         // Set cookie
@@ -36,6 +39,7 @@ export async function POST(request) {
                 id: user.id,
                 username: user.username,
                 role: user.role,
+                mustChangePassword,
             },
         });
 

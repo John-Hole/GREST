@@ -26,18 +26,19 @@ export async function GET() {
         }
 
         // Logica activeDay: se sono passate le 17:00, proponi già la giornata successiva
-        let activeDay = realDay;
         const hours = now.getHours();
+        let activeDay = realDay;
         if (hours >= 17) {
             activeDay = Math.min(realDay + 1, 15);
         }
 
         return NextResponse.json({ 
-            day: activeDay,  // Per compatibilità con i componenti esistenti che usano "day"
-            realDay: realDay // Per componenti come il briefing che devono restare sul giorno corrente
+            day: activeDay,      // Ripristinato: "day" avanza dopo le 17:00 per compatibilità
+            realDay: realDay,
+            giornataCorrente: realDay // Nuovo campo richiesto per la Navbar
         });
     } catch (error) {
         console.error('Error in current-day API:', error);
-        return NextResponse.json({ day: 1, realDay: 1 });
+        return NextResponse.json({ day: 1, realDay: 1, giornataCorrente: 1 });
     }
 }

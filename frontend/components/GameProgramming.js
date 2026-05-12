@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import AutocompleteInput from './AutocompleteInput';
-
+import '../styles/modal.css';
 
 export default function GameProgramming() {
     const [selectedDay, setSelectedDay] = useState(1);
@@ -27,12 +27,6 @@ export default function GameProgramming() {
         window.dispatchEvent(new Event('storage'));
     };
 
-    const getTimeLabel = (period, index) => {
-        // Rimosso per richiesta utente: qui si configurano postazioni, non orari
-        return '';
-    };
-
-    // We go back to 3 positions per period as requested, but with better mapping
     const [morningGames, setMorningGames] = useState([
         { slot: 1, gameName: '', location: '', referee: '' },
         { slot: 2, gameName: '', location: '', referee: '' },
@@ -45,12 +39,11 @@ export default function GameProgramming() {
         { slot: 6, gameName: '', location: '', referee: '' }
     ]);
 
+    const [editingSlot, setEditingSlot] = useState(null); // { period, index, data }
     const [locations, setLocations] = useState([]);
     const [referees, setReferees] = useState([]);
 
-
     useEffect(() => {
-        // Generate days 1-15
         const d = Array.from({ length: 15 }, (_, i) => i + 1);
         setDays(d);
         
@@ -101,14 +94,12 @@ export default function GameProgramming() {
             const res = await fetch(`/api/matches?day=${day}`);
             const matches = await res.json();
 
-            // Group by timeSlot to find the "N-th" match of each slot
             const grouped = {};
             matches.forEach(m => {
                 if (!grouped[m.timeSlot]) grouped[m.timeSlot] = [];
                 grouped[m.timeSlot].push(m);
             });
 
-            // Sort each group by ID to have stable order (Postazione 1, 2, 3)
             Object.keys(grouped).forEach(ts => {
                 grouped[ts].sort((a, b) => a.id - b.id);
             });
@@ -125,7 +116,6 @@ export default function GameProgramming() {
                 { slot: 6, gameName: '', location: '', referee: '' }
             ];
 
-            // For each period, find the data from the first available slot that has it
             const slotsMorning = ['11:00', '11:30', '12:00'];
             const slotsAfternoon = ['15:00', '15:30', '16:00'];
 
@@ -181,15 +171,38 @@ export default function GameProgramming() {
         }
     };
 
+    const openModal = (period, index) => {
+        const data = period === 'morning' ? morningGames[index] : afternoonGames[index];
+        setEditingSlot({ period, index, data: { ...data } });
+    };
+
+    const closeModal = () => {
+        setEditingSlot(null);
+    };
+
+    const handleModalChange = (field, value) => {
+        setEditingSlot(prev => ({
+            ...prev,
+            data: { ...prev.data, [field]: value }
+        }));
+    };
+
+    const saveModalChanges = () => {
+        if (!editingSlot) return;
+        const { period, index, data } = editingSlot;
+        handleGameChange(period, index, 'gameName', data.gameName);
+        handleGameChange(period, index, 'location', data.location);
+        handleGameChange(period, index, 'referee', data.referee);
+        closeModal();
+    };
+
     const handleSave = async () => {
         setLoading(true);
         setMsg(null);
         try {
-            // Fetch current matches to apply mapping
             const res = await fetch(`/api/matches?day=${selectedDay}`);
             const matches = await res.json();
 
-            // Group by timeSlot
             const grouped = {};
             matches.forEach(m => {
                 if (!grouped[m.timeSlot]) grouped[m.timeSlot] = [];
@@ -199,7 +212,6 @@ export default function GameProgramming() {
 
             const updates = [];
 
-            // Morning mapping
             ['11:00', '11:30', '12:00'].forEach(ts => {
                 if (grouped[ts]) {
                     grouped[ts].forEach((match, idx) => {
@@ -215,7 +227,6 @@ export default function GameProgramming() {
                 }
             });
 
-            // Afternoon mapping
             ['15:00', '15:30', '16:00'].forEach(ts => {
                 if (grouped[ts]) {
                     grouped[ts].forEach((match, idx) => {
@@ -251,67 +262,58 @@ export default function GameProgramming() {
         }
     };
 
-
-
     const renderGameCard = (game, period, index) => (
-        <div key={`${period}-${index}`} className="game-card card prog-card">
-            <div className="prog-header">
+        <div 
+            key={`${period}-${index}`} 
+            className="game-card card prog-card clickable-card"
+            onClick={() => openModal(period, index)}
+            style={{ 
+                cursor: 'pointer', 
+                border: '1px solid var(--color-border)',
+                transition: 'transform 0.2s, box-shadow 0.2s',
+                position: 'relative',
+                padding: 'var(--spacing-sm)'
+            }}
+        >
+            <div className="prog-header" style={{ marginBottom: '0.4rem', borderBottom: '1px solid var(--color-border)', paddingBottom: '0.3rem', fontSize: '0.85em', fontWeight: 'bold', color: 'var(--color-primary)' }}>
                 Postazione {index + 1} {period === 'morning' ? 'mattina' : 'pomeriggio'}
             </div>
 
-            <div className="form-group prog-form-group">
-                <label className="prog-label">
-                    Nome Gioco
-                </label>
-                <input
-                    type="text"
-                    className="input-field prog-input"
-                    value={game.gameName || ''}
-                    onChange={(e) => handleGameChange(period, index, 'gameName', e.target.value)}
-                    placeholder="Es. Palla Prigioniera"
-                />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
+                <div style={{ fontWeight: 'bold', fontSize: '1em', color: game.gameName ? 'var(--color-text-dark)' : 'var(--color-text-light)' }}>
+                    {game.gameName || 'Da definire'}
+                </div>
+                
+                <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', marginTop: '0.2rem' }}>
+                    {game.location && (
+                        <span className="badge badge-info" style={{ fontSize: '0.7em', padding: '1px 6px' }}>
+                            📍 {game.location}
+                        </span>
+                    )}
+                    {game.referee && (
+                        <span className="badge badge-secondary" style={{ fontSize: '0.7em', padding: '1px 6px' }}>
+                            👤 {game.referee}
+                        </span>
+                    )}
+                </div>
             </div>
 
-            <div className="prog-compact-row">
-                <div className="form-group prog-form-group">
-                    <label className="prog-label">
-                        Luogo
-                    </label>
-                    <AutocompleteInput
-                        value={game.location || ''}
-                        onChange={(e) => handleGameChange(period, index, 'location', e.target.value)}
-                        suggestions={Array.isArray(locations) ? locations.map(loc => loc.name) : []}
-                        placeholder="Es. Campo 1"
-                        className="input-field prog-input"
-                    />
-                </div>
-
-                <div className="form-group prog-form-group">
-                    <label className="prog-label">
-                        Nome Arbitro
-                    </label>
-                    <AutocompleteInput
-                        value={game.referee || ''}
-                        onChange={(e) => handleGameChange(period, index, 'referee', e.target.value)}
-                        suggestions={Array.isArray(referees) ? referees.map(ref => ref.name) : []}
-                        placeholder="Es. Mario Rossi"
-                        className="input-field prog-input"
-                    />
-                </div>
+            <div style={{ position: 'absolute', top: '8px', right: '8px', opacity: 0.2, fontSize: '0.8em' }}>
+                ✏️
             </div>
         </div>
     );
 
     return (
-        <div className="game-programming card animate-fade-in">
+        <div className="game-programming card animate-fade-in" style={{ padding: 'var(--spacing-md)' }}>
             {/* Header / Actions */}
-            <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', gap: '1rem' }}>
-                <h1 style={{ fontSize: '2rem', color: 'var(--color-primary)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.2rem', gap: '1rem' }}>
+                <h1 style={{ fontSize: '1.6rem', color: 'var(--color-primary)', display: 'flex', alignItems: 'center', gap: '0.5rem', margin: 0 }}>
                     <span>🎮</span> Programmazione Giochi
                 </h1>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', background: 'var(--color-bg-card)', padding: '0.5rem 1rem', borderRadius: '8px', border: '1px solid var(--color-border)' }}>
-                    <label className="switch" style={{ position: 'relative', display: 'inline-block', width: '40px', height: '24px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', background: 'var(--color-bg-navbar)', padding: '0.4rem 0.8rem', borderRadius: '8px', border: '1px solid var(--color-secondary-light)' }}>
+                    <label className="switch" style={{ position: 'relative', display: 'inline-block', width: '36px', height: '20px' }}>
                         <input
                             type="checkbox"
                             checked={showTimes}
@@ -324,65 +326,67 @@ export default function GameProgramming() {
                             transition: '.4s', borderRadius: '34px'
                         }}>
                             <span style={{
-                                position: 'absolute', content: '""', height: '16px', width: '16px',
-                                left: '4px', bottom: '4px', backgroundColor: 'white',
+                                position: 'absolute', content: '""', height: '14px', width: '14px',
+                                left: '3px', bottom: '3px', backgroundColor: 'white',
                                 transition: '.4s', borderRadius: '50%',
                                 transform: showTimes ? 'translateX(16px)' : 'translateX(0)'
                             }}></span>
                         </span>
                     </label>
-                    <span style={{ fontSize: '0.9em', fontWeight: '500' }}>Mostra orari (Pubblico)</span>
+                    <span style={{ fontSize: '0.85em', fontWeight: '500' }}>Mostra orari</span>
                 </div>
             </div>
 
             {loading ? (
-                <div className="spinner-container" style={{ textAlign: 'center', padding: '50px' }}><div className="spinner"></div></div>
+                <div className="spinner-container" style={{ textAlign: 'center', padding: '40px' }}><div className="spinner"></div></div>
             ) : (
                 <>
-                    <div className="mb-8 flex gap-4 items-center" style={{ marginBottom: '2rem', display: 'flex', flexWrap: 'wrap', gap: '1rem', alignItems: 'center' }}>
-                        <label style={{ fontWeight: 'bold' }}>Seleziona Giornata:</label>
-                        <select
-                            value={selectedDay}
-                            onChange={(e) => setSelectedDay(Number(e.target.value))}
-                            className="input-field"
-                            style={{ maxWidth: '200px' }}
-                        >
-                            {days.map(d => (
-                                <option key={d} value={d}>Giorno {d}</option>
-                            ))}
-                        </select>
+                    <div style={{ marginBottom: '1.2rem', display: 'flex', flexWrap: 'wrap', gap: '0.8rem', alignItems: 'center' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <label style={{ fontWeight: 'bold', fontSize: '0.9em' }}>Giorno:</label>
+                            <select
+                                value={selectedDay}
+                                onChange={(e) => setSelectedDay(Number(e.target.value))}
+                                className="input-field"
+                                style={{ maxWidth: '110px', padding: '4px 8px', fontSize: '0.9em' }}
+                            >
+                                {days.map(d => (
+                                    <option key={d} value={d}>Giorno {d}</option>
+                                ))}
+                            </select>
+                        </div>
 
                         <button
-                            className="btn btn-primary"
+                            className="btn btn-primary btn-sm"
                             onClick={handleSave}
                             disabled={loading}
-                            style={{ marginLeft: 'auto' }}
+                            style={{ marginLeft: 'auto', padding: '6px 14px' }}
                         >
-                            {loading ? 'Salvataggio...' : '💾 Salva Programmazione'}
+                            {loading ? 'Salvataggio...' : '💾 Salva Tutto'}
                         </button>
                     </div>
 
-
-
                     {msg && (
-                        <div className={`notification ${msg.type === 'error' ? 'notification-error' : 'notification-success'}`} style={{ marginBottom: '1rem' }}>
+                        <div className={`notification ${msg.type === 'error' ? 'notification-error' : 'notification-success'}`} style={{ marginBottom: '1rem', padding: '0.6rem', fontSize: '0.85em' }}>
                             {msg.text}
                         </div>
                     )}
 
                     {/* Morning Section */}
-                    <div className="period-section" style={{ marginBottom: '3rem' }}>
+                    <div className="period-section" style={{ marginBottom: '1.5rem' }}>
                         <div className="period-header" style={{
-                            backgroundColor: 'var(--color-secondary-light)',
-                            padding: '1rem',
+                            backgroundColor: 'var(--color-bg-navbar)',
+                            padding: '0.5rem 0.8rem',
                             borderRadius: '8px',
-                            marginBottom: '1.5rem',
-                            fontSize: '1.2em',
-                            fontWeight: 'bold'
+                            marginBottom: '0.8rem',
+                            fontSize: '0.95em',
+                            fontWeight: 'bold',
+                            border: '1px solid var(--color-secondary-light)',
+                            color: 'var(--color-primary-dark)'
                         }}>
-                            <span>🌅</span> Giorno {selectedDay} - Mattina (11:00 - 12:30)
+                            <span>🌅</span> Mattina (11:00 - 12:30)
                         </div>
-                        <div className="grid-3" style={{ gap: '1.5rem' }}>
+                        <div className="grid-3" style={{ gap: '0.6rem' }}>
                             {morningGames.map((game, idx) => renderGameCard(game, 'morning', idx))}
                         </div>
                     </div>
@@ -390,22 +394,76 @@ export default function GameProgramming() {
                     {/* Afternoon Section */}
                     <div className="period-section">
                         <div className="period-header" style={{
-                            backgroundColor: 'var(--color-secondary-light)',
-                            padding: '1rem',
+                            backgroundColor: 'var(--color-bg-navbar)',
+                            padding: '0.5rem 0.8rem',
                             borderRadius: '8px',
-                            marginBottom: '1.5rem',
-                            fontSize: '1.2em',
-                            fontWeight: 'bold'
+                            marginBottom: '0.8rem',
+                            fontSize: '0.95em',
+                            fontWeight: 'bold',
+                            border: '1px solid var(--color-secondary-light)',
+                            color: 'var(--color-primary-dark)'
                         }}>
-                            <span>☀️</span> Giorno {selectedDay} - Pomeriggio (15:00 - 16:30)
+                            <span>☀️</span> Pomeriggio (15:00 - 16:30)
                         </div>
-                        <div className="grid-3" style={{ gap: '1.5rem' }}>
+                        <div className="grid-3" style={{ gap: '0.6rem' }}>
                             {afternoonGames.map((game, idx) => renderGameCard(game, 'afternoon', idx))}
                         </div>
                     </div>
                 </>
             )}
-        </div>
 
+            {/* Slot Edit Modal */}
+            {editingSlot && (
+                <div className="modal-overlay" onClick={closeModal} style={{ zIndex: 10000 }}>
+                    <div className="modal animate-slide-up" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '380px', padding: 'var(--spacing-md)' }}>
+                        <h3 className="modal-title" style={{ marginBottom: '1rem', fontSize: '1.2em' }}>
+                            Modifica Postazione {editingSlot.index + 1}
+                        </h3>
+                        
+                        <div className="form-group" style={{ marginBottom: '0.8rem' }}>
+                            <label className="prog-label" style={{ fontSize: '0.85em', marginBottom: '0.2rem' }}>Nome Gioco</label>
+                            <input
+                                type="text"
+                                className="input-field"
+                                value={editingSlot.data.gameName || ''}
+                                onChange={(e) => handleModalChange('gameName', e.target.value)}
+                                placeholder="Es. Palla Prigioniera"
+                                autoFocus
+                                style={{ width: '100%', padding: '6px 10px' }}
+                            />
+                        </div>
+
+                        <div className="form-group" style={{ marginBottom: '0.8rem' }}>
+                            <label className="prog-label" style={{ fontSize: '0.85em', marginBottom: '0.2rem' }}>Luogo</label>
+                            <AutocompleteInput
+                                value={editingSlot.data.location || ''}
+                                onChange={(e) => handleModalChange('location', e.target.value)}
+                                suggestions={Array.isArray(locations) ? locations.map(loc => loc.name) : []}
+                                placeholder="Es. Campo 1"
+                            />
+                        </div>
+
+                        <div className="form-group" style={{ marginBottom: '1.2rem' }}>
+                            <label className="prog-label" style={{ fontSize: '0.85em', marginBottom: '0.2rem' }}>Nome Arbitro</label>
+                            <AutocompleteInput
+                                value={editingSlot.data.referee || ''}
+                                onChange={(e) => handleModalChange('referee', e.target.value)}
+                                suggestions={Array.isArray(referees) ? referees.map(ref => ref.name) : []}
+                                placeholder="Es. Mario Rossi"
+                            />
+                        </div>
+
+                        <div className="modal-actions" style={{ display: 'flex', gap: '0.6rem' }}>
+                            <button className="btn btn-secondary btn-sm" style={{ flex: 1 }} onClick={closeModal}>
+                                Annulla
+                            </button>
+                            <button className="btn btn-primary btn-sm" style={{ flex: 1 }} onClick={saveModalChanges}>
+                                Applica
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </div>
     );
 }
