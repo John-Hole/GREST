@@ -9,23 +9,6 @@ export default function GameProgramming() {
     const [days, setDays] = useState([]);
     const [loading, setLoading] = useState(false);
     const [msg, setMsg] = useState(null);
-    const [showTimes, setShowTimes] = useState(true);
-
-    useEffect(() => {
-        const check = () => {
-            const val = localStorage.getItem('showTurnTimes');
-            setShowTimes(val !== 'false');
-        };
-        check();
-        window.addEventListener('storage', check);
-        return () => window.removeEventListener('storage', check);
-    }, []);
-
-    const toggleShowTimes = (val) => {
-        setShowTimes(val);
-        localStorage.setItem('showTurnTimes', val);
-        window.dispatchEvent(new Event('storage'));
-    };
 
     const [morningGames, setMorningGames] = useState([
         { slot: 1, gameName: '', location: '', referee: '' },
@@ -42,6 +25,10 @@ export default function GameProgramming() {
     const [editingSlot, setEditingSlot] = useState(null); // { period, index, data }
     const [locations, setLocations] = useState([]);
     const [referees, setReferees] = useState([]);
+
+    // State for "save new to DB?" confirmation dialog
+    const [pendingSaveConfirm, setPendingSaveConfirm] = useState(null);
+    // { newLocations: [], newReferees: [], onConfirm, onSkip }
 
     useEffect(() => {
         const d = Array.from({ length: 15 }, (_, i) => i + 1);
@@ -196,7 +183,63 @@ export default function GameProgramming() {
         closeModal();
     };
 
-    const handleSave = async () => {
+    // --- DB lookup logic: find new locations/referees not in DB ---
+    const findNewEntries = () => {
+        const allGames = [...morningGames, ...afternoonGames];
+        const locationNames = Array.isArray(locations) ? locations.map(l => l.name.toLowerCase()) : [];
+        const refereeNames = Array.isArray(referees) ? referees.map(r => r.name.toLowerCase()) : [];
+
+        const newLocations = new Set();
+        const newReferees = new Set();
+
+        allGames.forEach(g => {
+            if (g.location && g.location.trim() && !locationNames.includes(g.location.trim().toLowerCase())) {
+                newLocations.add(g.location.trim());
+            }
+            if (g.referee && g.referee.trim() && !refereeNames.includes(g.referee.trim().toLowerCase())) {
+                newReferees.add(g.referee.trim());
+            }
+        });
+
+        return {
+            newLocations: [...newLocations],
+            newReferees: [...newReferees]
+        };
+    };
+
+    const saveNewEntriesToDb = async (newLocs, newRefs) => {
+        // Save new locations
+        for (const name of newLocs) {
+            try {
+                await fetch('/api/locations', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name })
+                });
+            } catch (err) {
+                console.error('Error saving location:', name, err);
+            }
+        }
+
+        // Save new referees
+        for (const name of newRefs) {
+            try {
+                await fetch('/api/referees', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name })
+                });
+            } catch (err) {
+                console.error('Error saving referee:', name, err);
+            }
+        }
+
+        // Refresh lists
+        await fetchLocations();
+        await fetchReferees();
+    };
+
+    const doSave = async () => {
         setLoading(true);
         setMsg(null);
         try {
@@ -262,6 +305,30 @@ export default function GameProgramming() {
         }
     };
 
+    const handleSave = async () => {
+        // Check for new locations/referees before saving
+        const { newLocations: newLocs, newReferees: newRefs } = findNewEntries();
+
+        if (newLocs.length > 0 || newRefs.length > 0) {
+            // Show confirmation dialog
+            setPendingSaveConfirm({
+                newLocations: newLocs,
+                newReferees: newRefs,
+                onConfirm: async () => {
+                    setPendingSaveConfirm(null);
+                    await saveNewEntriesToDb(newLocs, newRefs);
+                    await doSave();
+                },
+                onSkip: async () => {
+                    setPendingSaveConfirm(null);
+                    await doSave();
+                }
+            });
+        } else {
+            await doSave();
+        }
+    };
+
     const renderGameCard = (game, period, index) => (
         <div 
             key={`${period}-${index}`} 
@@ -306,35 +373,11 @@ export default function GameProgramming() {
 
     return (
         <div className="game-programming card animate-fade-in" style={{ padding: 'var(--spacing-md)' }}>
-            {/* Header / Actions */}
+            {/* Header */}
             <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.2rem', gap: '1rem' }}>
                 <h1 style={{ fontSize: '1.6rem', color: 'var(--color-primary)', display: 'flex', alignItems: 'center', gap: '0.5rem', margin: 0 }}>
                     <span>🎮</span> Programmazione Giochi
                 </h1>
-
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', background: 'var(--color-bg-navbar)', padding: '0.4rem 0.8rem', borderRadius: '8px', border: '1px solid var(--color-secondary-light)' }}>
-                    <label className="switch" style={{ position: 'relative', display: 'inline-block', width: '36px', height: '20px' }}>
-                        <input
-                            type="checkbox"
-                            checked={showTimes}
-                            onChange={(e) => toggleShowTimes(e.target.checked)}
-                            style={{ opacity: 0, width: 0, height: 0 }}
-                        />
-                        <span className="slider" style={{
-                            position: 'absolute', cursor: 'pointer', top: 0, left: 0, right: 0, bottom: 0,
-                            backgroundColor: showTimes ? 'var(--color-primary)' : '#ccc',
-                            transition: '.4s', borderRadius: '34px'
-                        }}>
-                            <span style={{
-                                position: 'absolute', content: '""', height: '14px', width: '14px',
-                                left: '3px', bottom: '3px', backgroundColor: 'white',
-                                transition: '.4s', borderRadius: '50%',
-                                transform: showTimes ? 'translateX(16px)' : 'translateX(0)'
-                            }}></span>
-                        </span>
-                    </label>
-                    <span style={{ fontSize: '0.85em', fontWeight: '500' }}>Mostra orari</span>
-                </div>
             </div>
 
             {loading ? (
@@ -415,7 +458,7 @@ export default function GameProgramming() {
             {/* Slot Edit Modal */}
             {editingSlot && (
                 <div className="modal-overlay" onClick={closeModal} style={{ zIndex: 10000 }}>
-                    <div className="modal animate-slide-up" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '380px', padding: 'var(--spacing-md)' }}>
+                    <div className="modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '380px', padding: 'var(--spacing-md)' }}>
                         <h3 className="modal-title" style={{ marginBottom: '1rem', fontSize: '1.2em' }}>
                             Modifica Postazione {editingSlot.index + 1}
                         </h3>
@@ -459,6 +502,64 @@ export default function GameProgramming() {
                             </button>
                             <button className="btn btn-primary btn-sm" style={{ flex: 1 }} onClick={saveModalChanges}>
                                 Applica
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Confirmation dialog for new locations/referees */}
+            {pendingSaveConfirm && (
+                <div className="modal-overlay" onClick={() => setPendingSaveConfirm(null)} style={{ zIndex: 10001 }}>
+                    <div className="modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '420px', padding: 'var(--spacing-md)' }}>
+                        <h3 className="modal-title" style={{ marginBottom: '0.8rem', fontSize: '1.2em' }}>
+                            Nuove voci trovate
+                        </h3>
+                        
+                        <p style={{ fontSize: '0.9em', color: 'var(--color-text-medium)', marginBottom: '1rem', textAlign: 'center' }}>
+                            Hai inserito nomi non presenti nel database. Vuoi salvarli per il futuro?
+                        </p>
+
+                        {pendingSaveConfirm.newLocations.length > 0 && (
+                            <div style={{ marginBottom: '0.8rem' }}>
+                                <div style={{ fontSize: '0.85em', fontWeight: 'bold', color: 'var(--color-primary)', marginBottom: '0.3rem' }}>
+                                    📍 Nuovi Luoghi:
+                                </div>
+                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.3rem' }}>
+                                    {pendingSaveConfirm.newLocations.map((loc, i) => (
+                                        <span key={i} className="badge badge-info" style={{ fontSize: '0.8em' }}>{loc}</span>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {pendingSaveConfirm.newReferees.length > 0 && (
+                            <div style={{ marginBottom: '1rem' }}>
+                                <div style={{ fontSize: '0.85em', fontWeight: 'bold', color: 'var(--color-primary)', marginBottom: '0.3rem' }}>
+                                    👤 Nuovi Arbitri:
+                                </div>
+                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.3rem' }}>
+                                    {pendingSaveConfirm.newReferees.map((ref, i) => (
+                                        <span key={i} className="badge badge-secondary" style={{ fontSize: '0.8em' }}>{ref}</span>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        <div className="modal-actions" style={{ display: 'flex', gap: '0.6rem' }}>
+                            <button 
+                                className="btn btn-secondary btn-sm" 
+                                style={{ flex: 1 }} 
+                                onClick={pendingSaveConfirm.onSkip}
+                            >
+                                No, salva solo giochi
+                            </button>
+                            <button 
+                                className="btn btn-primary btn-sm" 
+                                style={{ flex: 1 }} 
+                                onClick={pendingSaveConfirm.onConfirm}
+                            >
+                                Sì, salva nel DB
                             </button>
                         </div>
                     </div>

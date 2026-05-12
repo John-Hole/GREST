@@ -23,7 +23,6 @@ export default function ProgrammazionePage() {
 
     return (
         <div className="programmazione-page animate-fade-in">
-            <h1 className="page-title">Programmazione Giochi</h1>
             <GameProgramming />
         </div>
     );

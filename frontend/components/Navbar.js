@@ -54,6 +54,16 @@ export default function Navbar() {
         }
     };
 
+    const [lastClickTime, setLastClickTime] = useState(0);
+
+    const handleDayClick = () => {
+        const now = Date.now();
+        if (now - lastClickTime < 300) {
+            toggleTheme();
+        }
+        setLastClickTime(now);
+    };
+
     return (
         <nav className="navbar">
             <div className="navbar-left">
@@ -75,8 +85,8 @@ export default function Navbar() {
                 {currentDay && (
                     <div 
                         className="navbar-day" 
-                        onDoubleClick={toggleTheme}
-                        style={{ cursor: 'pointer', userSelect: 'none' }}
+                        onClick={handleDayClick}
+                        style={{ cursor: 'pointer', userSelect: 'none', touchAction: 'manipulation' }}
                         title="Doppio clic per cambiare tema"
                     >
                         Giornata {currentDay}
