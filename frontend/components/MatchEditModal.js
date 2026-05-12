@@ -95,12 +95,12 @@ export default function MatchEditModal({ match, isOpen, onClose, onSave, isSavin
                             <button
                                 type="button"
                                 className="btn btn-secondary"
-                                style={{ backgroundColor: '#e74c3c', borderColor: '#e74c3c', color: 'white' }}
+                                style={{ backgroundColor: 'transparent', borderColor: 'red', color: 'red', minWidth: 'auto', padding: '0.5rem 1rem', fontSize: '1.2rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                                 onClick={handleReset}
                                 disabled={isSaving}
                                 title="Azzera Risultato"
                             >
-                                🔄 Reset
+                                ↺
                             </button>
                         )}
                         <button
