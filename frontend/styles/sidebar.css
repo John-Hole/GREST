@@ -210,7 +210,7 @@
 .login-dropdown h3 {
     font-size: var(--font-size-subtitle);
     margin-bottom: var(--spacing-sm);
-    color: var(--color-text-dark);
+    color: var(--color-primary-dark);
 }
 
 .login-dropdown .form-group {
