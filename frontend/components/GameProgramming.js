@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import AutocompleteInput from './AutocompleteInput';
 import '../styles/modal.css';
 
@@ -372,6 +373,7 @@ export default function GameProgramming() {
     );
 
     return (
+        <>
         <div className="game-programming card animate-fade-in" style={{ padding: 'var(--spacing-md)' }}>
             {/* Header */}
             <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.2rem', gap: '1rem' }}>
@@ -454,117 +456,121 @@ export default function GameProgramming() {
                     </div>
                 </>
             )}
-
-            {/* Slot Edit Modal */}
-            {editingSlot && (
-                <div className="modal-overlay" onClick={closeModal} style={{ zIndex: 10000 }}>
-                    <div className="modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '380px', padding: 'var(--spacing-md)' }}>
-                        <h3 className="modal-title" style={{ marginBottom: '1rem', fontSize: '1.2em' }}>
-                            Modifica Postazione {editingSlot.index + 1}
-                        </h3>
-                        
-                        <div className="form-group" style={{ marginBottom: '0.8rem' }}>
-                            <label className="prog-label" style={{ fontSize: '0.85em', marginBottom: '0.2rem' }}>Nome Gioco</label>
-                            <input
-                                type="text"
-                                className="input-field"
-                                value={editingSlot.data.gameName || ''}
-                                onChange={(e) => handleModalChange('gameName', e.target.value)}
-                                placeholder="Es. Palla Prigioniera"
-                                autoFocus
-                                style={{ width: '100%', padding: '6px 10px' }}
-                            />
-                        </div>
-
-                        <div className="form-group" style={{ marginBottom: '0.8rem' }}>
-                            <label className="prog-label" style={{ fontSize: '0.85em', marginBottom: '0.2rem' }}>Luogo</label>
-                            <AutocompleteInput
-                                value={editingSlot.data.location || ''}
-                                onChange={(e) => handleModalChange('location', e.target.value)}
-                                suggestions={Array.isArray(locations) ? locations.map(loc => loc.name) : []}
-                                placeholder="Es. Campo 1"
-                            />
-                        </div>
-
-                        <div className="form-group" style={{ marginBottom: '1.2rem' }}>
-                            <label className="prog-label" style={{ fontSize: '0.85em', marginBottom: '0.2rem' }}>Nome Arbitro</label>
-                            <AutocompleteInput
-                                value={editingSlot.data.referee || ''}
-                                onChange={(e) => handleModalChange('referee', e.target.value)}
-                                suggestions={Array.isArray(referees) ? referees.map(ref => ref.name) : []}
-                                placeholder="Es. Mario Rossi"
-                            />
-                        </div>
-
-                        <div className="modal-actions" style={{ display: 'flex', gap: '0.6rem' }}>
-                            <button className="btn btn-secondary btn-sm" style={{ flex: 1 }} onClick={closeModal}>
-                                Annulla
-                            </button>
-                            <button className="btn btn-primary btn-sm" style={{ flex: 1 }} onClick={saveModalChanges}>
-                                Applica
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* Confirmation dialog for new locations/referees */}
-            {pendingSaveConfirm && (
-                <div className="modal-overlay" onClick={() => setPendingSaveConfirm(null)} style={{ zIndex: 10001 }}>
-                    <div className="modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '420px', padding: 'var(--spacing-md)' }}>
-                        <h3 className="modal-title" style={{ marginBottom: '0.8rem', fontSize: '1.2em' }}>
-                            Nuove voci trovate
-                        </h3>
-                        
-                        <p style={{ fontSize: '0.9em', color: 'var(--color-text-medium)', marginBottom: '1rem', textAlign: 'center' }}>
-                            Hai inserito nomi non presenti nel database. Vuoi salvarli per il futuro?
-                        </p>
-
-                        {pendingSaveConfirm.newLocations.length > 0 && (
-                            <div style={{ marginBottom: '0.8rem' }}>
-                                <div style={{ fontSize: '0.85em', fontWeight: 'bold', color: 'var(--color-primary)', marginBottom: '0.3rem' }}>
-                                    📍 Nuovi Luoghi:
-                                </div>
-                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.3rem' }}>
-                                    {pendingSaveConfirm.newLocations.map((loc, i) => (
-                                        <span key={i} className="badge badge-info" style={{ fontSize: '0.8em' }}>{loc}</span>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-
-                        {pendingSaveConfirm.newReferees.length > 0 && (
-                            <div style={{ marginBottom: '1rem' }}>
-                                <div style={{ fontSize: '0.85em', fontWeight: 'bold', color: 'var(--color-primary)', marginBottom: '0.3rem' }}>
-                                    👤 Nuovi Arbitri:
-                                </div>
-                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.3rem' }}>
-                                    {pendingSaveConfirm.newReferees.map((ref, i) => (
-                                        <span key={i} className="badge badge-secondary" style={{ fontSize: '0.8em' }}>{ref}</span>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-
-                        <div className="modal-actions" style={{ display: 'flex', gap: '0.6rem' }}>
-                            <button 
-                                className="btn btn-secondary btn-sm" 
-                                style={{ flex: 1 }} 
-                                onClick={pendingSaveConfirm.onSkip}
-                            >
-                                No, salva solo giochi
-                            </button>
-                            <button 
-                                className="btn btn-primary btn-sm" 
-                                style={{ flex: 1 }} 
-                                onClick={pendingSaveConfirm.onConfirm}
-                            >
-                                Sì, salva nel DB
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
         </div>
+
+        {/* Slot Edit Modal — portaled to body so overlay covers full screen */}
+        {editingSlot && createPortal(
+            <div className="modal-overlay" onClick={closeModal}>
+                <div className="modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '380px', padding: 'var(--spacing-md)' }}>
+                    <h3 className="modal-title" style={{ marginBottom: '1rem', fontSize: '1.2em' }}>
+                        Modifica Postazione {editingSlot.index + 1}
+                    </h3>
+                    
+                    <div className="form-group" style={{ marginBottom: '0.8rem' }}>
+                        <label className="prog-label" style={{ fontSize: '0.85em', marginBottom: '0.2rem' }}>Nome Gioco</label>
+                        <input
+                            type="text"
+                            className="input-field"
+                            value={editingSlot.data.gameName || ''}
+                            onChange={(e) => handleModalChange('gameName', e.target.value)}
+                            placeholder="Es. Palla Prigioniera"
+                            autoFocus
+                            style={{ width: '100%', padding: '6px 10px' }}
+                        />
+                    </div>
+
+                    <div className="form-group" style={{ marginBottom: '0.8rem' }}>
+                        <label className="prog-label" style={{ fontSize: '0.85em', marginBottom: '0.2rem' }}>Luogo</label>
+                        <AutocompleteInput
+                            value={editingSlot.data.location || ''}
+                            onChange={(e) => handleModalChange('location', e.target.value)}
+                            suggestions={Array.isArray(locations) ? locations.map(loc => loc.name) : []}
+                            placeholder="Es. Campo 1"
+                        />
+                    </div>
+
+                    <div className="form-group" style={{ marginBottom: '1.2rem' }}>
+                        <label className="prog-label" style={{ fontSize: '0.85em', marginBottom: '0.2rem' }}>Nome Arbitro</label>
+                        <AutocompleteInput
+                            value={editingSlot.data.referee || ''}
+                            onChange={(e) => handleModalChange('referee', e.target.value)}
+                            suggestions={Array.isArray(referees) ? referees.map(ref => ref.name) : []}
+                            placeholder="Es. Mario Rossi"
+                        />
+                    </div>
+
+                    <div className="modal-actions" style={{ display: 'flex', gap: '0.6rem' }}>
+                        <button className="btn btn-secondary btn-sm" style={{ flex: 1 }} onClick={closeModal}>
+                            Annulla
+                        </button>
+                        <button className="btn btn-primary btn-sm" style={{ flex: 1 }} onClick={saveModalChanges}>
+                            Applica
+                        </button>
+                    </div>
+                </div>
+            </div>,
+            document.body
+        )}
+
+        {/* Confirmation dialog — portaled to body */}
+        {pendingSaveConfirm && createPortal(
+            <div className="modal-overlay" onClick={() => setPendingSaveConfirm(null)}>
+                <div className="modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '420px', padding: 'var(--spacing-md)' }}>
+                    <h3 className="modal-title" style={{ marginBottom: '0.8rem', fontSize: '1.2em' }}>
+                        Nuove voci trovate
+                    </h3>
+                    
+                    <p style={{ fontSize: '0.9em', color: 'var(--color-text-medium)', marginBottom: '1rem', textAlign: 'center' }}>
+                        Hai inserito nomi non presenti nel database. Vuoi salvarli per il futuro?
+                    </p>
+
+                    {pendingSaveConfirm.newLocations.length > 0 && (
+                        <div style={{ marginBottom: '0.8rem' }}>
+                            <div style={{ fontSize: '0.85em', fontWeight: 'bold', color: 'var(--color-primary)', marginBottom: '0.3rem' }}>
+                                📍 Nuovi Luoghi:
+                            </div>
+                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.3rem' }}>
+                                {pendingSaveConfirm.newLocations.map((loc, i) => (
+                                    <span key={i} className="badge badge-info" style={{ fontSize: '0.8em' }}>{loc}</span>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    {pendingSaveConfirm.newReferees.length > 0 && (
+                        <div style={{ marginBottom: '1rem' }}>
+                            <div style={{ fontSize: '0.85em', fontWeight: 'bold', color: 'var(--color-primary)', marginBottom: '0.3rem' }}>
+                                👤 Nuovi Arbitri:
+                            </div>
+                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.3rem' }}>
+                                {pendingSaveConfirm.newReferees.map((ref, i) => (
+                                    <span key={i} className="badge badge-secondary" style={{ fontSize: '0.8em' }}>{ref}</span>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    <div className="modal-actions" style={{ display: 'flex', gap: '0.6rem' }}>
+                        <button 
+                            className="btn btn-secondary btn-sm" 
+                            style={{ flex: 1 }} 
+                            onClick={pendingSaveConfirm.onSkip}
+                        >
+                            No, salva solo giochi
+                        </button>
+                        <button 
+                            className="btn btn-primary btn-sm" 
+                            style={{ flex: 1 }} 
+                            onClick={pendingSaveConfirm.onConfirm}
+                        >
+                            Sì, salva nel DB
+                        </button>
+                    </div>
+                </div>
+            </div>,
+            document.body
+        )}
+
+        </>
     );
 }

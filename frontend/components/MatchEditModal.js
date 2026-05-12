@@ -28,6 +28,20 @@ export default function MatchEditModal({ match, isOpen, onClose, onSave, isSavin
         });
     };
 
+    const handleReset = (e) => {
+        e.preventDefault();
+        if (window.confirm('Sei sicuro di voler azzerare il punteggio?')) {
+            setScoreHome('');
+            setScoreAway('');
+            setNotes('');
+            onSave({
+                scoreHome: null,
+                scoreAway: null,
+                refereeNotes: ''
+            });
+        }
+    };
+
     return (
         <div className="modal-overlay" onClick={onClose}>
             <div
@@ -77,6 +91,18 @@ export default function MatchEditModal({ match, isOpen, onClose, onSave, isSavin
                     </div>
 
                     <div className="modal-actions">
+                        {match.status === 'completed' && (
+                            <button
+                                type="button"
+                                className="btn btn-secondary"
+                                style={{ backgroundColor: '#e74c3c', borderColor: '#e74c3c', color: 'white' }}
+                                onClick={handleReset}
+                                disabled={isSaving}
+                                title="Azzera Risultato"
+                            >
+                                🔄 Reset
+                            </button>
+                        )}
                         <button
                             type="button"
                             className="btn btn-secondary"
