@@ -6,9 +6,9 @@ import AutocompleteInput from './AutocompleteInput';
 import '../styles/modal.css';
 
 export default function GameProgramming() {
-    const [selectedDay, setSelectedDay] = useState(1);
+    const [selectedDay, setSelectedDay] = useState(null);
     const [days, setDays] = useState([]);
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
     const [msg, setMsg] = useState(null);
 
     const [morningGames, setMorningGames] = useState([
@@ -39,9 +39,11 @@ export default function GameProgramming() {
             try {
                 const res = await fetch('/api/config/current-day');
                 const data = await res.json();
-                if (data.day) setSelectedDay(data.day);
+                // This will trigger the selectedDay useEffect which loads data
+                setSelectedDay(data.day || 1);
             } catch (err) {
                 console.error('Error fetching current day', err);
+                setSelectedDay(1); // fallback
             }
         };
 
@@ -51,7 +53,7 @@ export default function GameProgramming() {
     }, []);
 
     useEffect(() => {
-        if (selectedDay) {
+        if (selectedDay !== null) {
             loadDayData(selectedDay);
         }
     }, [selectedDay]);
