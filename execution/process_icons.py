@@ -67,4 +67,63 @@ def process_icons(source_path, public_dir):
 if __name__ == "__main__":
     source = r"c:\Users\giova\Documents\Anigravity\GREST\Grest\LogoAlice.png"
     public = r"c:\Users\giova\Documents\Anigravity\GREST\frontend\public"
-    process_icons(source, public)
+    app_dir = r"c:\Users\giova\Documents\Anigravity\GREST\frontend\app"
+    
+    # Run processing
+    if not os.path.exists(source):
+        print(f"Error: Source file {source} not found.")
+        exit(1)
+
+    img = Image.open(source).convert("RGBA")
+    
+    # Simple background removal
+    data = img.getdata()
+    new_data = []
+    for item in data:
+        if item[0] > 240 and item[1] > 240 and item[2] > 240:
+            new_data.append((255, 255, 255, 0))
+        else:
+            new_data.append(item)
+    img.putdata(new_data)
+    
+    bbox = img.getbbox()
+    if bbox:
+        img = img.crop(bbox)
+
+    # Ensure directories exist
+    icons_dir = os.path.join(public, 'icons')
+    os.makedirs(icons_dir, exist_ok=True)
+
+    # Standard PWA icons (stay in public)
+    sizes = [192, 512]
+    for size in sizes:
+        width, height = img.size
+        max_dim = max(width, height)
+        square_img = Image.new('RGBA', (max_dim, max_dim), (255, 255, 255, 0))
+        square_img.paste(img, ((max_dim - width) // 2, (max_dim - height) // 2))
+        icon = square_img.resize((size, size), Image.Resampling.LANCZOS)
+        icon.save(os.path.join(icons_dir, f'icon-{size}x{size}.png'))
+        print(f"Generated {size}x{size} icon in public/icons")
+
+    # App-specific icons (Next.js conventions)
+    width, height = img.size
+    max_dim = max(width, height)
+    square_img = Image.new('RGBA', (max_dim, max_dim), (255, 255, 255, 0))
+    square_img.paste(img, ((max_dim - width) // 2, (max_dim - height) // 2))
+
+    # Favicon and icon.png in /app
+    favicon_32 = square_img.resize((32, 32), Image.Resampling.LANCZOS)
+    favicon_32.save(os.path.join(app_dir, 'favicon.ico'))
+    favicon_32.save(os.path.join(app_dir, 'icon.png'))
+    print("Generated favicon.ico and icon.png in app/")
+
+    # Apple Touch Icon in /app
+    apple_icon = square_img.resize((180, 180), Image.Resampling.LANCZOS)
+    apple_icon.save(os.path.join(app_dir, 'apple-icon.png'))
+    print("Generated apple-icon.png in app/")
+
+    # Standard logo.png in /public for Navbar
+    logo = square_img.resize((512, 512), Image.Resampling.LANCZOS)
+    logo.save(os.path.join(public, 'logo.png'))
+    print("Generated logo.png in public/")
+
