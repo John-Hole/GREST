@@ -182,42 +182,42 @@ export default function GameProgramming() {
         }));
     };
 
-    const saveModalChanges = () => {
+    const saveModalChanges = async () => {
         if (!editingSlot) return;
         const { period, index, data } = editingSlot;
 
-        // Update all fields in a single setState to avoid stale closure bug.
-        // Calling handleGameChange 3 times reads the same stale state snapshot,
-        // so only the last field would survive.
+        let updatedMorning = morningGames;
+        let updatedAfternoon = afternoonGames;
+
         if (period === 'morning') {
-            setMorningGames(prev => {
-                const updated = [...prev];
-                updated[index] = {
-                    ...updated[index],
-                    gameName: data.gameName,
-                    location: data.location,
-                    referee: data.referee
-                };
-                return updated;
-            });
+            updatedMorning = [...morningGames];
+            updatedMorning[index] = {
+                ...updatedMorning[index],
+                gameName: data.gameName,
+                location: data.location,
+                referee: data.referee
+            };
+            setMorningGames(updatedMorning);
         } else {
-            setAfternoonGames(prev => {
-                const updated = [...prev];
-                updated[index] = {
-                    ...updated[index],
-                    gameName: data.gameName,
-                    location: data.location,
-                    referee: data.referee
-                };
-                return updated;
-            });
+            updatedAfternoon = [...afternoonGames];
+            updatedAfternoon[index] = {
+                ...updatedAfternoon[index],
+                gameName: data.gameName,
+                location: data.location,
+                referee: data.referee
+            };
+            setAfternoonGames(updatedAfternoon);
         }
+        
         closeModal();
+        
+        // Trigger save automatically
+        await handleSave(updatedMorning, updatedAfternoon);
     };
 
     // --- DB lookup logic: find new locations/referees not in DB ---
-    const findNewEntries = () => {
-        const allGames = [...morningGames, ...afternoonGames];
+    const findNewEntries = (mGames = morningGames, aGames = afternoonGames) => {
+        const allGames = [...mGames, ...aGames];
         const locationNames = Array.isArray(locations) ? locations.map(l => l.name.toLowerCase()) : [];
         const refereeNames = Array.isArray(referees) ? referees.map(r => r.name.toLowerCase()) : [];
 
@@ -271,7 +271,7 @@ export default function GameProgramming() {
         await fetchReferees();
     };
 
-    const doSave = async () => {
+    const doSave = async (mGames = morningGames, aGames = afternoonGames) => {
         setLoading(true);
         setMsg(null);
         try {
@@ -299,9 +299,9 @@ export default function GameProgramming() {
                         if (idx < 3) {
                             updates.push({
                                 id: match.id,
-                                game_name: valOrNull(morningGames[idx].gameName),
-                                location: valOrNull(morningGames[idx].location),
-                                referee: valOrNull(morningGames[idx].referee)
+                                game_name: valOrNull(mGames[idx].gameName),
+                                location: valOrNull(mGames[idx].location),
+                                referee: valOrNull(mGames[idx].referee)
                             });
                         }
                     });
@@ -315,9 +315,9 @@ export default function GameProgramming() {
                         if (idx < 3) {
                             updates.push({
                                 id: match.id,
-                                game_name: valOrNull(afternoonGames[idx].gameName),
-                                location: valOrNull(afternoonGames[idx].location),
-                                referee: valOrNull(afternoonGames[idx].referee)
+                                game_name: valOrNull(aGames[idx].gameName),
+                                location: valOrNull(aGames[idx].location),
+                                referee: valOrNull(aGames[idx].referee)
                             });
                         }
                     });
@@ -344,9 +344,9 @@ export default function GameProgramming() {
         }
     };
 
-    const handleSave = async () => {
+    const handleSave = async (mGames = morningGames, aGames = afternoonGames) => {
         // Check for new locations/referees before saving
-        const { newLocations: newLocs, newReferees: newRefs } = findNewEntries();
+        const { newLocations: newLocs, newReferees: newRefs } = findNewEntries(mGames, aGames);
 
         if (newLocs.length > 0 || newRefs.length > 0) {
             // Show confirmation dialog
@@ -356,15 +356,15 @@ export default function GameProgramming() {
                 onConfirm: async () => {
                     setPendingSaveConfirm(null);
                     await saveNewEntriesToDb(newLocs, newRefs);
-                    await doSave();
+                    await doSave(mGames, aGames);
                 },
                 onSkip: async () => {
                     setPendingSaveConfirm(null);
-                    await doSave();
+                    await doSave(mGames, aGames);
                 }
             });
         } else {
-            await doSave();
+            await doSave(mGames, aGames);
         }
     };
 
@@ -438,15 +438,6 @@ export default function GameProgramming() {
                                 ))}
                             </select>
                         </div>
-
-                        <button
-                            className="btn btn-primary btn-sm"
-                            onClick={handleSave}
-                            disabled={loading}
-                            style={{ marginLeft: 'auto', padding: '6px 14px' }}
-                        >
-                            {loading ? 'Salvataggio...' : '💾 Salva Tutto'}
-                        </button>
                     </div>
 
                     {msg && (

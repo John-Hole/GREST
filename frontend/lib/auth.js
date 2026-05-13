@@ -13,7 +13,7 @@ async function signToken(payload) {
     return new SignJWT(payload)
         .setProtectedHeader({ alg: 'HS256' })
         .setIssuedAt()
-        .setExpirationTime('7d')
+        .setExpirationTime('30d')
         .sign(JWT_SECRET);
 }
 
@@ -73,7 +73,7 @@ async function requireArbitro() {
 }
 
 function createTokenCookie(token) {
-    return `${COOKIE_NAME}=${token}; HttpOnly; SameSite=Strict; Path=/; Max-Age=${60 * 60 * 24 * 7}`;
+    return `${COOKIE_NAME}=${token}; HttpOnly; SameSite=Strict; Path=/; Max-Age=${60 * 60 * 24 * 30}`;
 }
 
 function clearTokenCookie() {
