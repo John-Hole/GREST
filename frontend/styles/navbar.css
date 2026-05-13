@@ -64,7 +64,17 @@
     font-family: inherit;
     display: flex;
     align-items: center;
-    gap: 5px;
+    gap: 8px;
+}
+
+.navbar-logo-img {
+    height: 32px;
+    width: auto;
+    max-width: 40px;
+    object-fit: contain;
+    border-radius: 6px;
+    background-color: white; /* Added white background in case logo has transparency and needs contrast */
+    padding: 2px;
 }
 
 .navbar-logo-btn:hover {

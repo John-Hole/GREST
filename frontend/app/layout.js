@@ -11,6 +11,10 @@ export const metadata = {
   title: 'Grest PSG',
   description: 'Sistema gestione Grest PSG',
   manifest: '/manifest.json',
+  icons: {
+    icon: '/favicon.ico',
+    apple: '/apple-icon.png',
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',

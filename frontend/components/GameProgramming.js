@@ -84,12 +84,14 @@ export default function GameProgramming() {
             const res = await fetch(`/api/matches?day=${day}`);
             const matches = await res.json();
 
+            // Group matches by timeSlot
             const grouped = {};
             matches.forEach(m => {
                 if (!grouped[m.timeSlot]) grouped[m.timeSlot] = [];
                 grouped[m.timeSlot].push(m);
             });
 
+            // Sort each slot's matches by id so field index is stable
             Object.keys(grouped).forEach(ts => {
                 grouped[ts].sort((a, b) => a.id - b.id);
             });
@@ -109,35 +111,38 @@ export default function GameProgramming() {
             const slotsMorning = ['11:00', '11:30', '12:00'];
             const slotsAfternoon = ['15:00', '15:30', '16:00'];
 
-            slotsMorning.forEach((ts) => {
+            // Read field data from ANY morning time slot that has data.
+            // Each field index (0,1,2) maps to one UI postazione.
+            // We scan all time slots but only set the postazione if not yet filled.
+            for (const ts of slotsMorning) {
                 if (grouped[ts]) {
                     grouped[ts].forEach((match, idx) => {
-                        if (idx < 3 && match.gameName) {
+                        if (idx < 3 && !newMorning[idx].gameName && match.gameName) {
                             newMorning[idx] = {
                                 slot: idx + 1,
                                 gameName: match.gameName,
-                                location: match.location,
-                                referee: match.referee
+                                location: match.location || '',
+                                referee: match.referee || ''
                             };
                         }
                     });
                 }
-            });
+            }
 
-            slotsAfternoon.forEach((ts) => {
+            for (const ts of slotsAfternoon) {
                 if (grouped[ts]) {
                     grouped[ts].forEach((match, idx) => {
-                        if (idx < 3 && match.gameName) {
+                        if (idx < 3 && !newAfternoon[idx].gameName && match.gameName) {
                             newAfternoon[idx] = {
                                 slot: idx + 4,
                                 gameName: match.gameName,
-                                location: match.location,
-                                referee: match.referee
+                                location: match.location || '',
+                                referee: match.referee || ''
                             };
                         }
                     });
                 }
-            });
+            }
 
             setMorningGames(newMorning);
             setAfternoonGames(newAfternoon);
@@ -180,9 +185,33 @@ export default function GameProgramming() {
     const saveModalChanges = () => {
         if (!editingSlot) return;
         const { period, index, data } = editingSlot;
-        handleGameChange(period, index, 'gameName', data.gameName);
-        handleGameChange(period, index, 'location', data.location);
-        handleGameChange(period, index, 'referee', data.referee);
+
+        // Update all fields in a single setState to avoid stale closure bug.
+        // Calling handleGameChange 3 times reads the same stale state snapshot,
+        // so only the last field would survive.
+        if (period === 'morning') {
+            setMorningGames(prev => {
+                const updated = [...prev];
+                updated[index] = {
+                    ...updated[index],
+                    gameName: data.gameName,
+                    location: data.location,
+                    referee: data.referee
+                };
+                return updated;
+            });
+        } else {
+            setAfternoonGames(prev => {
+                const updated = [...prev];
+                updated[index] = {
+                    ...updated[index],
+                    gameName: data.gameName,
+                    location: data.location,
+                    referee: data.referee
+                };
+                return updated;
+            });
+        }
         closeModal();
     };
 
@@ -249,6 +278,7 @@ export default function GameProgramming() {
             const res = await fetch(`/api/matches?day=${selectedDay}`);
             const matches = await res.json();
 
+            // Group matches by timeSlot, sort by id for stable field index
             const grouped = {};
             matches.forEach(m => {
                 if (!grouped[m.timeSlot]) grouped[m.timeSlot] = [];
@@ -258,30 +288,36 @@ export default function GameProgramming() {
 
             const updates = [];
 
+            // Helper: convert empty string to null so SQL COALESCE doesn't overwrite with ""
+            const valOrNull = (v) => (v && v.trim()) ? v.trim() : null;
+
+            // For each morning time slot, apply the field-based UI values.
+            // Field index idx (0,1,2) within each time slot maps to morningGames[idx].
             ['11:00', '11:30', '12:00'].forEach(ts => {
                 if (grouped[ts]) {
                     grouped[ts].forEach((match, idx) => {
                         if (idx < 3) {
                             updates.push({
                                 id: match.id,
-                                game_name: morningGames[idx].gameName,
-                                location: morningGames[idx].location,
-                                referee: morningGames[idx].referee
+                                game_name: valOrNull(morningGames[idx].gameName),
+                                location: valOrNull(morningGames[idx].location),
+                                referee: valOrNull(morningGames[idx].referee)
                             });
                         }
                     });
                 }
             });
 
+            // Same for afternoon
             ['15:00', '15:30', '16:00'].forEach(ts => {
                 if (grouped[ts]) {
                     grouped[ts].forEach((match, idx) => {
                         if (idx < 3) {
                             updates.push({
                                 id: match.id,
-                                game_name: afternoonGames[idx].gameName,
-                                location: afternoonGames[idx].location,
-                                referee: afternoonGames[idx].referee
+                                game_name: valOrNull(afternoonGames[idx].gameName),
+                                location: valOrNull(afternoonGames[idx].location),
+                                referee: valOrNull(afternoonGames[idx].referee)
                             });
                         }
                     });

@@ -68,6 +68,7 @@ export default function Navbar() {
         <nav className="navbar">
             <div className="navbar-left">
                 <button className="navbar-logo-btn" onClick={handleLogoClick} aria-label="Menu">
+                    <img src="/logo.png" alt="Logo" className="navbar-logo-img" />
                     Grest <span>PSG</span>
                 </button>
             </div>
