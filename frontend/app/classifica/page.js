@@ -82,6 +82,7 @@ export default function ClassificaPage() {
 
     return (
         <div className="classifica-page animate-fade-in">
+            {/* 1. HEADER: TITOLO E FILTRI */}
             <div className="page-header" style={{ marginBottom: '2rem' }}>
                 <h1 className="page-title" style={{ marginBottom: '1.5rem' }}>Classifica Torneo</h1>
 
@@ -116,15 +117,21 @@ export default function ClassificaPage() {
                 </div>
             </div>
 
-            <RankingChart standings={standings} />
+            {/* 2. TABELLA CLASSIFICA */}
+            <div className="table-section" style={{ marginBottom: '3rem' }}>
+                <StandingsTable
+                    standings={filteredStandings}
+                    isAdmin={user?.role === 'admin'}
+                    startDay={start}
+                    endDay={end}
+                    useRelativeDays={viewMode !== 'general'}
+                />
+            </div>
 
-            <StandingsTable
-                standings={filteredStandings}
-                isAdmin={user?.role === 'admin'}
-                startDay={start}
-                endDay={end}
-                useRelativeDays={viewMode !== 'general'}
-            />
+            {/* 3. GRAFICO ANDAMENTO (IN FONDO) */}
+            <div className="chart-section">
+                <RankingChart standings={standings} />
+            </div>
         </div>
     );
 }

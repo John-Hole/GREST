@@ -25,25 +25,26 @@ ChartJS.register(
 export default function RankingChart({ standings }) {
     if (!standings || standings.length === 0) return null;
 
-    // 1. Determina quante giornate mostrare (l'ultima con punti assegnati)
-    let maxDay = 0;
+    // 1. Determina l'ultima giornata con punti assegnati (dove siamo arrivati)
+    let lastPlayedDay = 0;
     standings.forEach(team => {
         if (team.dailyPoints) {
             team.dailyPoints.forEach((pts, day) => {
-                if (pts !== 0 && day > maxDay) maxDay = day;
+                if (pts !== 0 && day > lastPlayedDay) lastPlayedDay = day;
             });
         }
     });
 
-    // Se non ci sono punti, mostriamo almeno la giornata 1
-    if (maxDay === 0) maxDay = 1;
+    // Mostriamo sempre tutte le 15 giornate sull'asse X
+    const totalDays = 15;
+    const days = Array.from({ length: totalDays }, (_, i) => i + 1);
 
-    const days = Array.from({ length: maxDay }, (_, i) => i + 1);
-
-    // 2. Calcola i rank per ogni giornata
+    // 2. Calcola i rank per ogni giornata giocata
     const datasets = standings.map(team => {
         const rankData = days.map(day => {
-            // Calcola la classifica totale fino a quel giorno per determinare il rank
+            // Se la giornata non è ancora stata giocata, non restituiamo dati per far fermare la linea
+            if (day > lastPlayedDay) return null;
+
             const dailyStandings = standings.map(t => {
                 const totalUpToDay = (t.dailyPoints || []).slice(0, day + 1).reduce((sum, p) => sum + p, 0);
                 return {
@@ -58,26 +59,30 @@ export default function RankingChart({ standings }) {
                 return b.goalsFor - a.goalsFor;
             });
 
-            // Trova la posizione della squadra corrente
-            const rank = dailyStandings.findIndex(t => t.teamId === team.teamId) + 1;
-            return rank;
+            return dailyStandings.findIndex(t => t.teamId === team.teamId) + 1;
         });
 
-        // Colore di fallback se non presente
         const teamColor = team.colorHex || '#1565C0';
+
+        // Creiamo un array per il raggio dei punti: 0 per tutti, tranne l'ultimo giocato
+        const pointRadii = rankData.map((val, idx) => {
+            if (idx === lastPlayedDay - 1 && val !== null) return 6; // Pallino più grosso sull'ultimo
+            return 0;
+        });
 
         return {
             label: team.teamName,
             data: rankData,
             borderColor: teamColor,
             backgroundColor: teamColor,
-            tension: 0, // Linee rette come richiesto
+            tension: 0,
             borderWidth: 3,
-            pointRadius: 4,
-            pointHoverRadius: 6,
+            pointRadius: pointRadii,
+            pointHoverRadius: pointRadii.map(r => r > 0 ? r + 2 : 0),
             pointBackgroundColor: teamColor,
             pointBorderColor: '#fff',
             pointBorderWidth: 2,
+            spanGaps: false // La linea si ferma se ci sono null
         };
     });
 
@@ -97,34 +102,14 @@ export default function RankingChart({ standings }) {
                 ticks: {
                     stepSize: 1,
                     precision: 0,
-                    font: {
-                        family: 'Inter',
-                        weight: 'bold'
-                    }
+                    font: { family: 'Inter', weight: 'bold' }
                 },
-                grid: {
-                    color: 'rgba(0, 0, 0, 0.05)',
-                    drawBorder: false
-                },
-                title: {
-                    display: true,
-                    text: 'Posizione',
-                    font: {
-                        family: 'Inter',
-                        weight: '600'
-                    }
-                }
+                grid: { color: 'rgba(0, 0, 0, 0.05)', drawBorder: false },
+                title: { display: true, text: 'Posizione', font: { family: 'Inter', weight: '600' } }
             },
             x: {
-                grid: {
-                    display: false
-                },
-                ticks: {
-                    font: {
-                        family: 'Inter',
-                        weight: '600'
-                    }
-                }
+                grid: { display: false },
+                ticks: { font: { family: 'Inter', weight: '600' } }
             }
         },
         plugins: {
@@ -134,11 +119,7 @@ export default function RankingChart({ standings }) {
                     usePointStyle: true,
                     pointStyle: 'circle',
                     padding: 20,
-                    font: {
-                        family: 'Inter',
-                        size: 12,
-                        weight: '500'
-                    }
+                    font: { family: 'Inter', size: 12, weight: '500' }
                 }
             },
             tooltip: {
@@ -169,7 +150,7 @@ export default function RankingChart({ standings }) {
                     Andamento Classifica
                 </h3>
                 <span style={{ fontSize: '0.8rem', color: 'var(--color-text-light)', fontWeight: '500' }}>
-                    Posizioni per giornata
+                    G1 - G15
                 </span>
             </div>
             <div style={{ height: '350px', width: '100%' }}>
