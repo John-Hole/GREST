@@ -5,14 +5,16 @@
     top: 0;
     left: 0;
     right: 0;
-    height: var(--navbar-height);
+    height: calc(var(--navbar-height) + env(safe-area-inset-top));
+    padding-top: env(safe-area-inset-top);
     background: var(--color-bg-navbar);
     /* Updated to yellow shade */
     box-shadow: var(--shadow-sm);
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 var(--spacing-lg);
+    padding-left: var(--spacing-lg);
+    padding-right: var(--spacing-lg);
     z-index: 200;
     /* Above sidebar overlay */
     border-bottom: 3px solid var(--color-primary);

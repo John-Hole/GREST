@@ -56,12 +56,19 @@ export async function DELETE(request) {
     try {
         const { searchParams } = new URL(request.url);
         const id = searchParams.get('id');
+        const deleteAll = searchParams.get('deleteAll');
+
+        const db = getDb();
+
+        if (deleteAll === 'true') {
+            await db.execute('DELETE FROM referees');
+            return NextResponse.json({ success: true, message: 'Tutti gli arbitri sono stati eliminati' });
+        }
 
         if (!id) {
             return NextResponse.json({ message: 'ID obbligatorio' }, { status: 400 });
         }
 
-        const db = getDb();
         await db.execute({
             sql: 'DELETE FROM referees WHERE id = ?',
             args: [id]

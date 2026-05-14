@@ -2,21 +2,42 @@
   "name": "GREST Management",
   "short_name": "GREST",
   "description": "App per la gestione del torneo GREST",
+  "lang": "it",
+  "dir": "ltr",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#1565C0",
   "orientation": "portrait-primary",
+  "categories": ["sports", "productivity"],
   "icons": [
     {
       "src": "/icons/icon-192x192.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     },
     {
       "src": "/icons/icon-512x512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Calendario",
+      "short_name": "Calendario",
+      "description": "Vedi il calendario delle partite",
+      "url": "/calendario",
+      "icons": [{ "src": "/icons/icon-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Classifica",
+      "short_name": "Classifica",
+      "description": "Vedi la classifica aggiornata",
+      "url": "/classifica",
+      "icons": [{ "src": "/icons/icon-192x192.png", "sizes": "192x192" }]
     }
   ]
 }

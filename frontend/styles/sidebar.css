@@ -2,7 +2,7 @@
 
 .sidebar {
     position: fixed;
-    top: var(--navbar-height);
+    top: calc(var(--navbar-height) + env(safe-area-inset-top));
     left: 0;
     bottom: 0;
     width: var(--sidebar-width);

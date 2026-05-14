@@ -13,11 +13,14 @@ export const metadata = {
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
-    statusBarStyle: 'default',
+    statusBarStyle: 'black-translucent',
     title: 'Grest PSG',
   },
   formatDetection: {
     telephone: false,
+  },
+  icons: {
+    apple: '/icons/icon-192x192.png',
   },
 };
 
@@ -26,6 +29,7 @@ export const viewport = {
   width: 'device-width',
   initialScale: 1,
   maximumScale: 1,
+  viewportFit: 'cover',
 };
 
 export default function RootLayout({ children }) {

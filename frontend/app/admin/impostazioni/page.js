@@ -163,8 +163,36 @@ export default function ImpostazioniPage() {
 
                 {/* Referees Management */}
                 <div className="card" style={{ padding: '2rem' }}>
-                    <h2 style={{ fontSize: '1.3em', marginBottom: '1.5rem', color: 'var(--color-primary-medium)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        <span>👤</span> Gestione Arbitri
+                    <h2 style={{ fontSize: '1.3em', marginBottom: '1.5rem', color: 'var(--color-primary-medium)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <span>👤</span> Gestione Arbitri
+                        </div>
+                        {referees.length > 0 && (
+                            <button 
+                                className="btn btn-danger btn-sm" 
+                                style={{ fontSize: '0.7em', padding: '4px 8px' }}
+                                onClick={async () => {
+                                    if (confirm('Sei sicuro di voler svuotare TOTALMENTE la lista arbitri? Questa operazione non è reversibile.')) {
+                                        try {
+                                            const res = await fetch('/api/referees?deleteAll=true', { method: 'DELETE' });
+                                            if (res.ok) {
+                                                fetchReferees();
+                                                setMsg({ type: 'success', text: 'Lista arbitri svuotata.' });
+                                                setTimeout(() => setMsg(null), 3000);
+                                            } else {
+                                                const data = await res.json();
+                                                setMsg({ type: 'error', text: data.message || 'Errore durante lo svuotamento.' });
+                                            }
+                                        } catch (e) {
+                                            console.error(e);
+                                            setMsg({ type: 'error', text: 'Errore di connessione.' });
+                                        }
+                                    }
+                                }}
+                            >
+                                🗑️ Svuota Tutto
+                            </button>
+                        )}
                     </h2>
                     <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem' }}>
                         <input
