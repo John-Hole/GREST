@@ -14,6 +14,7 @@ export default function GestioneTorneo() {
     const [savingTeamId, setSavingTeamId] = useState(null);
     const [msg, setMsg] = useState(null);
     const [teamMsg, setTeamMsg] = useState(null);
+    const [completion, setCompletion] = useState(0);
 
     useEffect(() => {
         if (!authLoading && (!user || user.role !== 'admin')) {
@@ -25,8 +26,23 @@ export default function GestioneTorneo() {
         if (user && user.role === 'admin') {
             fetchStartDate();
             fetchTeams();
+            fetchCompletion();
         }
     }, [user]);
+
+    const fetchCompletion = async () => {
+        try {
+            const res = await fetch('/api/matches');
+            if (res.ok) {
+                const matches = await res.json();
+                const total = matches.length;
+                const completed = matches.filter(m => m.scoreHome !== null && m.scoreHome !== undefined).length;
+                setCompletion(total > 0 ? Math.round((completed / total) * 100) : 0);
+            }
+        } catch (error) {
+            console.error('Errore nel caricamento dei match per le stats', error);
+        }
+    };
 
     const fetchTeams = async () => {
         try {
@@ -123,7 +139,7 @@ export default function GestioneTorneo() {
             margin: '0 auto',
             display: 'flex',
             flexDirection: 'column',
-            alignItems: 'center'
+            alignItems: 'flex-start'
         }}>
             <h1 className="page-title" style={{ 
                 fontSize: '1.8rem', 
@@ -132,9 +148,9 @@ export default function GestioneTorneo() {
                 alignItems: 'center', 
                 gap: '0.5rem',
                 width: '100%',
-                justifyContent: 'center'
+                justifyContent: 'flex-start'
             }}>
-                <span>⚙️</span> Gestione (v2)
+                <span>⚙️</span> Gestione
             </h1>
 
             <div style={{ 
@@ -173,16 +189,37 @@ export default function GestioneTorneo() {
                             width: '60px', 
                             height: '60px', 
                             borderRadius: '50%', 
-                            background: 'conic-gradient(var(--color-primary) 0% 35%, var(--color-secondary) 35% 80%, var(--color-border) 80% 100%)', 
+                            background: `conic-gradient(var(--color-primary) 0% ${completion}%, var(--color-border) ${completion}% 100%)`, 
                             flexShrink: 0,
-                            boxShadow: '0 4px 10px rgba(0,0,0,0.1)'
-                        }}></div>
+                            boxShadow: '0 4px 10px rgba(0,0,0,0.1)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            position: 'relative'
+                        }}>
+                            {/* Inner circle to make it a donut */}
+                            <div style={{ 
+                                position: 'absolute', 
+                                width: '45px', 
+                                height: '45px', 
+                                borderRadius: '50%', 
+                                background: 'var(--color-card-bg)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                fontSize: '0.85rem',
+                                fontWeight: 'bold',
+                                color: 'var(--color-primary)'
+                            }}>
+                                {completion}%
+                            </div>
+                        </div>
                         <div style={{ textAlign: 'left' }}>
                             <h2 style={{ fontSize: '1.1rem', fontWeight: 'bold', marginBottom: '0.25rem', color: 'var(--color-primary)' }}>
                                 📊 Statistiche
                             </h2>
                             <p style={{ fontSize: '0.8rem', color: 'var(--color-text-medium)', lineHeight: '1.3', margin: 0 }}>
-                                Analisi incontri e sfide.
+                                Torneo al {completion}%. Analisi sfide.
                             </p>
                         </div>
                     </div>
