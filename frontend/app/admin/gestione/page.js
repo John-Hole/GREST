@@ -32,15 +32,19 @@ export default function GestioneTorneo() {
 
     const fetchCompletion = async () => {
         try {
-            const res = await fetch('/api/matches');
-            if (res.ok) {
-                const matches = await res.json();
-                const total = matches.length;
-                const completed = matches.filter(m => m.scoreHome !== null && m.scoreHome !== undefined).length;
-                setCompletion(total > 0 ? Math.round((completed / total) * 100) : 0);
+            const [resDay, resMatches] = await Promise.all([
+                fetch('/api/config/current-day'),
+                fetch('/api/matches')
+            ]);
+            if (resDay.ok && resMatches.ok) {
+                const dayData = await resDay.json();
+                const matches = await resMatches.json();
+                const currentDay = dayData.realDay || dayData.day || 1;
+                const totalDays = matches.length > 0 ? Math.max(...matches.map(m => m.day)) : 1;
+                setCompletion(Math.round((currentDay / totalDays) * 100));
             }
         } catch (error) {
-            console.error('Errore nel caricamento dei match per le stats', error);
+            console.error('Errore nel caricamento della percentuale', error);
         }
     };
 
