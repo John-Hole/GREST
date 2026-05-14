@@ -26,6 +26,7 @@ export default function GameProgramming() {
     const [editingSlot, setEditingSlot] = useState(null); // { period, index, data }
     const [locations, setLocations] = useState([]);
     const [referees, setReferees] = useState([]);
+    const [games, setGames] = useState([]);
 
     // State for "save new to DB?" confirmation dialog
     const [pendingSaveConfirm, setPendingSaveConfirm] = useState(null);
@@ -50,6 +51,7 @@ export default function GameProgramming() {
         fetchInitialDay();
         fetchLocations();
         fetchReferees();
+        fetchGames();
     }, []);
 
     useEffect(() => {
@@ -73,6 +75,16 @@ export default function GameProgramming() {
             const res = await fetch('/api/referees');
             const data = await res.json();
             setReferees(data);
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
+    const fetchGames = async () => {
+        try {
+            const res = await fetch('/api/games');
+            const data = await res.json();
+            setGames(data);
         } catch (err) {
             console.error(err);
         }
@@ -215,16 +227,21 @@ export default function GameProgramming() {
         await handleSave(updatedMorning, updatedAfternoon);
     };
 
-    // --- DB lookup logic: find new locations/referees not in DB ---
+    // --- DB lookup logic: find new locations/referees/games not in DB ---
     const findNewEntries = (mGames = morningGames, aGames = afternoonGames) => {
         const allGames = [...mGames, ...aGames];
         const locationNames = Array.isArray(locations) ? locations.map(l => l.name.toLowerCase()) : [];
         const refereeNames = Array.isArray(referees) ? referees.map(r => r.name.toLowerCase()) : [];
+        const gameNamesList = Array.isArray(games) ? games.map(g => g.name.toLowerCase()) : [];
 
         const newLocations = new Set();
         const newReferees = new Set();
+        const newGames = new Set();
 
         allGames.forEach(g => {
+            if (g.gameName && g.gameName.trim() && !gameNamesList.includes(g.gameName.trim().toLowerCase())) {
+                newGames.add(g.gameName.trim());
+            }
             if (g.location && g.location.trim() && !locationNames.includes(g.location.trim().toLowerCase())) {
                 newLocations.add(g.location.trim());
             }
@@ -235,11 +252,25 @@ export default function GameProgramming() {
 
         return {
             newLocations: [...newLocations],
-            newReferees: [...newReferees]
+            newReferees: [...newReferees],
+            newGames: [...newGames]
         };
     };
 
-    const saveNewEntriesToDb = async (newLocs, newRefs) => {
+    const saveNewEntriesToDb = async (newLocs, newRefs, newGms) => {
+        // Save new games
+        for (const name of newGms) {
+            try {
+                await fetch('/api/games', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name })
+                });
+            } catch (err) {
+                console.error('Error saving game:', name, err);
+            }
+        }
+
         // Save new locations
         for (const name of newLocs) {
             try {
@@ -269,6 +300,7 @@ export default function GameProgramming() {
         // Refresh lists
         await fetchLocations();
         await fetchReferees();
+        await fetchGames();
     };
 
     const doSave = async (mGames = morningGames, aGames = afternoonGames) => {
@@ -345,17 +377,18 @@ export default function GameProgramming() {
     };
 
     const handleSave = async (mGames = morningGames, aGames = afternoonGames) => {
-        // Check for new locations/referees before saving
-        const { newLocations: newLocs, newReferees: newRefs } = findNewEntries(mGames, aGames);
+        // Check for new locations/referees/games before saving
+        const { newLocations: newLocs, newReferees: newRefs, newGames: newGms } = findNewEntries(mGames, aGames);
 
-        if (newLocs.length > 0 || newRefs.length > 0) {
+        if (newLocs.length > 0 || newRefs.length > 0 || newGms.length > 0) {
             // Show confirmation dialog
             setPendingSaveConfirm({
                 newLocations: newLocs,
                 newReferees: newRefs,
+                newGames: newGms,
                 onConfirm: async () => {
                     setPendingSaveConfirm(null);
-                    await saveNewEntriesToDb(newLocs, newRefs);
+                    await saveNewEntriesToDb(newLocs, newRefs, newGms);
                     await doSave(mGames, aGames);
                 },
                 onSkip: async () => {
@@ -497,14 +530,12 @@ export default function GameProgramming() {
                     
                     <div className="form-group" style={{ marginBottom: '0.8rem' }}>
                         <label className="prog-label" style={{ fontSize: '0.85em', marginBottom: '0.2rem' }}>Nome Gioco</label>
-                        <input
-                            type="text"
-                            className="input-field"
+                        <AutocompleteInput
                             value={editingSlot.data.gameName || ''}
                             onChange={(e) => handleModalChange('gameName', e.target.value)}
+                            suggestions={Array.isArray(games) ? games.map(g => g.name) : []}
                             placeholder="Es. Palla Prigioniera"
                             autoFocus
-                            style={{ width: '100%', padding: '6px 10px' }}
                         />
                     </div>
 
@@ -552,6 +583,19 @@ export default function GameProgramming() {
                     <p style={{ fontSize: '0.9em', color: 'var(--color-text-medium)', marginBottom: '1rem', textAlign: 'center' }}>
                         Hai inserito nomi non presenti nel database. Vuoi salvarli per il futuro?
                     </p>
+
+                    {pendingSaveConfirm.newGames && pendingSaveConfirm.newGames.length > 0 && (
+                        <div style={{ marginBottom: '0.8rem' }}>
+                            <div style={{ fontSize: '0.85em', fontWeight: 'bold', color: 'var(--color-primary)', marginBottom: '0.3rem' }}>
+                                🎮 Nuovi Giochi:
+                            </div>
+                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.3rem' }}>
+                                {pendingSaveConfirm.newGames.map((g, i) => (
+                                    <span key={i} className="badge" style={{ backgroundColor: 'var(--color-primary)', color: 'white', fontSize: '0.8em', padding: '2px 8px', borderRadius: '12px' }}>{g}</span>
+                                ))}
+                            </div>
+                        </div>
+                    )}
 
                     {pendingSaveConfirm.newLocations.length > 0 && (
                         <div style={{ marginBottom: '0.8rem' }}>

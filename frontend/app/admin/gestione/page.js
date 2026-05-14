@@ -134,7 +134,7 @@ export default function GestioneTorneo() {
                 width: '100%',
                 justifyContent: 'center'
             }}>
-                <span>⚙️</span> Gestione
+                <span>⚙️</span> Gestione (v2)
             </h1>
 
             <div style={{ 

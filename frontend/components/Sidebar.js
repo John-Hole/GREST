@@ -90,6 +90,15 @@ export default function Sidebar() {
                         <span className="sidebar-link-label">Briefing</span>
                     </Link>
 
+                    <Link
+                        href="/giochi"
+                        className={`sidebar-link ${isActive('/giochi') ? 'active' : ''}`}
+                        onClick={closeSidebar}
+                    >
+                        <span className="sidebar-link-icon">📖</span>
+                        <span className="sidebar-link-label">Giochi</span>
+                    </Link>
+
                     {user && (
                         <>
                             <div className="sidebar-divider" />
