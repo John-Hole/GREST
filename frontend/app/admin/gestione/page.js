@@ -192,19 +192,6 @@ export default function GestioneTorneo() {
                             e.currentTarget.style.borderColor = 'var(--color-border)';
                         }}
                     >
-                        {/* Decorative background element */}
-                        <div style={{
-                            position: 'absolute',
-                            top: '-20px',
-                            right: '-20px',
-                            width: '100px',
-                            height: '100px',
-                            background: 'var(--color-primary)',
-                            opacity: '0.05',
-                            borderRadius: '50%',
-                            zIndex: 0
-                        }}></div>
-
                         <div style={{ 
                             width: '80px', 
                             height: '80px', 
