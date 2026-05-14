@@ -76,12 +76,75 @@ export default function BriefingPage() {
         }
     };
 
+    const handleExportCurrent = () => {
+        if (!briefingContent) {
+            showToast({ type: 'warning', message: 'Nessun contenuto da esportare' });
+            return;
+        }
+        
+        const blob = new Blob([briefingContent], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `briefing_giorno_${selectedDay}.txt`;
+        a.click();
+        URL.revokeObjectURL(url);
+    };
+
+    const handleExportAll = async () => {
+        try {
+            const res = await fetch('/api/briefings?day=all');
+            const data = await res.json();
+            
+            if (!data.briefings || data.briefings.length === 0) {
+                showToast({ type: 'warning', message: 'Nessun briefing trovato' });
+                return;
+            }
+
+            let fullContent = 'TUTTI I BRIEFING\n\n';
+            data.briefings.forEach(b => {
+                fullContent += `--- GIORNO ${b.day_number} ---\n`;
+                fullContent += `${b.content}\n\n`;
+            });
+
+            const blob = new Blob([fullContent], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `tutti_i_briefing.txt`;
+            a.click();
+            URL.revokeObjectURL(url);
+        } catch (err) {
+            console.error('Export error', err);
+            showToast({ type: 'error', message: 'Errore durante l\'esportazione' });
+        }
+    };
+
     return (
         <div className="briefing-page animate-fade-in">
-            <h1 className="page-title">Briefing Giornaliero</h1>
-            <p style={{ color: 'var(--color-text-medium)', marginBottom: '2rem' }}>
-                Comunicazioni e note per lo staff, organizzate per giornata.
-            </p>
+            <div className="briefing-header" style={{ 
+                display: 'flex', 
+                justifyContent: 'space-between', 
+                alignItems: 'flex-start', 
+                marginBottom: '2rem',
+                flexWrap: 'wrap',
+                gap: '1rem'
+            }}>
+                <div style={{ flex: '1', minWidth: '300px' }}>
+                    <h1 className="page-title" style={{ marginBottom: '0.5rem' }}>Briefing Giornaliero</h1>
+                    <p style={{ color: 'var(--color-text-medium)', margin: 0 }}>
+                        Comunicazioni e note per lo staff, organizzate per giornata.
+                    </p>
+                </div>
+                <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                    <button className="btn btn-secondary" onClick={handleExportCurrent} title="Esporta briefing di oggi">
+                        📤 Esporta
+                    </button>
+                    <button className="btn btn-secondary" onClick={handleExportAll} title="Esporta tutti i briefing">
+                        📂 Esporta Tutto
+                    </button>
+                </div>
+            </div>
 
             <div className="day-selector-container card" style={{ marginBottom: '2rem' }}>
                 <label htmlFor="day-select" style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold', color: 'var(--color-text-dark)' }}>
