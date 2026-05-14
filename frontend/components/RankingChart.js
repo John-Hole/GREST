@@ -59,6 +59,11 @@ export default function RankingChart({ standings }) {
                 return b.goalsFor - a.goalsFor;
             });
 
+            return dailyStandings.findIndex(t => t.teamId === team.teamId) + 1;
+        });
+
+        const teamColor = team.colorHex || '#1565C0';
+
         // Creiamo un array per il raggio dei punti: piccoli per il passato, grande per l'ultimo, 0 per il futuro
         const pointRadii = rankData.map((val, idx) => {
             if (val === null) return 0;
