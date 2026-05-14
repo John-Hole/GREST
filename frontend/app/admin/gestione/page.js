@@ -139,72 +139,92 @@ export default function GestioneTorneo() {
 
             <div style={{ 
                 display: 'grid', 
-                gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', 
+                gridTemplateColumns: 'repeat(auto-fit, minmax(450px, 1fr))', 
                 gap: '2rem', 
                 width: '100%',
-                justifyContent: 'center'
+                alignItems: 'start'
             }}>
-                {/* Statistiche Card */}
-                <div 
-                    className="card animate-fade-in" 
-                    style={{ padding: '1.5rem', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', transition: 'transform 0.2s', border: '1px solid var(--color-border)' }} 
-                    onClick={() => router.push('/admin/statistiche')}
-                    onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.02)'}
-                    onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
-                >
-                    <h2 style={{ fontSize: '1.2rem', fontWeight: 'bold', marginBottom: '1rem', color: 'var(--color-primary)' }}>
-                        📊 Statistiche Incontri
-                    </h2>
-                    <div style={{ 
-                        width: '100px', 
-                        height: '100px', 
-                        borderRadius: '50%', 
-                        background: 'conic-gradient(var(--color-primary) 0% 35%, var(--color-secondary) 35% 80%, var(--color-border) 80% 100%)', 
-                        marginBottom: '1rem',
-                        boxShadow: '0 4px 10px rgba(0,0,0,0.1)'
-                    }}></div>
-                    <p style={{ fontSize: '0.85rem', color: 'var(--color-text-medium)', textAlign: 'center', lineHeight: '1.4' }}>
-                        Visualizza le statistiche degli incontri, la distribuzione delle sfide e le prestazioni delle singole squadre. Clicca per accedere.
-                    </p>
-                </div>
-
-                {/* General Settings Card */}
-                <div className="card animate-fade-in" style={{ padding: '1.25rem' }}>
-                    <h2 style={{ fontSize: '1.1rem', fontWeight: 'bold', marginBottom: '1rem', color: 'var(--color-primary)' }}>
-                        📅 Inizio Torneo
-                    </h2>
-
-                    {msg && (
-                        <div className={`notification ${msg.type === 'error' ? 'notification-error' : 'notification-success'}`} style={{ marginBottom: '1rem', padding: '0.5rem', fontSize: '0.85rem' }}>
-                            {msg.text}
+                {/* Left Column: Stats and Start Date */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                    {/* Statistiche Card - Smaller and more compact */}
+                    <div 
+                        className="card animate-fade-in" 
+                        style={{ 
+                            padding: '1.25rem', 
+                            cursor: 'pointer', 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            gap: '1.25rem',
+                            transition: 'all 0.2s', 
+                            border: '1px solid var(--color-border)',
+                            background: 'linear-gradient(135deg, var(--color-card-bg) 0%, var(--color-bg-light) 100%)'
+                        }} 
+                        onClick={() => router.push('/admin/statistiche')}
+                        onMouseEnter={(e) => {
+                            e.currentTarget.style.transform = 'translateY(-4px)';
+                            e.currentTarget.style.boxShadow = '0 8px 20px rgba(0,0,0,0.15)';
+                        }}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.style.transform = 'translateY(0)';
+                            e.currentTarget.style.boxShadow = 'none';
+                        }}
+                    >
+                        <div style={{ 
+                            width: '60px', 
+                            height: '60px', 
+                            borderRadius: '50%', 
+                            background: 'conic-gradient(var(--color-primary) 0% 35%, var(--color-secondary) 35% 80%, var(--color-border) 80% 100%)', 
+                            flexShrink: 0,
+                            boxShadow: '0 4px 10px rgba(0,0,0,0.1)'
+                        }}></div>
+                        <div style={{ textAlign: 'left' }}>
+                            <h2 style={{ fontSize: '1.1rem', fontWeight: 'bold', marginBottom: '0.25rem', color: 'var(--color-primary)' }}>
+                                📊 Statistiche
+                            </h2>
+                            <p style={{ fontSize: '0.8rem', color: 'var(--color-text-medium)', lineHeight: '1.3', margin: 0 }}>
+                                Analisi incontri e sfide.
+                            </p>
                         </div>
-                    )}
-
-                    <div className="form-group" style={{ marginBottom: '1rem' }}>
-                        <input
-                            type="date"
-                            className="input-field"
-                            value={startDate}
-                            onChange={(e) => setStartDate(e.target.value)}
-                            style={{ width: '100%', marginBottom: '0.75rem' }}
-                        />
-                        <p style={{ fontSize: '0.8rem', color: 'var(--color-text-medium)', lineHeight: '1.3' }}>
-                            Imposta la data per ricalcolare tutte le giornate.
-                        </p>
                     </div>
 
-                    <button 
-                        className="btn btn-primary" 
-                        style={{ width: '100%', padding: '0.5rem' }}
-                        onClick={handleSave} 
-                        disabled={saving || !startDate}
-                    >
-                        {saving ? 'Salvataggio...' : '💾 Salva Data'}
-                    </button>
+                    {/* General Settings Card */}
+                    <div className="card animate-fade-in" style={{ padding: '1.25rem' }}>
+                        <h2 style={{ fontSize: '1.1rem', fontWeight: 'bold', marginBottom: '1rem', color: 'var(--color-primary)' }}>
+                            📅 Inizio Torneo
+                        </h2>
+
+                        {msg && (
+                            <div className={`notification ${msg.type === 'error' ? 'notification-error' : 'notification-success'}`} style={{ marginBottom: '1rem', padding: '0.5rem', fontSize: '0.85rem' }}>
+                                {msg.text}
+                            </div>
+                        )}
+
+                        <div className="form-group" style={{ marginBottom: '1rem' }}>
+                            <input
+                                type="date"
+                                className="input-field"
+                                value={startDate}
+                                onChange={(e) => setStartDate(e.target.value)}
+                                style={{ width: '100%', marginBottom: '0.75rem' }}
+                            />
+                            <p style={{ fontSize: '0.8rem', color: 'var(--color-text-medium)', lineHeight: '1.3' }}>
+                                Imposta la data per ricalcolare tutte le giornate.
+                            </p>
+                        </div>
+
+                        <button 
+                            className="btn btn-primary" 
+                            style={{ width: '100%', padding: '0.5rem' }}
+                            onClick={handleSave} 
+                            disabled={saving || !startDate}
+                        >
+                            {saving ? 'Salvataggio...' : '💾 Salva Data'}
+                        </button>
+                    </div>
                 </div>
 
-                {/* Teams Management Card */}
-                <div className="card animate-fade-in" style={{ padding: '1.25rem' }}>
+                {/* Right Column: Teams Management Card */}
+                <div className="card animate-fade-in" style={{ padding: '1.25rem', height: '100%' }}>
                     <h2 style={{ fontSize: '1.1rem', fontWeight: 'bold', marginBottom: '1rem', color: 'var(--color-primary)' }}>
                         👥 Squadre
                     </h2>
