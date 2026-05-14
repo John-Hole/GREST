@@ -77,7 +77,7 @@ export default function RankingChart({ standings }) {
             borderColor: teamColor,
             backgroundColor: teamColor,
             tension: 0,
-            borderWidth: 2, // Linee più sottili
+            borderWidth: 3, // Linee un po' più spesse
             pointRadius: pointRadii,
             pointHoverRadius: pointRadii.map(r => r > 0 ? r + 2 : 0),
             pointBackgroundColor: teamColor,
