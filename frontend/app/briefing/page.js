@@ -9,29 +9,34 @@ export default function BriefingPage() {
     const { showToast } = useToast();
 
     const [loading, setLoading] = useState(true);
-    const [selectedDay, setSelectedDay] = useState(1);
+    const [selectedDay, setSelectedDay] = useState(null);
     const [tournamentDays] = useState(Array.from({ length: 15 }, (_, i) => i + 1));
     const [briefingContent, setBriefingContent] = useState('');
     const [isSaving, setIsSaving] = useState(false);
 
     const isPrivileged = user && ['admin', 'admin_giochi'].includes(user.role);
 
+    // Initial fetch for current day
     useEffect(() => {
         const init = async () => {
             try {
-                // Fetch current day
                 const res = await fetch('/api/config/current-day');
                 const data = await res.json();
                 const current = data.realDay || 1;
                 setSelectedDay(current);
+                // The fetchBriefing for the initial day will be triggered by the second useEffect
             } catch (e) {
                 console.error(e);
+                setSelectedDay(1); // Fallback to day 1
             }
         };
         init();
     }, []);
 
+    // Fetch briefing whenever selectedDay changes
     useEffect(() => {
+        if (selectedDay === null) return;
+
         const fetchBriefing = async () => {
             setLoading(true);
             try {
@@ -40,14 +45,13 @@ export default function BriefingPage() {
                 setBriefingContent(data.content || '');
             } catch (err) {
                 console.error('Error fetching briefing', err);
+                showToast({ type: 'error', message: 'Errore nel caricamento del briefing' });
             } finally {
                 setLoading(false);
             }
         };
 
-        if (selectedDay) {
-            fetchBriefing();
-        }
+        fetchBriefing();
     }, [selectedDay]);
 
     const handleSave = async () => {
@@ -119,6 +123,15 @@ export default function BriefingPage() {
             showToast({ type: 'error', message: 'Errore durante l\'esportazione' });
         }
     };
+
+    if (selectedDay === null) {
+        return (
+            <div className="briefing-page animate-fade-in" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
+                <div className="spinner"></div>
+                <p style={{ marginTop: '1rem', color: 'var(--color-text-medium)' }}>Caricamento briefing...</p>
+            </div>
+        );
+    }
 
     return (
         <div className="briefing-page animate-fade-in">

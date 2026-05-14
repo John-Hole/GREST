@@ -117,17 +117,57 @@ export default function GestioneTorneo() {
     if (!user || user.role !== 'admin') return null;
 
     return (
-        <div className="container" style={{ padding: '1rem', maxWidth: '1000px' }}>
-            <h1 className="page-title" style={{ fontSize: '1.5rem', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        <div className="container" style={{ 
+            padding: '2rem 1rem', 
+            maxWidth: '1100px', 
+            margin: '0 auto',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center'
+        }}>
+            <h1 className="page-title" style={{ 
+                fontSize: '1.8rem', 
+                marginBottom: '2rem', 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: '0.5rem',
+                width: '100%',
+                justifyContent: 'center'
+            }}>
                 <span>⚙️</span> Gestione
             </h1>
 
             <div style={{ 
                 display: 'grid', 
-                gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', 
-                gap: '1.5rem', 
-                alignItems: 'start' 
+                gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', 
+                gap: '2rem', 
+                width: '100%',
+                justifyContent: 'center'
             }}>
+                {/* Statistiche Card */}
+                <div 
+                    className="card animate-fade-in" 
+                    style={{ padding: '1.5rem', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', transition: 'transform 0.2s', border: '1px solid var(--color-border)' }} 
+                    onClick={() => router.push('/admin/statistiche')}
+                    onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.02)'}
+                    onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                >
+                    <h2 style={{ fontSize: '1.2rem', fontWeight: 'bold', marginBottom: '1rem', color: 'var(--color-primary)' }}>
+                        📊 Statistiche Incontri
+                    </h2>
+                    <div style={{ 
+                        width: '100px', 
+                        height: '100px', 
+                        borderRadius: '50%', 
+                        background: 'conic-gradient(var(--color-primary) 0% 35%, var(--color-secondary) 35% 80%, var(--color-border) 80% 100%)', 
+                        marginBottom: '1rem',
+                        boxShadow: '0 4px 10px rgba(0,0,0,0.1)'
+                    }}></div>
+                    <p style={{ fontSize: '0.85rem', color: 'var(--color-text-medium)', textAlign: 'center', lineHeight: '1.4' }}>
+                        Visualizza le statistiche degli incontri, la distribuzione delle sfide e le prestazioni delle singole squadre. Clicca per accedere.
+                    </p>
+                </div>
+
                 {/* General Settings Card */}
                 <div className="card animate-fade-in" style={{ padding: '1.25rem' }}>
                     <h2 style={{ fontSize: '1.1rem', fontWeight: 'bold', marginBottom: '1rem', color: 'var(--color-primary)' }}>
