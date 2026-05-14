@@ -106,7 +106,7 @@ export default function GiochiPage() {
                 }
             } else {
                 const data = await res.json();
-                alert(data.message || 'Errore durante l\\'eliminazione');
+                alert(data.message || `Errore durante l'eliminazione`);
             }
         } catch (err) {
             console.error('Error deleting game:', err);
