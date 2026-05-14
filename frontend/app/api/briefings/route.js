@@ -9,11 +9,16 @@ export async function GET(request) {
         const { searchParams } = new URL(request.url);
         const day = searchParams.get('day');
         
-        if (!day) {
-            return NextResponse.json({ message: 'Day parameter is required' }, { status: 400 });
+        const db = getDb();
+
+        if (!day || day === 'all') {
+            const { rows } = await db.execute({
+                sql: 'SELECT day_number, content FROM briefings ORDER BY day_number ASC',
+                args: []
+            });
+            return NextResponse.json({ briefings: rows });
         }
 
-        const db = getDb();
         const { rows } = await db.execute({
             sql: 'SELECT content FROM briefings WHERE day_number = ?',
             args: [parseInt(day)]

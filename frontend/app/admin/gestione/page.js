@@ -117,108 +117,134 @@ export default function GestioneTorneo() {
     if (!user || user.role !== 'admin') return null;
 
     return (
-        <div className="container" style={{ padding: '2rem' }}>
-            <h1 style={{ fontSize: '2rem', color: 'var(--color-primary)', marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '0.5rem', whiteSpace: 'nowrap' }}>
+        <div className="container" style={{ padding: 'var(--spacing-lg)' }}>
+            <h1 className="page-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <span>⚙️</span> Gestione Torneo
             </h1>
 
-            <div className="card" style={{ maxWidth: '600px', marginBottom: '2rem' }}>
-                <h2 style={{ fontSize: '1.5rem', marginBottom: '1.5rem' }}>Impostazioni Generali</h2>
+            <div style={{ 
+                display: 'flex', 
+                flexWrap: 'wrap', 
+                gap: 'var(--spacing-lg)', 
+                alignItems: 'flex-start' 
+            }}>
+                {/* General Settings Card */}
+                <div className="card animate-fade-in" style={{ flex: '1 1 400px', minWidth: '320px' }}>
+                    <h2 className="section-title">
+                        <span>📅</span> Impostazioni Generali
+                    </h2>
 
-                {msg && (
-                    <div className={`notification ${msg.type === 'error' ? 'notification-error' : 'notification-success'}`} style={{ marginBottom: '1rem' }}>
-                        {msg.text}
+                    {msg && (
+                        <div className={`notification ${msg.type === 'error' ? 'notification-error' : 'notification-success'}`} style={{ marginBottom: '1rem' }}>
+                            {msg.text}
+                        </div>
+                    )}
+
+                    <div className="form-group" style={{ marginBottom: '1.5rem' }}>
+                        <label>Data di Inizio Torneo</label>
+                        <p style={{ fontSize: '0.85rem', color: 'var(--color-text-medium)', marginBottom: '1rem' }}>
+                            Ricalcola automaticamente le date delle 15 giornate (esclusi weekend).
+                        </p>
+                        <input
+                            type="date"
+                            className="input-field"
+                            value={startDate}
+                            onChange={(e) => setStartDate(e.target.value)}
+                            style={{ maxWidth: '100%' }}
+                        />
                     </div>
-                )}
 
-                <div className="form-group" style={{ marginBottom: '1.5rem' }}>
-                    <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '0.5rem' }}>Data di Inizio Torneo</label>
-                    <p style={{ fontSize: '0.9rem', color: 'var(--color-text-muted)', marginBottom: '1rem' }}>
-                        Impostando questa data, verranno ricalcolate automaticamente le date di tutte le 15 giornate del torneo, saltando i sabati e le domeniche.
-                    </p>
-                    <input
-                        type="date"
-                        className="input-field"
-                        value={startDate}
-                        onChange={(e) => setStartDate(e.target.value)}
-                        style={{ maxWidth: '300px' }}
-                    />
+                    <button 
+                        className="btn btn-primary" 
+                        style={{ width: '100%' }}
+                        onClick={handleSave} 
+                        disabled={saving || !startDate}
+                    >
+                        {saving ? 'Salvataggio...' : '💾 Salva Impostazioni'}
+                    </button>
                 </div>
 
-                <button 
-                    className="btn btn-primary" 
-                    onClick={handleSave} 
-                    disabled={saving || !startDate}
-                >
-                    {saving ? 'Salvataggio in corso...' : '💾 Salva Impostazioni'}
-                </button>
-            </div>
+                {/* Teams Management Card */}
+                <div className="card animate-fade-in" style={{ flex: '2 1 600px', minWidth: '320px' }}>
+                    <h2 className="section-title">
+                        <span>👥</span> Gestione Squadre
+                    </h2>
 
-            <div className="card" style={{ maxWidth: '800px' }}>
-                <h2 style={{ fontSize: '1.5rem', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <span>👥</span> Gestione Squadre
-                </h2>
-
-                {teamMsg && (
-                    <div className={`notification ${teamMsg.type === 'error' ? 'notification-error' : 'notification-success'}`} style={{ marginBottom: '1rem' }}>
-                        {teamMsg.text}
-                    </div>
-                )}
-
-                <div style={{ display: 'grid', gap: '1rem' }}>
-                    {teams.map((team) => (
-                        <div key={team.id} style={{ 
-                            display: 'flex', 
-                            alignItems: 'center', 
-                            gap: '1rem', 
-                            padding: '1rem', 
-                            backgroundColor: 'var(--color-bg-navbar)', 
-                            borderRadius: 'var(--radius-md)',
-                            border: '1px solid var(--color-border)'
-                        }}>
-                            <div style={{ width: '40px', fontWeight: 'bold', color: 'var(--color-primary-medium)', fontSize: '1.1rem' }}>
-                                #{team.id}
-                            </div>
-                            <div style={{ flex: 1 }}>
-                                <label style={{ fontSize: '0.8rem', color: 'var(--color-text-medium)', display: 'block', marginBottom: '0.2rem' }}>Nome Squadra</label>
-                                <input
-                                    type="text"
-                                    className="input-field"
-                                    value={team.name}
-                                    onChange={(e) => handleTeamChange(team.id, 'name', e.target.value)}
-                                    placeholder="Nome Squadra"
-                                    style={{ margin: 0, width: '100%' }}
-                                />
-                            </div>
-                            <div style={{ width: '80px' }}>
-                                <label style={{ fontSize: '0.8rem', color: 'var(--color-text-medium)', display: 'block', marginBottom: '0.2rem' }}>Colore</label>
-                                <input
-                                    type="color"
-                                    value={team.color_hex || '#000000'}
-                                    onChange={(e) => handleTeamChange(team.id, 'color_hex', e.target.value)}
-                                    style={{ 
-                                        width: '100%', 
-                                        height: '40px', 
-                                        padding: '2px', 
-                                        border: '1px solid var(--color-border)', 
-                                        borderRadius: 'var(--radius-sm)',
-                                        backgroundColor: 'var(--color-bg-card)',
-                                        cursor: 'pointer'
-                                    }}
-                                />
-                            </div>
-                            <div style={{ alignSelf: 'flex-end' }}>
-                                <button 
-                                    className="btn btn-primary" 
-                                    style={{ padding: '0.6rem 1.2rem' }}
-                                    onClick={() => handleUpdateTeam(team)}
-                                    disabled={savingTeamId === team.id}
-                                >
-                                    {savingTeamId === team.id ? '...' : '💾 Salva'}
-                                </button>
-                            </div>
+                    {teamMsg && (
+                        <div className={`notification ${teamMsg.type === 'error' ? 'notification-error' : 'notification-success'}`} style={{ marginBottom: '1rem' }}>
+                            {teamMsg.text}
                         </div>
-                    ))}
+                    )}
+
+                    <div style={{ overflowX: 'auto' }}>
+                        <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: '0 8px' }}>
+                            <thead>
+                                <tr style={{ textAlign: 'left', color: 'var(--color-text-medium)', fontSize: '0.85rem' }}>
+                                    <th style={{ padding: '0 1rem' }}>ID</th>
+                                    <th style={{ padding: '0 1rem' }}>Nome Squadra</th>
+                                    <th style={{ padding: '0 1rem', width: '80px' }}>Colore</th>
+                                    <th style={{ padding: '0 1rem', width: '100px' }}>Azione</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {teams.map((team) => (
+                                    <tr key={team.id} style={{ 
+                                        backgroundColor: 'var(--color-bg-navbar)',
+                                        borderRadius: 'var(--radius-sm)'
+                                    }}>
+                                        <td style={{ 
+                                            padding: '0.75rem 1rem', 
+                                            fontWeight: 'bold', 
+                                            color: 'var(--color-primary)',
+                                            borderTopLeftRadius: 'var(--radius-sm)',
+                                            borderBottomLeftRadius: 'var(--radius-sm)'
+                                        }}>
+                                            #{team.id}
+                                        </td>
+                                        <td style={{ padding: '0.75rem 1rem' }}>
+                                            <input
+                                                type="text"
+                                                className="input-field"
+                                                value={team.name}
+                                                onChange={(e) => handleTeamChange(team.id, 'name', e.target.value)}
+                                                style={{ margin: 0, width: '100%', padding: '6px 10px' }}
+                                            />
+                                        </td>
+                                        <td style={{ padding: '0.75rem 1rem' }}>
+                                            <input
+                                                type="color"
+                                                value={team.color_hex || '#000000'}
+                                                onChange={(e) => handleTeamChange(team.id, 'color_hex', e.target.value)}
+                                                style={{ 
+                                                    width: '100%', 
+                                                    height: '34px', 
+                                                    padding: '2px', 
+                                                    border: '1px solid var(--color-border)', 
+                                                    borderRadius: '4px',
+                                                    backgroundColor: 'var(--color-bg-card)',
+                                                    cursor: 'pointer'
+                                                }}
+                                            />
+                                        </td>
+                                        <td style={{ 
+                                            padding: '0.75rem 1rem',
+                                            borderTopRightRadius: 'var(--radius-sm)',
+                                            borderBottomRightRadius: 'var(--radius-sm)'
+                                        }}>
+                                            <button 
+                                                className="btn btn-primary btn-sm" 
+                                                style={{ width: '100%' }}
+                                                onClick={() => handleUpdateTeam(team)}
+                                                disabled={savingTeamId === team.id}
+                                            >
+                                                {savingTeamId === team.id ? '...' : 'Salva'}
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
