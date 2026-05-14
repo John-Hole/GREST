@@ -71,7 +71,7 @@ export default function StatisticheIncontri() {
                 
                 // Track matches vs opponent (including scheduled ones)
                 if (!opponentsData[opponent.id]) {
-                    opponentsData[opponent.id] = { name: opponent.name, color: opponent.color_hex || '#ccc', count: 0 };
+                    opponentsData[opponent.id] = { name: opponent.name, color: opponent.color || '#ccc', count: 0 };
                 }
                 opponentsData[opponent.id].count += 1;
                 
@@ -87,7 +87,7 @@ export default function StatisticheIncontri() {
                     if (!h2hData[opponent.id]) {
                         h2hData[opponent.id] = { 
                             name: opponent.name, 
-                            color: opponent.color_hex || '#ccc', 
+                            color: opponent.color || '#ccc', 
                             wins: 0, draws: 0, losses: 0, 
                             gf: 0, ga: 0, 
                             played: 0 
