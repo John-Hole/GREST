@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import StandingsTable from '@/components/StandingsTable';
+import RankingChart from '@/components/RankingChart';
 import { useAuth } from '@/components/AuthProvider';
 
 export default function ClassificaPage() {
@@ -114,6 +115,8 @@ export default function ClassificaPage() {
                     ))}
                 </div>
             </div>
+
+            <RankingChart standings={standings} />
 
             <StandingsTable
                 standings={filteredStandings}

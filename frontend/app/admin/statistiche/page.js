@@ -54,6 +54,8 @@ export default function StatisticheIncontri() {
     let wins = 0;
     let draws = 0;
     let losses = 0;
+    let goalsScored = 0;
+    let goalsConceded = 0;
     let opponentsData = {};
     let h2hData = {};
 
@@ -69,7 +71,7 @@ export default function StatisticheIncontri() {
                 
                 // Track matches vs opponent (including scheduled ones)
                 if (!opponentsData[opponent.id]) {
-                    opponentsData[opponent.id] = { name: opponent.name, color: opponent.color || '#ccc', count: 0 };
+                    opponentsData[opponent.id] = { name: opponent.name, color: opponent.color_hex || '#ccc', count: 0 };
                 }
                 opponentsData[opponent.id].count += 1;
                 
@@ -79,16 +81,22 @@ export default function StatisticheIncontri() {
                     const myScoreNum = Number(myScore);
                     const oppScoreNum = Number(oppScore);
                     
+                    goalsScored += myScoreNum;
+                    goalsConceded += oppScoreNum;
+                    
                     if (!h2hData[opponent.id]) {
                         h2hData[opponent.id] = { 
                             name: opponent.name, 
-                            color: opponent.color || '#ccc', 
+                            color: opponent.color_hex || '#ccc', 
                             wins: 0, draws: 0, losses: 0, 
+                            gf: 0, ga: 0, 
                             played: 0 
                         };
                     }
                     
                     h2hData[opponent.id].played += 1;
+                    h2hData[opponent.id].gf += myScoreNum;
+                    h2hData[opponent.id].ga += oppScoreNum;
 
                     if (myScoreNum > oppScoreNum) {
                         wins += 1;
@@ -131,10 +139,10 @@ export default function StatisticheIncontri() {
                         onClick={() => router.push('/admin/gestione')} 
                         style={{ padding: '0.6rem 1.2rem', borderRadius: '12px', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
                     >
-                        <span>←</span> Indietro
+                        <span>←</span> Torna alla Gestione
                     </button>
                     <h1 style={{ fontSize: '1.8rem', fontWeight: '800', margin: 0, color: 'var(--color-primary-dark)' }}>
-                        📊 Analisi Incontri
+                        📊 Analisi Performance
                     </h1>
                 </div>
                 
@@ -163,10 +171,12 @@ export default function StatisticheIncontri() {
             {!selectedTeamId ? (
                 <div className="card" style={{ padding: '4rem 2rem', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
                     <div style={{ fontSize: '4rem', opacity: 0.3 }}>📈</div>
-                    <h2 style={{ color: 'var(--color-text-medium)' }}>Seleziona una squadra per visualizzare le statistiche</h2>
+                    <h2 style={{ color: 'var(--color-text-medium)' }}>Seleziona una squadra per visualizzare le statistiche dettagliate</h2>
+                    <p style={{ color: 'var(--color-text-light)' }}>Verranno mostrate le distribuzioni degli avversari, i risultati e i confronti diretti.</p>
                 </div>
             ) : (
                 <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                    {/* First Row: Distribution and General Stats */}
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '2rem' }}>
                         
                         {/* Distribution Donut */}
@@ -176,37 +186,42 @@ export default function StatisticheIncontri() {
                             {totalMatchCount > 0 ? (
                                 <>
                                     <div style={{ 
-                                        width: '200px', 
-                                        height: '200px', 
+                                        width: '220px', 
+                                        height: '220px', 
                                         borderRadius: '50%', 
                                         background: conicGradientString,
                                         position: 'relative',
                                         display: 'flex',
                                         alignItems: 'center',
                                         justifyContent: 'center',
-                                        boxShadow: '0 8px 20px rgba(0,0,0,0.1)',
+                                        boxShadow: '0 10px 25px rgba(0,0,0,0.15)',
                                         marginBottom: '2rem'
                                     }}>
+                                        {/* Inner White Circle */}
                                         <div style={{ 
-                                            width: '140px', 
-                                            height: '140px', 
+                                            width: '150px', 
+                                            height: '150px', 
                                             borderRadius: '50%', 
                                             background: 'white',
                                             display: 'flex',
                                             flexDirection: 'column',
                                             alignItems: 'center',
-                                            justifyContent: 'center'
+                                            justifyContent: 'center',
+                                            boxShadow: 'inset 0 2px 10px rgba(0,0,0,0.05)'
                                         }}>
-                                            <span style={{ fontSize: '2rem', fontWeight: '900' }}>{totalMatchCount}</span>
-                                            <span style={{ fontSize: '0.7rem', textTransform: 'uppercase', color: 'var(--color-text-light)' }}>Match</span>
+                                            <span style={{ fontSize: '2rem', fontWeight: '900', color: 'var(--color-text-main)' }}>{totalMatchCount}</span>
+                                            <span style={{ fontSize: '0.7rem', textTransform: 'uppercase', color: 'var(--color-text-light)', fontWeight: 'bold' }}>Totale Match</span>
                                         </div>
                                     </div>
                                     
                                     <div style={{ width: '100%', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.8rem' }}>
                                         {pieData.map((item, idx) => (
-                                            <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', padding: '0.6rem', background: 'white', borderRadius: '8px', border: '1px solid var(--color-border)' }}>
-                                                <div style={{ width: '10px', height: '10px', borderRadius: '2px', backgroundColor: item.color, flexShrink: 0 }}></div>
-                                                <span style={{ fontWeight: '600', fontSize: '0.8rem' }}>{item.name}</span>
+                                            <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', padding: '0.6rem', background: 'var(--color-bg-light)', borderRadius: '10px', border: '1px solid var(--color-border)' }}>
+                                                <div style={{ width: '12px', height: '12px', borderRadius: '4px', backgroundColor: item.color, flexShrink: 0 }}></div>
+                                                <div style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+                                                    <span style={{ fontWeight: '700', fontSize: '0.85rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.name}</span>
+                                                    <span style={{ fontSize: '0.75rem', color: 'var(--color-text-medium)' }}>{item.count} sfide</span>
+                                                </div>
                                             </div>
                                         ))}
                                     </div>
@@ -216,78 +231,100 @@ export default function StatisticheIncontri() {
                             )}
                         </div>
 
-                        {/* General Performance Summary (Minimalist) */}
+                        {/* Performance Summary */}
                         <div className="card" style={{ padding: '2rem' }}>
-                            <h2 style={{ fontSize: '1.25rem', fontWeight: '700', marginBottom: '2rem', color: 'var(--color-primary)' }}>Prestazioni</h2>
+                            <h2 style={{ fontSize: '1.25rem', fontWeight: '700', marginBottom: '2rem', color: 'var(--color-primary)' }}>Riepilogo Risultati</h2>
                             
                             {totalPlayed > 0 ? (
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                                    <div style={{ padding: '1rem', background: 'var(--color-bg-light)', border: '1px solid var(--color-border)', borderRadius: '15px', textAlign: 'center' }}>
+                                        <div style={{ fontSize: '0.8rem', fontWeight: 'bold', textTransform: 'uppercase', color: 'var(--color-text-medium)', marginBottom: '0.5rem' }}>Partite Totali Giocate</div>
+                                        <div style={{ fontSize: '2.5rem', fontWeight: '900', color: 'var(--color-primary)' }}>{totalPlayed}</div>
+                                    </div>
+
+                                    {/* Big Stats Grid */}
                                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
-                                        <div style={{ textAlign: 'center' }}>
-                                            <div style={{ fontSize: '1.8rem', fontWeight: '900' }}>{wins}</div>
-                                            <div style={{ fontSize: '0.75rem', color: 'var(--color-text-medium)' }}>Vinte</div>
+                                        <div style={{ padding: '1rem', background: '#e8f5e9', border: '1px solid #c8e6c9', borderRadius: '15px', textAlign: 'center' }}>
+                                            <div style={{ fontSize: '1.8rem', fontWeight: '900', color: '#2e7d32' }}>{wins}</div>
+                                            <div style={{ fontSize: '0.7rem', fontWeight: 'bold', textTransform: 'uppercase', color: '#4caf50' }}>Vinte</div>
                                         </div>
-                                        <div style={{ textAlign: 'center' }}>
-                                            <div style={{ fontSize: '1.8rem', fontWeight: '900' }}>{draws}</div>
-                                            <div style={{ fontSize: '0.75rem', color: 'var(--color-text-medium)' }}>Pareggi</div>
+                                        <div style={{ padding: '1rem', background: '#fff9c4', border: '1px solid #fff59d', borderRadius: '15px', textAlign: 'center' }}>
+                                            <div style={{ fontSize: '1.8rem', fontWeight: '900', color: '#fbc02d' }}>{draws}</div>
+                                            <div style={{ fontSize: '0.7rem', fontWeight: 'bold', textTransform: 'uppercase', color: '#fdd835' }}>Pareggi</div>
                                         </div>
-                                        <div style={{ textAlign: 'center' }}>
-                                            <div style={{ fontSize: '1.8rem', fontWeight: '900' }}>{losses}</div>
-                                            <div style={{ fontSize: '0.75rem', color: 'var(--color-text-medium)' }}>Perse</div>
+                                        <div style={{ padding: '1rem', background: '#ffebee', border: '1px solid #ffcdd2', borderRadius: '15px', textAlign: 'center' }}>
+                                            <div style={{ fontSize: '1.8rem', fontWeight: '900', color: '#c62828' }}>{losses}</div>
+                                            <div style={{ fontSize: '0.7rem', fontWeight: 'bold', textTransform: 'uppercase', color: '#f44336' }}>Perse</div>
                                         </div>
                                     </div>
-                                    
-                                    <div style={{ borderTop: '1px solid var(--color-border)', paddingTop: '1.5rem', textAlign: 'center' }}>
-                                        <div style={{ fontSize: '0.8rem', color: 'var(--color-text-medium)', marginBottom: '0.5rem' }}>Percentuale di Vittoria</div>
-                                        <div style={{ fontSize: '2.5rem', fontWeight: '900', color: 'var(--color-primary)' }}>
-                                            {Math.round((wins / totalPlayed) * 100)}%
-                                        </div>
+
+                                    <div style={{ padding: '1.5rem', background: 'var(--color-primary)', color: 'white', borderRadius: '15px', textAlign: 'center' }}>
+                                        <div style={{ fontSize: '0.8rem', opacity: 0.8, textTransform: 'uppercase', fontWeight: 'bold' }}>Percentuale di Vittoria</div>
+                                        <div style={{ fontSize: '2rem', fontWeight: '900' }}>{Math.round((wins / totalPlayed) * 100)}%</div>
                                     </div>
                                 </div>
                             ) : (
-                                <p style={{ color: 'var(--color-text-medium)', textAlign: 'center' }}>Ancora nessun risultato inserito.</p>
+                                <p style={{ color: 'var(--color-text-medium)', textAlign: 'center', marginTop: '2rem' }}>Ancora nessun risultato inserito.</p>
                             )}
                         </div>
                     </div>
 
                     {/* Head-to-Head Section */}
                     <div className="card" style={{ padding: '2rem' }}>
-                        <h2 style={{ fontSize: '1.25rem', fontWeight: '700', marginBottom: '1.5rem', color: 'var(--color-primary)' }}>
-                            Confronti Diretti
+                        <h2 style={{ fontSize: '1.25rem', fontWeight: '700', marginBottom: '1.5rem', color: 'var(--color-primary)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            ⚔️ Confronti Diretti (Head-to-Head)
                         </h2>
                         
                         {Object.keys(h2hData).length > 0 ? (
                             <div style={{ overflowX: 'auto' }}>
-                                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                                <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: '0 0.8rem' }}>
                                     <thead>
-                                        <tr style={{ textAlign: 'left', color: 'var(--color-text-light)', fontSize: '0.8rem', borderBottom: '1px solid var(--color-border)' }}>
-                                            <th style={{ padding: '1rem' }}>Avversario</th>
-                                            <th style={{ padding: '1rem', textAlign: 'center' }}>G</th>
-                                            <th style={{ padding: '1rem', textAlign: 'center' }}>V</th>
-                                            <th style={{ padding: '1rem', textAlign: 'center' }}>P</th>
-                                            <th style={{ padding: '1rem', textAlign: 'center' }}>S</th>
-                                            <th style={{ padding: '1rem', textAlign: 'center' }}>Win %</th>
+                                        <tr style={{ textAlign: 'left', color: 'var(--color-text-light)', fontSize: '0.8rem', textTransform: 'uppercase' }}>
+                                            <th style={{ padding: '0 1rem' }}>Avversario</th>
+                                            <th style={{ padding: '0 1rem', textAlign: 'center' }}>G</th>
+                                            <th style={{ padding: '0 1rem', textAlign: 'center' }}>V</th>
+                                            <th style={{ padding: '0 1rem', textAlign: 'center' }}>P</th>
+                                            <th style={{ padding: '0 1rem', textAlign: 'center' }}>S</th>
+                                            <th style={{ padding: '0 1rem', textAlign: 'center' }}>Win %</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         {Object.values(h2hData).sort((a,b) => b.played - a.played).map((h, idx) => (
-                                            <tr key={idx} style={{ borderBottom: '1px solid var(--color-border)' }}>
-                                                <td style={{ padding: '1rem' }}>
-                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                                        <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: h.color }}></div>
-                                                        <span style={{ fontWeight: '700' }}>{h.name}</span>
-                                                    </div>
+                                            <tr key={idx} style={{ background: 'var(--color-bg-light)', borderRadius: '15px' }}>
+                                                <td style={{ padding: '1rem', borderRadius: '15px 0 0 15px', borderLeft: `6px solid ${h.color}` }}>
+                                                    <span style={{ fontWeight: '800' }}>{h.name}</span>
                                                 </td>
-                                                <td style={{ padding: '1rem', textAlign: 'center' }}>{h.played}</td>
-                                                <td style={{ padding: '1rem', textAlign: 'center' }}>{h.wins}</td>
-                                                <td style={{ padding: '1rem', textAlign: 'center' }}>{h.draws}</td>
-                                                <td style={{ padding: '1rem', textAlign: 'center' }}>{h.losses}</td>
-                                                <td style={{ padding: '1rem', textAlign: 'center' }}>
-                                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
-                                                        <div style={{ width: '60px', background: '#eee', height: '6px', borderRadius: '3px' }}>
-                                                            <div style={{ width: `${(h.wins/h.played)*100}%`, background: 'var(--color-primary)', height: '100%', borderRadius: '3px' }}></div>
-                                                        </div>
-                                                        <span style={{ fontSize: '0.75rem', fontWeight: 'bold' }}>{Math.round((h.wins/h.played)*100)}%</span>
+                                                <td style={{ padding: '1rem', textAlign: 'center', fontWeight: '700' }}>{h.played}</td>
+                                                <td style={{ padding: '1rem', textAlign: 'center', color: '#2ecc71', fontWeight: 'bold' }}>{h.wins}</td>
+                                                <td style={{ padding: '1rem', textAlign: 'center', color: '#f1c40f', fontWeight: 'bold' }}>{h.draws}</td>
+                                                <td style={{ padding: '1rem', textAlign: 'center', color: '#e74c3c', fontWeight: 'bold' }}>{h.losses}</td>
+                                                <td style={{ padding: '1rem', textAlign: 'center', borderRadius: '0 15px 15px 0' }}>
+                                                    <div style={{ 
+                                                        background: 'var(--color-border)', 
+                                                        height: '24px', 
+                                                        borderRadius: '12px', 
+                                                        position: 'relative', 
+                                                        overflow: 'hidden',
+                                                        minWidth: '80px',
+                                                        margin: '0 auto'
+                                                    }}>
+                                                        <div style={{ 
+                                                            background: h.wins > h.losses ? '#2ecc71' : (h.wins < h.losses ? '#e74c3c' : '#f1c40f'),
+                                                            width: `${(h.wins/h.played)*100}%`,
+                                                            height: '100%',
+                                                            transition: 'width 0.5s ease'
+                                                        }}></div>
+                                                        <span style={{ 
+                                                            position: 'absolute', 
+                                                            top: '50%', 
+                                                            left: '50%', 
+                                                            transform: 'translate(-50%, -50%)', 
+                                                            fontSize: '0.65rem', 
+                                                            fontWeight: '900',
+                                                            color: (h.wins/h.played) > 0.5 ? 'white' : 'var(--color-text-main)'
+                                                        }}>
+                                                            {Math.round((h.wins/h.played)*100)}%
+                                                        </span>
                                                     </div>
                                                 </td>
                                             </tr>
@@ -296,7 +333,7 @@ export default function StatisticheIncontri() {
                                 </table>
                             </div>
                         ) : (
-                            <p style={{ color: 'var(--color-text-medium)', textAlign: 'center', padding: '1rem' }}>Nessun confronto diretto disponibile.</p>
+                            <p style={{ color: 'var(--color-text-medium)', textAlign: 'center', padding: '2rem' }}>Nessun confronto diretto ancora disponibile.</p>
                         )}
                     </div>
                 </div>
