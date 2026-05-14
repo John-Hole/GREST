@@ -59,15 +59,11 @@ export default function RankingChart({ standings }) {
                 return b.goalsFor - a.goalsFor;
             });
 
-            return dailyStandings.findIndex(t => t.teamId === team.teamId) + 1;
-        });
-
-        const teamColor = team.colorHex || '#1565C0';
-
-        // Creiamo un array per il raggio dei punti: 0 per tutti, tranne l'ultimo giocato
+        // Creiamo un array per il raggio dei punti: piccoli per il passato, grande per l'ultimo, 0 per il futuro
         const pointRadii = rankData.map((val, idx) => {
-            if (idx === lastPlayedDay - 1 && val !== null) return 6; // Pallino più grosso sull'ultimo
-            return 0;
+            if (val === null) return 0;
+            if (idx === lastPlayedDay - 1) return 6; // Pallino attuale
+            return 2.5; // Micro-pallini storici
         });
 
         return {
@@ -76,13 +72,13 @@ export default function RankingChart({ standings }) {
             borderColor: teamColor,
             backgroundColor: teamColor,
             tension: 0,
-            borderWidth: 3,
+            borderWidth: 2, // Linee più sottili
             pointRadius: pointRadii,
             pointHoverRadius: pointRadii.map(r => r > 0 ? r + 2 : 0),
             pointBackgroundColor: teamColor,
             pointBorderColor: '#fff',
-            pointBorderWidth: 2,
-            spanGaps: false // La linea si ferma se ci sono null
+            pointBorderWidth: 1.5,
+            spanGaps: false
         };
     });
 
