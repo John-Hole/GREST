@@ -166,64 +166,100 @@ export default function GestioneTorneo() {
             }}>
                 {/* Left Column: Stats and Start Date */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-                    {/* Statistiche Card - Smaller and more compact */}
                     <div 
                         className="card animate-fade-in" 
                         style={{ 
-                            padding: '1.25rem', 
+                            padding: '1.5rem', 
                             cursor: 'pointer', 
                             display: 'flex', 
                             alignItems: 'center', 
-                            gap: '1.25rem',
-                            transition: 'all 0.2s', 
+                            gap: '1.5rem',
+                            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)', 
                             border: '1px solid var(--color-border)',
-                            background: 'linear-gradient(135deg, var(--color-card-bg) 0%, var(--color-bg-light) 100%)'
+                            background: 'var(--color-card-bg)',
+                            position: 'relative',
+                            overflow: 'hidden'
                         }} 
                         onClick={() => router.push('/admin/statistiche')}
                         onMouseEnter={(e) => {
-                            e.currentTarget.style.transform = 'translateY(-4px)';
-                            e.currentTarget.style.boxShadow = '0 8px 20px rgba(0,0,0,0.15)';
+                            e.currentTarget.style.transform = 'translateY(-6px)';
+                            e.currentTarget.style.boxShadow = '0 12px 30px rgba(0,0,0,0.2)';
+                            e.currentTarget.style.borderColor = 'var(--color-primary)';
                         }}
                         onMouseLeave={(e) => {
                             e.currentTarget.style.transform = 'translateY(0)';
                             e.currentTarget.style.boxShadow = 'none';
+                            e.currentTarget.style.borderColor = 'var(--color-border)';
                         }}
                     >
+                        {/* Decorative background element */}
+                        <div style={{
+                            position: 'absolute',
+                            top: '-20px',
+                            right: '-20px',
+                            width: '100px',
+                            height: '100px',
+                            background: 'var(--color-primary)',
+                            opacity: '0.05',
+                            borderRadius: '50%',
+                            zIndex: 0
+                        }}></div>
+
                         <div style={{ 
-                            width: '60px', 
-                            height: '60px', 
+                            width: '80px', 
+                            height: '80px', 
                             borderRadius: '50%', 
-                            background: `conic-gradient(var(--color-primary) 0% ${completion}%, var(--color-border) ${completion}% 100%)`, 
+                            background: `conic-gradient(var(--color-primary) 0% ${completion}%, #e2e8f0 ${completion}% 100%)`, 
                             flexShrink: 0,
-                            boxShadow: '0 4px 10px rgba(0,0,0,0.1)',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            position: 'relative'
+                            position: 'relative',
+                            boxShadow: '0 4px 15px rgba(0,0,0,0.1)',
+                            zIndex: 1
                         }}>
-                            {/* Inner circle to make it a donut */}
+                            {/* Inner circle (Donut) */}
                             <div style={{ 
-                                position: 'absolute', 
-                                width: '45px', 
-                                height: '45px', 
+                                width: '64px', 
+                                height: '64px', 
                                 borderRadius: '50%', 
-                                background: 'var(--color-card-bg)',
+                                background: 'white',
                                 display: 'flex',
+                                flexDirection: 'column',
                                 alignItems: 'center',
                                 justifyContent: 'center',
-                                fontSize: '0.85rem',
-                                fontWeight: 'bold',
-                                color: 'var(--color-primary)'
+                                boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.05)'
                             }}>
-                                {completion}%
+                                <span style={{ 
+                                    fontSize: '1.1rem', 
+                                    fontWeight: '800', 
+                                    color: 'var(--color-primary)',
+                                    lineHeight: '1'
+                                }}>
+                                    {completion}%
+                                </span>
+                                <span style={{ 
+                                    fontSize: '0.5rem', 
+                                    textTransform: 'uppercase', 
+                                    color: 'var(--color-text-light)',
+                                    fontWeight: 'bold',
+                                    marginTop: '2px'
+                                }}>
+                                    Progress
+                                </span>
                             </div>
                         </div>
-                        <div style={{ textAlign: 'left' }}>
-                            <h2 style={{ fontSize: '1.1rem', fontWeight: 'bold', marginBottom: '0.25rem', color: 'var(--color-primary)' }}>
-                                📊 Statistiche
-                            </h2>
-                            <p style={{ fontSize: '0.8rem', color: 'var(--color-text-medium)', lineHeight: '1.3', margin: 0 }}>
-                                Torneo al {completion}%. Analisi sfide.
+                        
+                        <div style={{ textAlign: 'left', zIndex: 1 }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.4rem' }}>
+                                <span style={{ fontSize: '1.2rem' }}>📊</span>
+                                <h2 style={{ fontSize: '1.2rem', fontWeight: '700', margin: 0, color: 'var(--color-text-main)' }}>
+                                    Statistiche
+                                </h2>
+                            </div>
+                            <p style={{ fontSize: '0.9rem', color: 'var(--color-text-medium)', lineHeight: '1.4', margin: 0 }}>
+                                Il torneo è al <strong>{completion}%</strong> del suo percorso.<br/>
+                                <span style={{ fontSize: '0.8rem', color: 'var(--color-primary)', fontWeight: '500' }}>Clicca per l'analisi dettagliata →</span>
                             </p>
                         </div>
                     </div>
