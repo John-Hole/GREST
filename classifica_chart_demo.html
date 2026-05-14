@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demo Grafico Classifica - GREST</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --color-primary: #FFB84D;
+            --color-bg-main: #FFF8E7;
+            --color-text-dark: #2C2C2C;
+            --radius-md: 12px;
+            --spacing-md: 1.5rem;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--color-bg-main);
+            color: var(--color-text-dark);
+            margin: 0;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 900px;
+            background: white;
+            padding: 2rem;
+            border-radius: var(--radius-md);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        }
+
+        h1 {
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            color: var(--color-text-dark);
+            text-align: center;
+        }
+
+        p {
+            text-align: center;
+            color: #666;
+            margin-bottom: 2rem;
+        }
+
+        .chart-wrapper {
+            position: relative;
+            height: 450px;
+            width: 100%;
+        }
+
+        .badge {
+            display: inline-block;
+            background: var(--color-primary);
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div style="text-align: center;"><span class="badge">PROTOTIPO</span></div>
+        <h1>Andamento Classifica</h1>
+        <p>Visualizzazione delle posizioni (1-6) nel corso delle giornate</p>
+
+        <div class="chart-wrapper">
+            <canvas id="rankingChart"></canvas>
+        </div>
+    </div>
+
+    <script>
+        const ctx = document.getElementById('rankingChart').getContext('2d');
+        
+        // Dati di esempio per 6 squadre su 5 giornate
+        const labels = ['Giornata 1', 'Giornata 2', 'Giornata 3', 'Giornata 4', 'Giornata 5'];
+        
+        const data = {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'Rossi',
+                    data: [1, 2, 1, 1, 1],
+                    borderColor: '#FF4D4D',
+                    backgroundColor: '#FF4D4D',
+                    tension: 0.3,
+                    pointRadius: 6,
+                    pointHoverRadius: 8
+                },
+                {
+                    label: 'Gialli',
+                    data: [3, 1, 2, 3, 2],
+                    borderColor: '#FFD700',
+                    backgroundColor: '#FFD700',
+                    tension: 0.3,
+                    pointRadius: 6,
+                    pointHoverRadius: 8
+                },
+                {
+                    label: 'Blu',
+                    data: [2, 3, 4, 2, 3],
+                    borderColor: '#3498DB',
+                    backgroundColor: '#3498DB',
+                    tension: 0.3,
+                    pointRadius: 6,
+                    pointHoverRadius: 8
+                },
+                {
+                    label: 'Verdi',
+                    data: [5, 4, 3, 5, 4],
+                    borderColor: '#2ECC71',
+                    backgroundColor: '#2ECC71',
+                    tension: 0.3,
+                    pointRadius: 6,
+                    pointHoverRadius: 8
+                },
+                {
+                    label: 'Arancioni',
+                    data: [4, 5, 6, 4, 5],
+                    borderColor: '#E67E22',
+                    backgroundColor: '#E67E22',
+                    tension: 0.3,
+                    pointRadius: 6,
+                    pointHoverRadius: 8
+                },
+                {
+                    label: 'Viola',
+                    data: [6, 6, 5, 6, 6],
+                    borderColor: '#9B59B6',
+                    backgroundColor: '#9B59B6',
+                    tension: 0.3,
+                    pointRadius: 6,
+                    pointHoverRadius: 8
+                }
+            ]
+        };
+
+        const config = {
+            type: 'line',
+            data: data,
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        reverse: true, // Inverte l'asse Y (1 in alto, 6 in basso)
+                        min: 1,
+                        max: 6,
+                        ticks: {
+                            stepSize: 1,
+                            font: {
+                                weight: 'bold'
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Posizione in Classifica'
+                        },
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            usePointStyle: true,
+                            padding: 20,
+                            font: {
+                                family: 'Inter',
+                                size: 12
+                            }
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        padding: 12,
+                        cornerRadius: 8,
+                        displayColors: true,
+                        callbacks: {
+                            label: function(context) {
+                                return context.dataset.label + ': ' + context.parsed.y + '° posto';
+                            }
+                        }
+                    }
+                }
+            }
+        };
+
+        const rankingChart = new Chart(ctx, config);
+    </script>
+</body>
+</html>
