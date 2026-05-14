@@ -57,6 +57,7 @@ export default function StatisticheIncontri() {
     let goalsScored = 0;
     let goalsConceded = 0;
     let opponentsData = {};
+    let h2hData = {};
 
     if (selectedTeamId) {
         const teamId = parseInt(selectedTeamId);
@@ -70,23 +71,43 @@ export default function StatisticheIncontri() {
                 
                 // Track matches vs opponent (including scheduled ones)
                 if (!opponentsData[opponent.id]) {
-                    opponentsData[opponent.id] = { name: opponent.name, color: opponent.color || '#ccc', count: 0 };
+                    opponentsData[opponent.id] = { name: opponent.name, color: opponent.color_hex || '#ccc', count: 0 };
                 }
                 opponentsData[opponent.id].count += 1;
                 
                 // Track results if match is completed (has score)
                 if (myScore !== null && myScore !== undefined && oppScore !== null && oppScore !== undefined) {
                     totalPlayed += 1;
-                    // Ensure scores are numbers
                     const myScoreNum = Number(myScore);
                     const oppScoreNum = Number(oppScore);
                     
                     goalsScored += myScoreNum;
                     goalsConceded += oppScoreNum;
                     
-                    if (myScoreNum > oppScoreNum) wins += 1;
-                    else if (myScoreNum < oppScoreNum) losses += 1;
-                    else draws += 1;
+                    if (!h2hData[opponent.id]) {
+                        h2hData[opponent.id] = { 
+                            name: opponent.name, 
+                            color: opponent.color_hex || '#ccc', 
+                            wins: 0, draws: 0, losses: 0, 
+                            gf: 0, ga: 0, 
+                            played: 0 
+                        };
+                    }
+                    
+                    h2hData[opponent.id].played += 1;
+                    h2hData[opponent.id].gf += myScoreNum;
+                    h2hData[opponent.id].ga += oppScoreNum;
+
+                    if (myScoreNum > oppScoreNum) {
+                        wins += 1;
+                        h2hData[opponent.id].wins += 1;
+                    } else if (myScoreNum < oppScoreNum) {
+                        losses += 1;
+                        h2hData[opponent.id].losses += 1;
+                    } else {
+                        draws += 1;
+                        h2hData[opponent.id].draws += 1;
+                    }
                 }
             }
         });
@@ -110,26 +131,36 @@ export default function StatisticheIncontri() {
     }
 
     return (
-        <div className="container" style={{ padding: '1rem', maxWidth: '1000px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' }}>
-                <button className="btn btn-secondary" onClick={() => router.push('/admin/gestione')} style={{ padding: '0.5rem 1rem' }}>
-                    ← Indietro
-                </button>
-                <h1 className="page-title" style={{ fontSize: '1.5rem', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    📊 Statistiche Incontri
-                </h1>
-            </div>
-
-            <div className="card animate-fade-in" style={{ padding: '1.5rem', marginBottom: '1.5rem' }}>
-                <div className="form-group">
-                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>Seleziona Squadra:</label>
+        <div className="container" style={{ padding: '2rem 1rem', maxWidth: '1100px', margin: '0 auto' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                    <button 
+                        className="btn btn-secondary" 
+                        onClick={() => router.push('/admin/gestione')} 
+                        style={{ padding: '0.6rem 1.2rem', borderRadius: '12px', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+                    >
+                        <span>←</span> Torna alla Gestione
+                    </button>
+                    <h1 style={{ fontSize: '1.8rem', fontWeight: '800', margin: 0, color: 'var(--color-primary-dark)' }}>
+                        📊 Analisi Performance
+                    </h1>
+                </div>
+                
+                <div style={{ minWidth: '250px' }}>
                     <select 
                         className="input-field" 
                         value={selectedTeamId} 
                         onChange={(e) => setSelectedTeamId(e.target.value)}
-                        style={{ width: '100%', maxWidth: '400px' }}
+                        style={{ 
+                            width: '100%', 
+                            padding: '0.8rem', 
+                            borderRadius: '12px', 
+                            fontWeight: '600',
+                            boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
+                            border: '2px solid var(--color-primary)'
+                        }}
                     >
-                        <option value="">-- Seleziona una squadra --</option>
+                        <option value="">Seleziona una squadra...</option>
                         {teams.map(t => (
                             <option key={t.id} value={t.id}>{t.name}</option>
                         ))}
@@ -137,85 +168,193 @@ export default function StatisticheIncontri() {
                 </div>
             </div>
 
-            {selectedTeamId && (
-                <div className="animate-fade-in" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem' }}>
-                    {/* Distribution Pie Chart */}
-                    <div className="card" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                        <h2 style={{ fontSize: '1.2rem', marginBottom: '1.5rem', color: 'var(--color-primary)' }}>Distribuzione Avversari</h2>
+            {!selectedTeamId ? (
+                <div className="card" style={{ padding: '4rem 2rem', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
+                    <div style={{ fontSize: '4rem', opacity: 0.3 }}>📈</div>
+                    <h2 style={{ color: 'var(--color-text-medium)' }}>Seleziona una squadra per visualizzare le statistiche dettagliate</h2>
+                    <p style={{ color: 'var(--color-text-light)' }}>Verranno mostrate le distribuzioni degli avversari, i risultati e i confronti diretti.</p>
+                </div>
+            ) : (
+                <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                    {/* First Row: Distribution and General Stats */}
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '2rem' }}>
                         
-                        {totalMatchCount > 0 ? (
-                            <>
-                                <div style={{ 
-                                    width: '200px', 
-                                    height: '200px', 
-                                    borderRadius: '50%', 
-                                    background: conicGradientString,
-                                    marginBottom: '1.5rem',
-                                    boxShadow: '0 4px 10px rgba(0,0,0,0.2)'
-                                }}></div>
-                                
-                                <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                                    <div style={{ padding: '0.5rem', textAlign: 'center', fontWeight: 'bold', fontSize: '0.9rem', color: 'var(--color-text-medium)', marginBottom: '0.5rem' }}>
-                                        Totale Incontri: {totalMatchCount}
-                                    </div>
-                                    {pieData.map((item, idx) => (
-                                        <div key={idx} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.5rem', background: 'var(--color-bg-light)', borderRadius: '4px' }}>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                                <span style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: item.color, display: 'inline-block' }}></span>
-                                                <span style={{ fontWeight: 'bold' }}>{item.name}</span>
-                                            </div>
-                                            <span>{item.count} ({Math.round(item.count/totalMatchCount*100)}%)</span>
+                        {/* Distribution Donut */}
+                        <div className="card" style={{ padding: '2rem', display: 'flex', flexDirection: 'column', alignItems: 'center', position: 'relative' }}>
+                            <h2 style={{ fontSize: '1.25rem', fontWeight: '700', marginBottom: '2rem', color: 'var(--color-primary)' }}>Distribuzione Avversari</h2>
+                            
+                            {totalMatchCount > 0 ? (
+                                <>
+                                    <div style={{ 
+                                        width: '220px', 
+                                        height: '220px', 
+                                        borderRadius: '50%', 
+                                        background: conicGradientString,
+                                        position: 'relative',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        boxShadow: '0 10px 25px rgba(0,0,0,0.15)',
+                                        marginBottom: '2rem'
+                                    }}>
+                                        {/* Inner White Circle */}
+                                        <div style={{ 
+                                            width: '150px', 
+                                            height: '150px', 
+                                            borderRadius: '50%', 
+                                            background: 'white',
+                                            display: 'flex',
+                                            flexDirection: 'column',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            boxShadow: 'inset 0 2px 10px rgba(0,0,0,0.05)'
+                                        }}>
+                                            <span style={{ fontSize: '2rem', fontWeight: '900', color: 'var(--color-text-main)' }}>{totalMatchCount}</span>
+                                            <span style={{ fontSize: '0.7rem', textTransform: 'uppercase', color: 'var(--color-text-light)', fontWeight: 'bold' }}>Totale Match</span>
                                         </div>
-                                    ))}
+                                    </div>
+                                    
+                                    <div style={{ width: '100%', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.8rem' }}>
+                                        {pieData.map((item, idx) => (
+                                            <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', padding: '0.6rem', background: 'var(--color-bg-light)', borderRadius: '10px', border: '1px solid var(--color-border)' }}>
+                                                <div style={{ width: '12px', height: '12px', borderRadius: '4px', backgroundColor: item.color, flexShrink: 0 }}></div>
+                                                <div style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+                                                    <span style={{ fontWeight: '700', fontSize: '0.85rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.name}</span>
+                                                    <span style={{ fontSize: '0.75rem', color: 'var(--color-text-medium)' }}>{item.count} sfide</span>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </>
+                            ) : (
+                                <p style={{ color: 'var(--color-text-medium)' }}>Nessun incontro programmato.</p>
+                            )}
+                        </div>
+
+                        {/* Performance Summary */}
+                        <div className="card" style={{ padding: '2rem' }}>
+                            <h2 style={{ fontSize: '1.25rem', fontWeight: '700', marginBottom: '2rem', color: 'var(--color-primary)' }}>Riepilogo Risultati</h2>
+                            
+                            {totalPlayed > 0 ? (
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                    {/* Big Stats Grid */}
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+                                        <div style={{ padding: '1rem', background: '#e8f5e9', border: '1px solid #c8e6c9', borderRadius: '15px', textAlign: 'center' }}>
+                                            <div style={{ fontSize: '1.8rem', fontWeight: '900', color: '#2e7d32' }}>{wins}</div>
+                                            <div style={{ fontSize: '0.7rem', fontWeight: 'bold', textTransform: 'uppercase', color: '#4caf50' }}>Vinte</div>
+                                        </div>
+                                        <div style={{ padding: '1rem', background: '#fff9c4', border: '1px solid #fff59d', borderRadius: '15px', textAlign: 'center' }}>
+                                            <div style={{ fontSize: '1.8rem', fontWeight: '900', color: '#fbc02d' }}>{draws}</div>
+                                            <div style={{ fontSize: '0.7rem', fontWeight: 'bold', textTransform: 'uppercase', color: '#fdd835' }}>Pareggi</div>
+                                        </div>
+                                        <div style={{ padding: '1rem', background: '#ffebee', border: '1px solid #ffcdd2', borderRadius: '15px', textAlign: 'center' }}>
+                                            <div style={{ fontSize: '1.8rem', fontWeight: '900', color: '#c62828' }}>{losses}</div>
+                                            <div style={{ fontSize: '0.7rem', fontWeight: 'bold', textTransform: 'uppercase', color: '#f44336' }}>Perse</div>
+                                        </div>
+                                    </div>
+
+                                    {/* Score Metrics */}
+                                    <div style={{ background: 'var(--color-bg-light)', padding: '1.5rem', borderRadius: '15px', border: '1px solid var(--color-border)' }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem', paddingBottom: '0.8rem', borderBottom: '1px dashed var(--color-border)' }}>
+                                            <span style={{ fontWeight: '600' }}>Punti Totali Fatti:</span>
+                                            <span style={{ fontWeight: '800', color: 'var(--color-primary)', fontSize: '1.2rem' }}>{goalsScored}</span>
+                                        </div>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem', paddingBottom: '0.8rem', borderBottom: '1px dashed var(--color-border)' }}>
+                                            <span style={{ fontWeight: '600' }}>Punti Totali Subiti:</span>
+                                            <span style={{ fontWeight: '800', color: 'var(--color-secondary)', fontSize: '1.2rem' }}>{goalsConceded}</span>
+                                        </div>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                            <span style={{ fontWeight: '600' }}>Differenza Punti:</span>
+                                            <div style={{ 
+                                                padding: '0.4rem 1rem', 
+                                                borderRadius: '20px', 
+                                                background: (goalsScored - goalsConceded) >= 0 ? '#e8f5e9' : '#ffebee',
+                                                color: (goalsScored - goalsConceded) >= 0 ? '#2e7d32' : '#c62828',
+                                                fontWeight: '900',
+                                                fontSize: '1.2rem'
+                                            }}>
+                                                {(goalsScored - goalsConceded) > 0 ? '+' : ''}{goalsScored - goalsConceded}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div style={{ padding: '1rem', background: 'var(--color-primary)', color: 'white', borderRadius: '15px', textAlign: 'center', marginTop: '0.5rem' }}>
+                                        <div style={{ fontSize: '0.75rem', opacity: 0.8, textTransform: 'uppercase', fontWeight: 'bold' }}>Media Punti a Partita</div>
+                                        <div style={{ fontSize: '1.5rem', fontWeight: '900' }}>{(goalsScored / totalPlayed).toFixed(1)}</div>
+                                    </div>
                                 </div>
-                            </>
-                        ) : (
-                            <p style={{ color: 'var(--color-text-medium)' }}>Nessun incontro programmato per questa squadra.</p>
-                        )}
+                            ) : (
+                                <p style={{ color: 'var(--color-text-medium)', textAlign: 'center', marginTop: '2rem' }}>Ancora nessun risultato inserito.</p>
+                            )}
+                        </div>
                     </div>
 
-                    {/* Altre Statistiche */}
-                    <div className="card" style={{ padding: '1.5rem' }}>
-                        <h2 style={{ fontSize: '1.2rem', marginBottom: '1.5rem', color: 'var(--color-primary)' }}>Prestazioni (Incontri Giocati)</h2>
+                    {/* Head-to-Head Section */}
+                    <div className="card" style={{ padding: '2rem' }}>
+                        <h2 style={{ fontSize: '1.25rem', fontWeight: '700', marginBottom: '1.5rem', color: 'var(--color-primary)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            ⚔️ Confronti Diretti (Head-to-Head)
+                        </h2>
                         
-                        {totalPlayed > 0 ? (
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.75rem', background: 'var(--color-bg-light)', borderRadius: '4px' }}>
-                                    <span>Partite Giocate:</span>
-                                    <span style={{ fontWeight: 'bold', fontSize: '1.1rem' }}>{totalPlayed}</span>
-                                </div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.75rem', background: 'rgba(46, 204, 113, 0.1)', borderLeft: '4px solid #2ecc71', borderRadius: '4px' }}>
-                                    <span>Vittorie:</span>
-                                    <span style={{ fontWeight: 'bold', color: '#2ecc71', fontSize: '1.1rem' }}>{wins}</span>
-                                </div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.75rem', background: 'rgba(241, 196, 15, 0.1)', borderLeft: '4px solid #f1c40f', borderRadius: '4px' }}>
-                                    <span>Pareggi:</span>
-                                    <span style={{ fontWeight: 'bold', color: '#f1c40f', fontSize: '1.1rem' }}>{draws}</span>
-                                </div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.75rem', background: 'rgba(231, 76, 60, 0.1)', borderLeft: '4px solid #e74c3c', borderRadius: '4px' }}>
-                                    <span>Sconfitte:</span>
-                                    <span style={{ fontWeight: 'bold', color: '#e74c3c', fontSize: '1.1rem' }}>{losses}</span>
-                                </div>
-                                
-                                <hr style={{ border: 'none', borderTop: '1px solid var(--color-border)', margin: '0.5rem 0' }} />
-                                
-                                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.75rem', background: 'var(--color-bg-light)', borderRadius: '4px' }}>
-                                    <span>Punti Fatti:</span>
-                                    <span style={{ fontWeight: 'bold', color: 'var(--color-primary)' }}>{goalsScored}</span>
-                                </div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.75rem', background: 'var(--color-bg-light)', borderRadius: '4px' }}>
-                                    <span>Punti Subiti:</span>
-                                    <span style={{ fontWeight: 'bold', color: 'var(--color-secondary)' }}>{goalsConceded}</span>
-                                </div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.75rem', background: 'var(--color-bg-light)', borderRadius: '4px' }}>
-                                    <span>Differenza Punti:</span>
-                                    <span style={{ fontWeight: 'bold', color: (goalsScored - goalsConceded) >= 0 ? '#2ecc71' : '#e74c3c' }}>
-                                        {(goalsScored - goalsConceded) > 0 ? '+' : ''}{goalsScored - goalsConceded}
-                                    </span>
-                                </div>
+                        {Object.keys(h2hData).length > 0 ? (
+                            <div style={{ overflowX: 'auto' }}>
+                                <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: '0 0.8rem' }}>
+                                    <thead>
+                                        <tr style={{ textAlign: 'left', color: 'var(--color-text-light)', fontSize: '0.8rem', textTransform: 'uppercase' }}>
+                                            <th style={{ padding: '0 1rem' }}>Avversario</th>
+                                            <th style={{ padding: '0 1rem', textAlign: 'center' }}>G</th>
+                                            <th style={{ padding: '0 1rem', textAlign: 'center' }}>V</th>
+                                            <th style={{ padding: '0 1rem', textAlign: 'center' }}>P</th>
+                                            <th style={{ padding: '0 1rem', textAlign: 'center' }}>S</th>
+                                            <th style={{ padding: '0 1rem', textAlign: 'center' }}>GF - GS</th>
+                                            <th style={{ padding: '0 1rem', textAlign: 'center' }}>Win %</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {Object.values(h2hData).sort((a,b) => b.played - a.played).map((h, idx) => (
+                                            <tr key={idx} style={{ background: 'var(--color-bg-light)', borderRadius: '15px' }}>
+                                                <td style={{ padding: '1rem', borderRadius: '15px 0 0 15px', borderLeft: `6px solid ${h.color}` }}>
+                                                    <span style={{ fontWeight: '800' }}>{h.name}</span>
+                                                </td>
+                                                <td style={{ padding: '1rem', textAlign: 'center', fontWeight: '700' }}>{h.played}</td>
+                                                <td style={{ padding: '1rem', textAlign: 'center', color: '#2ecc71', fontWeight: 'bold' }}>{h.wins}</td>
+                                                <td style={{ padding: '1rem', textAlign: 'center', color: '#f1c40f', fontWeight: 'bold' }}>{h.draws}</td>
+                                                <td style={{ padding: '1rem', textAlign: 'center', color: '#e74c3c', fontWeight: 'bold' }}>{h.losses}</td>
+                                                <td style={{ padding: '1rem', textAlign: 'center', fontWeight: '600' }}>{h.gf} - {h.ga}</td>
+                                                <td style={{ padding: '1rem', textAlign: 'center', borderRadius: '0 15px 15px 0' }}>
+                                                    <div style={{ 
+                                                        background: 'var(--color-border)', 
+                                                        height: '24px', 
+                                                        borderRadius: '12px', 
+                                                        position: 'relative', 
+                                                        overflow: 'hidden',
+                                                        minWidth: '60px'
+                                                    }}>
+                                                        <div style={{ 
+                                                            background: h.wins > h.losses ? '#2ecc71' : (h.wins < h.losses ? '#e74c3c' : '#f1c40f'),
+                                                            width: `${(h.wins/h.played)*100}%`,
+                                                            height: '100%',
+                                                            transition: 'width 0.5s ease'
+                                                        }}></div>
+                                                        <span style={{ 
+                                                            position: 'absolute', 
+                                                            top: '50%', 
+                                                            left: '50%', 
+                                                            transform: 'translate(-50%, -50%)', 
+                                                            fontSize: '0.65rem', 
+                                                            fontWeight: '900',
+                                                            color: (h.wins/h.played) > 0.5 ? 'white' : 'var(--color-text-main)'
+                                                        }}>
+                                                            {Math.round((h.wins/h.played)*100)}%
+                                                        </span>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
                             </div>
                         ) : (
-                            <p style={{ color: 'var(--color-text-medium)' }}>Nessun incontro giocato (con risultato) per questa squadra.</p>
+                            <p style={{ color: 'var(--color-text-medium)', textAlign: 'center', padding: '2rem' }}>Nessun confronto diretto ancora disponibile.</p>
                         )}
                     </div>
                 </div>
