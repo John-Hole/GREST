@@ -179,6 +179,26 @@ export default function UserManagement() {
         }
     };
 
+    const getTeamStyle = (teamId) => {
+        if (!teamId) return { 
+            background: 'var(--color-bg-main)', 
+            color: 'var(--color-text-medium)', 
+            border: '1px solid var(--color-border)',
+            cursor: 'pointer', outline: 'none', fontFamily: 'inherit'
+        };
+        const team = teams.find(t => t.id == teamId);
+        if (team && team.color_hex) {
+            return { 
+                background: `${team.color_hex}25`, 
+                color: team.color_hex, 
+                border: 'none', 
+                fontWeight: '600',
+                cursor: 'pointer', outline: 'none', fontFamily: 'inherit'
+            }; 
+        }
+        return { background: 'rgba(136,136,136,0.15)', color: 'inherit', border: 'none', cursor: 'pointer', outline: 'none', fontFamily: 'inherit' };
+    };
+
     const getRoleBadgeClass = (role) => {
         switch (role) {
             case 'admin': return 'badge-primary';
@@ -314,13 +334,14 @@ export default function UserManagement() {
                                     </td>
                                     <td style={{ padding: '0.8rem 1rem', borderRight: '1px solid var(--color-border)' }}>
                                         <select 
+                                            className="badge"
                                             value={user.team_id || ''} 
                                             onChange={(e) => handleTeamChange(user, e.target.value)}
-                                            style={{ padding: '4px', fontSize: '0.85em', border: '1px solid var(--color-border)', borderRadius: '4px', background: 'var(--color-bg-main)' }}
+                                            style={getTeamStyle(user.team_id)}
                                         >
-                                            <option value="">Nessuna</option>
+                                            <option value="" style={{ color: 'initial', background: 'initial' }}>Nessuna</option>
                                             {teams.map(t => (
-                                                <option key={t.id} value={t.id}>{t.name}</option>
+                                                <option key={t.id} value={t.id} style={{ color: 'initial', background: 'initial' }}>{t.name}</option>
                                             ))}
                                         </select>
                                     </td>
