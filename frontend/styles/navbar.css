@@ -148,6 +148,14 @@
         font-size: 0.75rem;
     }
 
+    .navbar-left {
+        flex: 1;
+    }
+
+    .navbar-right {
+        flex: 1;
+    }
+
     .navbar-center {
         position: static;
         transform: none;
