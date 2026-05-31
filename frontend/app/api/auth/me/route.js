@@ -1,23 +1,35 @@
 import { NextResponse } from 'next/server';
 import { getAuthUser } from '@/lib/auth';
+import { getDb } from '@/lib/db';
 
 export async function GET() {
     try {
-        const user = await getAuthUser();
+        const userPayload = await getAuthUser();
 
-        if (!user) {
+        if (!userPayload) {
             return NextResponse.json({ message: 'Non autenticato' }, { status: 401 });
         }
 
+        // Fetch latest data from DB to get theme
+        const db = getDb();
+        const { rows } = await db.execute({
+            sql: 'SELECT theme FROM users WHERE id = ?',
+            args: [userPayload.userId]
+        });
+
+        const theme = rows.length > 0 ? rows[0].theme : 'light';
+
         return NextResponse.json({
             user: {
-                id: user.userId,
-                username: user.username,
-                role: user.role,
-                mustChangePassword: !!user.mustChangePassword,
+                id: userPayload.userId,
+                username: userPayload.username,
+                role: userPayload.role,
+                mustChangePassword: !!userPayload.mustChangePassword,
+                theme: theme
             },
         });
     } catch (error) {
+        console.error('Error in /api/auth/me:', error);
         return NextResponse.json({ message: 'Errore interno del server' }, { status: 500 });
     }
 }

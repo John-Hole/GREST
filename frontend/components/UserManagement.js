@@ -16,6 +16,10 @@ export default function UserManagement() {
     const [credentialsModal, setCredentialsModal] = useState(null);
     // { type: 'created' | 'reset', username: '...', temporaryPassword: '...' }
 
+    // Edit Role State
+    const [editingUser, setEditingUser] = useState(null);
+    const [editRoleValue, setEditRoleValue] = useState('');
+
     useEffect(() => {
         fetchUsers();
     }, []);
@@ -80,6 +84,31 @@ export default function UserManagement() {
             } else {
                 const data = await res.json();
                 setMsg({ type: 'error', text: data.message || 'Errore eliminazione utente.' });
+            }
+        } catch (err) {
+            setMsg({ type: 'error', text: 'Errore di connessione.' });
+        }
+    };
+
+    const handleUpdateRole = async (userId) => {
+        try {
+            const res = await fetch('/api/users', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    id: userId,
+                    role: editRoleValue
+                })
+            });
+
+            if (res.ok) {
+                fetchUsers();
+                setMsg({ type: 'success', text: 'Ruolo aggiornato.' });
+                setEditingUser(null);
+                setTimeout(() => setMsg(null), 3000);
+            } else {
+                const data = await res.json();
+                setMsg({ type: 'error', text: data.message || 'Errore aggiornamento ruolo.' });
             }
         } catch (err) {
             setMsg({ type: 'error', text: 'Errore di connessione.' });
@@ -228,9 +257,22 @@ export default function UserManagement() {
                                 <tr key={user.id} style={{ borderBottom: '1px solid var(--color-border)', background: idx % 2 === 0 ? 'var(--color-bg-card)' : 'var(--color-bg-main)' }}>
                                     <td style={{ padding: '0.8rem 1rem', fontWeight: '500', borderRight: '1px solid var(--color-border)' }}>{user.username}</td>
                                     <td style={{ padding: '0.8rem 1rem', borderRight: '1px solid var(--color-border)' }}>
-                                        <span className={`badge ${getRoleBadgeClass(user.role)}`}>
-                                            {getRoleLabel(user.role)}
-                                        </span>
+                                        {editingUser === user.id ? (
+                                            <select 
+                                                className="input-field" 
+                                                value={editRoleValue} 
+                                                onChange={(e) => setEditRoleValue(e.target.value)}
+                                                style={{ padding: '0.4rem', fontSize: '0.9em', margin: 0 }}
+                                            >
+                                                <option value="arbitro">Arbitro</option>
+                                                <option value="admin_giochi">Admin Giochi</option>
+                                                <option value="admin">Admin Totale</option>
+                                            </select>
+                                        ) : (
+                                            <span className={`badge ${getRoleBadgeClass(user.role)}`}>
+                                                {getRoleLabel(user.role)}
+                                            </span>
+                                        )}
                                     </td>
                                     <td style={{ padding: '0.8rem 1rem', borderRight: '1px solid var(--color-border)' }}>
                                         {user.must_change_password ? (
@@ -244,24 +286,58 @@ export default function UserManagement() {
                                     </td>
                                     <td style={{ padding: '0.8rem 1rem', textAlign: 'center' }}>
                                         <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem' }}>
-                                            <button
-                                                className="btn-icon"
-                                                title="Reset Password"
-                                                onClick={() => handleResetPassword(user)}
-                                                style={{ background: 'var(--color-secondary-light)', color: 'var(--color-primary-dark)', padding: '0.5rem', borderRadius: '6px', border: '1px solid var(--color-border)' }}
-                                            >
-                                                🔑
-                                            </button>
+                                            {editingUser === user.id ? (
+                                                <>
+                                                    <button
+                                                        className="btn-icon"
+                                                        title="Salva"
+                                                        onClick={() => handleUpdateRole(user.id)}
+                                                        style={{ background: 'rgba(34, 197, 94, 0.1)', color: '#22c55e', padding: '0.5rem', borderRadius: '6px', border: '1px solid rgba(34, 197, 94, 0.2)' }}
+                                                    >
+                                                        💾
+                                                    </button>
+                                                    <button
+                                                        className="btn-icon"
+                                                        title="Annulla"
+                                                        onClick={() => setEditingUser(null)}
+                                                        style={{ background: 'rgba(107, 114, 128, 0.1)', color: '#6b7280', padding: '0.5rem', borderRadius: '6px', border: '1px solid rgba(107, 114, 128, 0.2)' }}
+                                                    >
+                                                        ❌
+                                                    </button>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    {user.username !== 'admin' && (
+                                                        <button
+                                                            className="btn-icon"
+                                                            title="Modifica Ruolo"
+                                                            onClick={() => { setEditingUser(user.id); setEditRoleValue(user.role); }}
+                                                            style={{ background: 'var(--color-secondary-light)', color: 'var(--color-primary-dark)', padding: '0.5rem', borderRadius: '6px', border: '1px solid var(--color-border)' }}
+                                                        >
+                                                            ✏️
+                                                        </button>
+                                                    )}
 
-                                            {user.username !== 'admin' && (
-                                                <button
-                                                    className="btn-icon"
-                                                    title="Elimina Utente"
-                                                    onClick={() => handleDelete(user)}
-                                                    style={{ background: 'rgba(220, 38, 38, 0.1)', color: '#ef4444', padding: '0.5rem', borderRadius: '6px', border: '1px solid rgba(220, 38, 38, 0.2)' }}
-                                                >
-                                                    🗑️
-                                                </button>
+                                                    <button
+                                                        className="btn-icon"
+                                                        title="Reset Password"
+                                                        onClick={() => handleResetPassword(user)}
+                                                        style={{ background: 'var(--color-secondary-light)', color: 'var(--color-primary-dark)', padding: '0.5rem', borderRadius: '6px', border: '1px solid var(--color-border)' }}
+                                                    >
+                                                        🔑
+                                                    </button>
+
+                                                    {user.username !== 'admin' && (
+                                                        <button
+                                                            className="btn-icon"
+                                                            title="Elimina Utente"
+                                                            onClick={() => handleDelete(user)}
+                                                            style={{ background: 'rgba(220, 38, 38, 0.1)', color: '#ef4444', padding: '0.5rem', borderRadius: '6px', border: '1px solid rgba(220, 38, 38, 0.2)' }}
+                                                        >
+                                                            🗑️
+                                                        </button>
+                                                    )}
+                                                </>
                                             )}
                                         </div>
                                     </td>

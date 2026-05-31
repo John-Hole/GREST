@@ -4,12 +4,14 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useNav } from './NavContext';
+import { useAuth } from './AuthProvider';
 import '../styles/navbar.css';
 
 export default function Navbar() {
     const [currentDay, setCurrentDay] = useState(null);
     const [isDark, setIsDark] = useState(false);
     const { toggleSidebar } = useNav();
+    const { user } = useAuth();
     const pathname = usePathname();
 
     useEffect(() => {
@@ -20,15 +22,47 @@ export default function Navbar() {
         }
     }, []);
 
-    const toggleTheme = () => {
+    // Sync with user account theme if available
+    useEffect(() => {
+        if (user && user.theme) {
+            const isUserThemeDark = user.theme === 'dark';
+            if (isUserThemeDark !== isDark) {
+                setIsDark(isUserThemeDark);
+                if (isUserThemeDark) {
+                    document.documentElement.classList.add('dark');
+                    localStorage.setItem('theme', 'dark');
+                } else {
+                    document.documentElement.classList.remove('dark');
+                    localStorage.setItem('theme', 'light');
+                }
+            }
+        }
+    }, [user]);
+
+    const toggleTheme = async () => {
         const newDark = !isDark;
         setIsDark(newDark);
+        const themeStr = newDark ? 'dark' : 'light';
+        
         if (newDark) {
             document.documentElement.classList.add('dark');
             localStorage.setItem('theme', 'dark');
         } else {
             document.documentElement.classList.remove('dark');
             localStorage.setItem('theme', 'light');
+        }
+
+        // Save to account invisibly if logged in
+        if (user) {
+            try {
+                await fetch('/api/users/theme', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ theme: themeStr }),
+                });
+            } catch (err) {
+                console.error('Failed to save theme to account', err);
+            }
         }
     };
 

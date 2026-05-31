@@ -40,6 +40,7 @@ export async function POST(request) {
                 username: user.username,
                 role: user.role,
                 mustChangePassword,
+                theme: user.theme || 'light'
             },
         });
 
