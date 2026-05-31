@@ -21,9 +21,19 @@ export default function UserManagement() {
     const [mobileEditUser, setMobileEditUser] = useState(null);
     // { type: 'created' | 'reset', username: '...', temporaryPassword: '...' }
 
+    const [isDark, setIsDark] = useState(false);
+
     useEffect(() => {
         fetchUsers();
         fetchTeams();
+
+        const checkTheme = () => {
+            setIsDark(document.documentElement.classList.contains('dark'));
+        };
+        checkTheme();
+        const observer = new MutationObserver(checkTheme);
+        observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+        return () => observer.disconnect();
     }, []);
 
     const fetchTeams = async () => {
@@ -192,6 +202,41 @@ export default function UserManagement() {
         };
         const team = teams.find(t => t.id == teamId);
         if (team && team.color_hex) {
+            // Check if the color is light to optimize contrast in light mode
+            let isLight = false;
+            if (!isDark) {
+                try {
+                    const hex = team.color_hex.replace('#', '');
+                    let r = 0, g = 0, b = 0;
+                    if (hex.length === 3) {
+                        r = parseInt(hex[0] + hex[0], 16);
+                        g = parseInt(hex[1] + hex[1], 16);
+                        b = parseInt(hex[2] + hex[2], 16);
+                    } else if (hex.length === 6) {
+                        r = parseInt(hex.substring(0, 2), 16);
+                        g = parseInt(hex.substring(2, 4), 16);
+                        b = parseInt(hex.substring(4, 6), 16);
+                    }
+                    const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+                    if (brightness > 180) {
+                        isLight = true;
+                    }
+                } catch (e) {
+                    console.error('Error parsing team color:', e);
+                }
+            }
+
+            if (isLight) {
+                // Return high contrast tag for light mode
+                return {
+                    background: 'rgba(0, 0, 0, 0.05)',
+                    color: 'var(--color-text-dark)',
+                    border: `1px solid ${team.color_hex.toLowerCase() === '#ffffff' || team.color_hex.toLowerCase() === '#fff' ? 'var(--color-border)' : team.color_hex}`,
+                    fontWeight: '600',
+                    cursor: 'pointer', outline: 'none', fontFamily: 'inherit'
+                };
+            }
+
             return { 
                 background: `${team.color_hex}25`, 
                 color: team.color_hex, 

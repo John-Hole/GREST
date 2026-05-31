@@ -103,7 +103,8 @@ export default function LaMiaSquadra() {
                             width: '12px',
                             height: '12px',
                             borderRadius: '50%',
-                            backgroundColor: myTeam.color_hex || '#000'
+                            backgroundColor: myTeam.color_hex || '#000',
+                            border: '1px solid rgba(0, 0, 0, 0.15)'
                         }} />
                         <span style={{ fontSize: '1.1rem', fontWeight: 'bold', color: 'var(--color-text-medium)' }}>
                             {myTeam.name}
