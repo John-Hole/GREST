@@ -197,9 +197,9 @@ export default function Home() {
       </section>
 
       <section className="section animate-slide-up" style={{ animationDelay: '0.2s' }}>
-        <div className="section-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+        <div className="section-header">
           <h2 className="section-title">
-            <span>🏆</span> Classifica (Settimana {Math.ceil((weekRange.start) / 5)})
+            <span>🏆</span> Classifica <span style={{ whiteSpace: 'nowrap' }}>(Settimana {Math.ceil((weekRange.start) / 5)})</span>
           </h2>
           <Link href="/classifica" className="btn btn-secondary btn-sm">
             Completa

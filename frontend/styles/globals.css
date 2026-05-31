@@ -230,6 +230,14 @@ table {
     margin-bottom: var(--spacing-lg);
 }
 
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-md);
+    gap: var(--spacing-sm);
+}
+
 .section-title {
     font-size: 1.5em;
     font-weight: var(--font-weight-bold);
@@ -238,6 +246,22 @@ table {
     display: flex;
     align-items: center;
     gap: var(--spacing-xs);
+}
+
+.section-header .section-title {
+    margin-bottom: 0;
+}
+
+@media (max-width: 767px) {
+    .section-title {
+        font-size: 1.25rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .section-title {
+        font-size: 1.15rem;
+    }
 }
 
 /* Badges */
