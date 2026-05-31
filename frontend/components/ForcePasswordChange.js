@@ -1,17 +1,39 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import '../styles/modal.css';
 
 export default function ForcePasswordChange({ username, onPasswordChanged }) {
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
+    const [teamId, setTeamId] = useState('');
+    const [teams, setTeams] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
+
+    useEffect(() => {
+        const fetchTeams = async () => {
+            try {
+                const res = await fetch('/api/config/teams');
+                if (res.ok) {
+                    const data = await res.json();
+                    setTeams(data);
+                }
+            } catch (err) {
+                console.error('Error fetching teams:', err);
+            }
+        };
+        fetchTeams();
+    }, []);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError(null);
+
+        if (!teamId) {
+            setError('Devi selezionare una squadra di appartenenza.');
+            return;
+        }
 
         if (newPassword.length < 6) {
             setError('La password deve essere di almeno 6 caratteri.');
@@ -29,7 +51,7 @@ export default function ForcePasswordChange({ username, onPasswordChanged }) {
             const res = await fetch('/api/auth/change-password', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ newPassword }),
+                body: JSON.stringify({ newPassword, teamId }),
             });
 
             const data = await res.json();
@@ -90,6 +112,23 @@ export default function ForcePasswordChange({ username, onPasswordChanged }) {
                             minLength={6}
                             autoComplete="new-password"
                         />
+                    </div>
+
+                    <div className="form-group" style={{ marginBottom: '2rem' }}>
+                        <label>La Tua Squadra</label>
+                        <select
+                            className="input-field"
+                            value={teamId}
+                            onChange={(e) => setTeamId(e.target.value)}
+                            required
+                        >
+                            <option value="">-- Seleziona una squadra --</option>
+                            {teams.map(team => (
+                                <option key={team.id} value={team.id}>
+                                    {team.name}
+                                </option>
+                            ))}
+                        </select>
                     </div>
 
                     <button

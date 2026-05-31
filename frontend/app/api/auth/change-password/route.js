@@ -6,7 +6,7 @@ import { requireAuth, signToken, createTokenCookie } from '@/lib/auth';
 export async function POST(request) {
     try {
         const user = await requireAuth();
-        const { newPassword } = await request.json();
+        const { newPassword, teamId } = await request.json();
 
         if (!newPassword || newPassword.length < 6) {
             return NextResponse.json(
@@ -18,10 +18,17 @@ export async function POST(request) {
         const db = getDb();
         const passwordHash = await bcrypt.hash(newPassword, 10);
 
-        await db.execute({
-            sql: 'UPDATE users SET password_hash = ?, must_change_password = 0 WHERE id = ?',
-            args: [passwordHash, user.userId]
-        });
+        if (teamId) {
+            await db.execute({
+                sql: 'UPDATE users SET password_hash = ?, must_change_password = 0, team_id = ? WHERE id = ?',
+                args: [passwordHash, parseInt(teamId), user.userId]
+            });
+        } else {
+            await db.execute({
+                sql: 'UPDATE users SET password_hash = ?, must_change_password = 0 WHERE id = ?',
+                args: [passwordHash, user.userId]
+            });
+        }
 
         // Genera nuovo JWT senza il flag mustChangePassword
         const newToken = await signToken({
@@ -29,6 +36,7 @@ export async function POST(request) {
             username: user.username,
             role: user.role,
             mustChangePassword: false,
+            team_id: teamId ? parseInt(teamId) : user.team_id,
         });
 
         const response = NextResponse.json({ success: true });

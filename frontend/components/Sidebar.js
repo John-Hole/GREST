@@ -99,6 +99,17 @@ export default function Sidebar() {
                         <span className="sidebar-link-label">Giochi</span>
                     </Link>
 
+                    {user && user.team_id && (
+                        <Link
+                            href="/squadra"
+                            className={`sidebar-link ${isActive('/squadra') ? 'active' : ''}`}
+                            onClick={closeSidebar}
+                        >
+                            <span className="sidebar-link-icon">👕</span>
+                            <span className="sidebar-link-label">La Mia Squadra</span>
+                        </Link>
+                    )}
+
                     {user && (
                         <>
                             <div className="sidebar-divider" />
@@ -170,7 +181,8 @@ export default function Sidebar() {
                                     <span className="role-badge">
                                         {user.role === 'admin' ? 'Admin Totale' :
                                             user.role === 'admin_giochi' ? 'Admin Giochi' :
-                                                user.role === 'arbitro' ? 'Arbitro' : ''}
+                                                user.role === 'arbitro' ? 'Arbitro' :
+                                                    user.role === 'animatore' ? 'Animatore' : ''}
                                     </span>
                                 </div>
                                 <button className="logout-btn" onClick={handleLogout} title="Esci">

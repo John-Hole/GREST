@@ -13,7 +13,7 @@ export async function GET() {
         // Fetch latest data from DB to get theme
         const db = getDb();
         const { rows } = await db.execute({
-            sql: 'SELECT theme FROM users WHERE id = ?',
+            sql: 'SELECT theme, team_id FROM users WHERE id = ?',
             args: [userPayload.userId]
         });
 
@@ -25,7 +25,8 @@ export async function GET() {
                 username: userPayload.username,
                 role: userPayload.role,
                 mustChangePassword: !!userPayload.mustChangePassword,
-                theme: theme
+                theme: theme,
+                team_id: rows.length > 0 ? rows[0].team_id : null,
             },
         });
     } catch (error) {

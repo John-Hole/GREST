@@ -48,6 +48,12 @@ export function getDb() {
     ALTER TABLE users ADD COLUMN theme TEXT DEFAULT 'light'
   `).catch(() => { /* Column already exists, ignore */ });
 
+  // Migration: add team_id column if it doesn't exist
+  client.execute(`
+    ALTER TABLE users ADD COLUMN team_id INTEGER REFERENCES teams(id) DEFAULT NULL
+  `).catch(() => { /* Column already exists, ignore */ });
+
+
   globalThis.__db = client;
   return client;
 }

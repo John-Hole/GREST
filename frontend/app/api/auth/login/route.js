@@ -30,6 +30,7 @@ export async function POST(request) {
             username: user.username,
             role: user.role,
             mustChangePassword,
+            team_id: user.team_id,
         });
 
         // Set cookie
@@ -40,7 +41,8 @@ export async function POST(request) {
                 username: user.username,
                 role: user.role,
                 mustChangePassword,
-                theme: user.theme || 'light'
+                theme: user.theme || 'light',
+                team_id: user.team_id,
             },
         });
 

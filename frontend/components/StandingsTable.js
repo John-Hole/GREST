@@ -2,7 +2,7 @@
 
 import '../styles/standings.css';
 
-export default function StandingsTable({ standings, isAdmin = false, startDay = 1, endDay = 15, useRelativeDays = false }) {
+export default function StandingsTable({ standings, isAdmin = false, startDay = 1, endDay = 15, useRelativeDays = false, highlightTeamId = null }) {
     const days = [];
     for (let i = startDay; i <= endDay; i++) {
         days.push(i);
@@ -27,7 +27,7 @@ export default function StandingsTable({ standings, isAdmin = false, startDay = 
                     </thead>
                     <tbody>
                         {standings.map((team, index) => (
-                            <tr key={team.teamId}>
+                            <tr key={team.teamId} className={highlightTeamId === team.teamId ? 'highlighted-team' : ''}>
                                 <td>
                                     <span className={`pos-badge ${index < 3 ? `pos-${index + 1}` : ''}`}>
                                         {index + 1}

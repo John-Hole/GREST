@@ -25,7 +25,7 @@ function formatUsername(nome, cognome) {
 const createUserSchema = z.object({
     nome: z.string().min(2, "Nome deve essere almeno 2 caratteri"),
     cognome: z.string().min(2, "Cognome deve essere almeno 2 caratteri"),
-    role: z.enum(['admin', 'admin_giochi', 'arbitro'], "Ruolo non valido"),
+    role: z.enum(['admin', 'admin_giochi', 'arbitro', 'animatore'], "Ruolo non valido"),
 });
 
 export async function GET() {
@@ -33,7 +33,7 @@ export async function GET() {
         await requireAdmin();
         const db = getDb();
         // Exclude password_hash
-        const { rows: users } = await db.execute('SELECT id, username, role, must_change_password, created_at FROM users ORDER BY username ASC');
+        const { rows: users } = await db.execute('SELECT id, username, role, must_change_password, team_id, created_at FROM users ORDER BY username ASC');
         return NextResponse.json(users);
     } catch (error) {
         if (error.message === 'Forbidden' || error.message === 'Unauthorized') {
@@ -101,9 +101,9 @@ export async function PUT(request) {
     try {
         await requireAdmin();
         const body = await request.json();
-        let { id, resetPassword, role } = body;
+        let { id, resetPassword, role, team_id } = body;
 
-        console.log(`PUT /api/users called for ID: ${id}, Role update: ${role}, Reset password: ${!!resetPassword}`);
+        console.log(`PUT /api/users called for ID: ${id}, Role update: ${role}, Reset password: ${!!resetPassword}, Team ID: ${team_id}`);
 
         if (!id) {
             return NextResponse.json({ message: 'ID mancante' }, { status: 400 });
@@ -131,12 +131,17 @@ export async function PUT(request) {
         }
 
         if (role) {
-            const validRoles = ['admin', 'admin_giochi', 'arbitro'];
+            const validRoles = ['admin', 'admin_giochi', 'arbitro', 'animatore'];
             if (!validRoles.includes(role)) {
                 return NextResponse.json({ message: 'Ruolo non valido' }, { status: 400 });
             }
             updates.push("role = ?");
             params.push(role);
+        }
+
+        if (team_id !== undefined) {
+            updates.push("team_id = ?");
+            params.push(team_id === null || team_id === '' ? null : parseInt(team_id));
         }
 
         if (updates.length === 0) {

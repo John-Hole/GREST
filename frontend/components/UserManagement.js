@@ -8,21 +8,31 @@ export default function UserManagement() {
     const [users, setUsers] = useState([]);
 
     // Create Form State (nome + cognome instead of username + password)
-    const [form, setForm] = useState({ nome: '', cognome: '', role: 'arbitro' });
+    const [form, setForm] = useState({ nome: '', cognome: '', role: 'animatore' });
     const [loading, setLoading] = useState(false);
     const [msg, setMsg] = useState(null);
+    const [teams, setTeams] = useState([]);
 
     // Credentials Display Modal (after creation or password reset)
     const [credentialsModal, setCredentialsModal] = useState(null);
     // { type: 'created' | 'reset', username: '...', temporaryPassword: '...' }
 
-    // Edit Role State
-    const [editingUser, setEditingUser] = useState(null);
-    const [editRoleValue, setEditRoleValue] = useState('');
-
     useEffect(() => {
         fetchUsers();
+        fetchTeams();
     }, []);
+
+    const fetchTeams = async () => {
+        try {
+            const res = await fetch('/api/config/teams');
+            if (res.ok) {
+                const data = await res.json();
+                setTeams(data);
+            }
+        } catch (err) {
+            console.error('Error fetching teams:', err);
+        }
+    };
 
     const fetchUsers = async () => {
         try {
@@ -54,7 +64,7 @@ export default function UserManagement() {
 
             const data = await res.json();
             if (res.ok) {
-                setForm({ nome: '', cognome: '', role: 'arbitro' });
+                setForm({ nome: '', cognome: '', role: 'animatore' });
                 fetchUsers();
                 // Show credentials modal
                 setCredentialsModal({
@@ -90,21 +100,20 @@ export default function UserManagement() {
         }
     };
 
-    const handleUpdateRole = async (userId) => {
+    const handleUpdateRole = async (userId, newRole) => {
         try {
             const res = await fetch('/api/users', {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     id: userId,
-                    role: editRoleValue
+                    role: newRole
                 })
             });
 
             if (res.ok) {
                 fetchUsers();
                 setMsg({ type: 'success', text: 'Ruolo aggiornato.' });
-                setEditingUser(null);
                 setTimeout(() => setMsg(null), 3000);
             } else {
                 const data = await res.json();
@@ -146,11 +155,36 @@ export default function UserManagement() {
         }
     };
 
+    const handleTeamChange = async (user, newTeamId) => {
+        try {
+            const res = await fetch('/api/users', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    id: user.id,
+                    team_id: newTeamId === '' ? null : newTeamId
+                })
+            });
+
+            if (res.ok) {
+                fetchUsers();
+                setMsg({ type: 'success', text: 'Squadra aggiornata.' });
+                setTimeout(() => setMsg(null), 3000);
+            } else {
+                const data = await res.json();
+                setMsg({ type: 'error', text: data.message || 'Errore aggiornamento squadra.' });
+            }
+        } catch (err) {
+            setMsg({ type: 'error', text: 'Errore di connessione.' });
+        }
+    };
+
     const getRoleBadgeClass = (role) => {
         switch (role) {
             case 'admin': return 'badge-primary';
             case 'admin_giochi': return 'badge-success';
             case 'arbitro': return 'badge-info';
+            case 'animatore': return 'badge-warning';
             default: return 'badge-secondary';
         }
     };
@@ -160,6 +194,7 @@ export default function UserManagement() {
             case 'admin': return 'Admin Totale';
             case 'admin_giochi': return 'Admin Giochi';
             case 'arbitro': return 'Arbitro';
+            case 'animatore': return 'Animatore';
             default: return role;
         }
     };
@@ -214,6 +249,7 @@ export default function UserManagement() {
                             onChange={handleChange}
                             className="input-field"
                         >
+                            <option value="animatore">Animatore</option>
                             <option value="arbitro">Arbitro</option>
                             <option value="admin_giochi">Admin Giochi</option>
                             <option value="admin">Admin Totale</option>
@@ -247,6 +283,7 @@ export default function UserManagement() {
                             <tr style={{ background: 'var(--color-bg-main)', borderBottom: '2px solid var(--color-border)' }}>
                                 <th style={{ padding: '1rem', textAlign: 'left', borderRight: '1px solid var(--color-border)' }}>Username</th>
                                 <th style={{ padding: '1rem', textAlign: 'left', borderRight: '1px solid var(--color-border)' }}>Ruolo</th>
+                                <th style={{ padding: '1rem', textAlign: 'left', borderRight: '1px solid var(--color-border)' }}>Squadra</th>
                                 <th style={{ padding: '1rem', textAlign: 'left', borderRight: '1px solid var(--color-border)' }}>Stato</th>
                                 <th style={{ padding: '1rem', textAlign: 'left', borderRight: '1px solid var(--color-border)' }}>Creato il</th>
                                 <th style={{ padding: '1rem', textAlign: 'center' }}>Azioni</th>
@@ -257,13 +294,13 @@ export default function UserManagement() {
                                 <tr key={user.id} style={{ borderBottom: '1px solid var(--color-border)', background: idx % 2 === 0 ? 'var(--color-bg-card)' : 'var(--color-bg-main)' }}>
                                     <td style={{ padding: '0.8rem 1rem', fontWeight: '500', borderRight: '1px solid var(--color-border)' }}>{user.username}</td>
                                     <td style={{ padding: '0.8rem 1rem', borderRight: '1px solid var(--color-border)' }}>
-                                        {editingUser === user.id ? (
+                                        {user.username !== 'admin' ? (
                                             <select 
-                                                className="input-field" 
-                                                value={editRoleValue} 
-                                                onChange={(e) => setEditRoleValue(e.target.value)}
-                                                style={{ padding: '0.4rem', fontSize: '0.9em', margin: 0 }}
+                                                value={user.role} 
+                                                onChange={(e) => handleUpdateRole(user.id, e.target.value)}
+                                                style={{ padding: '4px', fontSize: '0.85em', border: '1px solid var(--color-border)', borderRadius: '4px', background: 'var(--color-bg-main)' }}
                                             >
+                                                <option value="animatore">Animatore</option>
                                                 <option value="arbitro">Arbitro</option>
                                                 <option value="admin_giochi">Admin Giochi</option>
                                                 <option value="admin">Admin Totale</option>
@@ -273,6 +310,18 @@ export default function UserManagement() {
                                                 {getRoleLabel(user.role)}
                                             </span>
                                         )}
+                                    </td>
+                                    <td style={{ padding: '0.8rem 1rem', borderRight: '1px solid var(--color-border)' }}>
+                                        <select 
+                                            value={user.team_id || ''} 
+                                            onChange={(e) => handleTeamChange(user, e.target.value)}
+                                            style={{ padding: '4px', fontSize: '0.85em', border: '1px solid var(--color-border)', borderRadius: '4px', background: 'var(--color-bg-main)' }}
+                                        >
+                                            <option value="">Nessuna</option>
+                                            {teams.map(t => (
+                                                <option key={t.id} value={t.id}>{t.name}</option>
+                                            ))}
+                                        </select>
                                     </td>
                                     <td style={{ padding: '0.8rem 1rem', borderRight: '1px solid var(--color-border)' }}>
                                         {user.must_change_password ? (
@@ -286,58 +335,24 @@ export default function UserManagement() {
                                     </td>
                                     <td style={{ padding: '0.8rem 1rem', textAlign: 'center' }}>
                                         <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem' }}>
-                                            {editingUser === user.id ? (
-                                                <>
-                                                    <button
-                                                        className="btn-icon"
-                                                        title="Salva"
-                                                        onClick={() => handleUpdateRole(user.id)}
-                                                        style={{ background: 'rgba(34, 197, 94, 0.1)', color: '#22c55e', padding: '0.5rem', borderRadius: '6px', border: '1px solid rgba(34, 197, 94, 0.2)' }}
-                                                    >
-                                                        💾
-                                                    </button>
-                                                    <button
-                                                        className="btn-icon"
-                                                        title="Annulla"
-                                                        onClick={() => setEditingUser(null)}
-                                                        style={{ background: 'rgba(107, 114, 128, 0.1)', color: '#6b7280', padding: '0.5rem', borderRadius: '6px', border: '1px solid rgba(107, 114, 128, 0.2)' }}
-                                                    >
-                                                        ❌
-                                                    </button>
-                                                </>
-                                            ) : (
-                                                <>
-                                                    {user.username !== 'admin' && (
-                                                        <button
-                                                            className="btn-icon"
-                                                            title="Modifica Ruolo"
-                                                            onClick={() => { setEditingUser(user.id); setEditRoleValue(user.role); }}
-                                                            style={{ background: 'var(--color-secondary-light)', color: 'var(--color-primary-dark)', padding: '0.5rem', borderRadius: '6px', border: '1px solid var(--color-border)' }}
-                                                        >
-                                                            ✏️
-                                                        </button>
-                                                    )}
+                                            <button
+                                                className="btn-icon"
+                                                title="Reset Password"
+                                                onClick={() => handleResetPassword(user)}
+                                                style={{ background: 'var(--color-secondary-light)', color: 'var(--color-primary-dark)', padding: '0.5rem', borderRadius: '6px', border: '1px solid var(--color-border)' }}
+                                            >
+                                                🔑
+                                            </button>
 
-                                                    <button
-                                                        className="btn-icon"
-                                                        title="Reset Password"
-                                                        onClick={() => handleResetPassword(user)}
-                                                        style={{ background: 'var(--color-secondary-light)', color: 'var(--color-primary-dark)', padding: '0.5rem', borderRadius: '6px', border: '1px solid var(--color-border)' }}
-                                                    >
-                                                        🔑
-                                                    </button>
-
-                                                    {user.username !== 'admin' && (
-                                                        <button
-                                                            className="btn-icon"
-                                                            title="Elimina Utente"
-                                                            onClick={() => handleDelete(user)}
-                                                            style={{ background: 'rgba(220, 38, 38, 0.1)', color: '#ef4444', padding: '0.5rem', borderRadius: '6px', border: '1px solid rgba(220, 38, 38, 0.2)' }}
-                                                        >
-                                                            🗑️
-                                                        </button>
-                                                    )}
-                                                </>
+                                            {user.username !== 'admin' && (
+                                                <button
+                                                    className="btn-icon"
+                                                    title="Elimina Utente"
+                                                    onClick={() => handleDelete(user)}
+                                                    style={{ background: 'rgba(220, 38, 38, 0.1)', color: '#ef4444', padding: '0.5rem', borderRadius: '6px', border: '1px solid rgba(220, 38, 38, 0.2)' }}
+                                                >
+                                                    🗑️
+                                                </button>
                                             )}
                                         </div>
                                     </td>
@@ -345,7 +360,7 @@ export default function UserManagement() {
                             ))}
                             {users.length === 0 && (
                                 <tr>
-                                    <td colSpan="5" style={{ textAlign: 'center', padding: '2rem', color: 'var(--color-text-medium)' }}>
+                                    <td colSpan="6" style={{ textAlign: 'center', padding: '2rem', color: 'var(--color-text-medium)' }}>
                                         Nessun utente trovato
                                     </td>
                                 </tr>
