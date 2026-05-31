@@ -612,3 +612,33 @@ table {
     background: rgba(136, 136, 136, 0.15);
     color: var(--color-text-medium);
 }
+@media (max-width: 767px) {
+    .desktop-only { display: none !important; }
+}
+@media (min-width: 768px) {
+    .mobile-only { display: none !important; }
+}
+.mobile-user-card {
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-md);
+    margin-bottom: var(--spacing-sm);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.mobile-user-card:active {
+    transform: scale(0.98);
+}
+.mobile-user-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.mobile-user-name {
+    font-weight: 600;
+    font-size: 1.1em;
+}

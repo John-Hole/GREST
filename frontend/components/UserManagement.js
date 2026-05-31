@@ -15,6 +15,10 @@ export default function UserManagement() {
 
     // Credentials Display Modal (after creation or password reset)
     const [credentialsModal, setCredentialsModal] = useState(null);
+    const [copied, setCopied] = useState(false);
+    
+    // Mobile Edit User Modal
+    const [mobileEditUser, setMobileEditUser] = useState(null);
     // { type: 'created' | 'reset', username: '...', temporaryPassword: '...' }
 
     useEffect(() => {
@@ -218,6 +222,17 @@ export default function UserManagement() {
             default: return role;
         }
     };
+    const handleCopyCredentials = async () => {
+        if (!credentialsModal) return;
+        const textToCopy = `Username:\n${credentialsModal.username}\n\nPassword Temporanea:\n${credentialsModal.temporaryPassword}`;
+        try {
+            await navigator.clipboard.writeText(textToCopy);
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
+        } catch (err) {
+            console.error('Failed to copy text: ', err);
+        }
+    };
 
     return (
         <div className="user-management animate-fade-in">
@@ -297,7 +312,7 @@ export default function UserManagement() {
                     <span>👥</span> Utenti Esistenti
                 </h2>
 
-                <div className="table-responsive">
+                <div className="table-responsive desktop-only">
                     <table className="table" style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid var(--color-border)' }}>
                         <thead>
                             <tr style={{ background: 'var(--color-bg-main)', borderBottom: '2px solid var(--color-border)' }}>
@@ -390,6 +405,35 @@ export default function UserManagement() {
                         </tbody>
                     </table>
                 </div>
+
+                {/* Mobile User List */}
+                <div className="mobile-only">
+                    {users.length === 0 ? (
+                        <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--color-text-medium)' }}>
+                            Nessun utente trovato
+                        </div>
+                    ) : (
+                        users.map(user => (
+                            <div key={user.id} className="mobile-user-card" onClick={() => setMobileEditUser(user)}>
+                                <div className="mobile-user-info">
+                                    <span className="mobile-user-name">{user.username}</span>
+                                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '4px' }}>
+                                        <span className={`badge ${getRoleBadgeClass(user.role)}`}>{getRoleLabel(user.role)}</span>
+                                        {user.team_id && (
+                                            <span className="badge" style={{ ...getTeamStyle(user.team_id), padding: '2px 8px', fontSize: '0.75em' }}>
+                                                {teams.find(t => t.id == user.team_id)?.name}
+                                            </span>
+                                        )}
+                                    </div>
+                                </div>
+                                <div style={{ color: 'var(--color-text-medium)' }}>
+                                    {user.must_change_password ? '⏳' : '✅'}
+                                    <span style={{ marginLeft: '8px', fontSize: '1.2em' }}>›</span>
+                                </div>
+                            </div>
+                        ))
+                    )}
+                </div>
             </div>
 
             {/* Credentials Display Modal */}
@@ -417,6 +461,13 @@ export default function UserManagement() {
 
                         <div className="modal-actions">
                             <button
+                                className="btn"
+                                onClick={handleCopyCredentials}
+                                style={{ width: '100%', marginBottom: '0.5rem', background: 'var(--color-secondary-light)', color: 'var(--color-primary-dark)', fontWeight: 'bold' }}
+                            >
+                                {copied ? '✅ Copiato!' : '📋 Copia Credenziali'}
+                            </button>
+                            <button
                                 className="btn btn-primary"
                                 onClick={() => setCredentialsModal(null)}
                                 style={{ width: '100%' }}
@@ -424,6 +475,96 @@ export default function UserManagement() {
                                 Ho Capito, Chiudi
                             </button>
                         </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Mobile Edit Modal */}
+            {mobileEditUser && (
+                <div className="modal-overlay" onClick={() => setMobileEditUser(null)} style={{ zIndex: 10000 }}>
+                    <div className="modal animate-slide-up" onClick={e => e.stopPropagation()} style={{ width: '90%', maxWidth: '400px', padding: '1.5rem' }}>
+                        <h2 className="modal-title" style={{ borderBottom: '1px solid var(--color-border)', paddingBottom: '0.5rem', marginBottom: '1rem', textAlign: 'left' }}>
+                            <span style={{ fontSize: '0.8em', color: 'var(--color-text-medium)', display: 'block', marginBottom: '4px' }}>Gestisci Utente</span>
+                            {mobileEditUser.username}
+                        </h2>
+
+                        <div className="form-group" style={{ marginBottom: '1rem' }}>
+                            <label style={{ fontSize: '0.9em', color: 'var(--color-text-medium)' }}>Ruolo</label>
+                            {mobileEditUser.username !== 'admin' ? (
+                                <select 
+                                    className={`badge ${getRoleBadgeClass(mobileEditUser.role)}`}
+                                    value={mobileEditUser.role} 
+                                    onChange={(e) => {
+                                        handleUpdateRole(mobileEditUser.id, e.target.value);
+                                        setMobileEditUser({...mobileEditUser, role: e.target.value});
+                                    }}
+                                    style={{ border: 'none', cursor: 'pointer', outline: 'none', fontFamily: 'inherit', width: '100%', padding: '12px', fontSize: '1.1em', textAlign: 'center' }}
+                                >
+                                    <option value="animatore" style={{ color: 'initial', background: 'initial' }}>Animatore</option>
+                                    <option value="arbitro" style={{ color: 'initial', background: 'initial' }}>Arbitro</option>
+                                    <option value="admin_giochi" style={{ color: 'initial', background: 'initial' }}>Admin Giochi</option>
+                                    <option value="admin" style={{ color: 'initial', background: 'initial' }}>Admin Totale</option>
+                                </select>
+                            ) : (
+                                <div style={{ padding: '8px 0' }}>
+                                    <span className={`badge ${getRoleBadgeClass(mobileEditUser.role)}`} style={{ padding: '8px 16px', fontSize: '1.1em' }}>
+                                        {getRoleLabel(mobileEditUser.role)}
+                                    </span>
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="form-group" style={{ marginBottom: '1.5rem' }}>
+                            <label style={{ fontSize: '0.9em', color: 'var(--color-text-medium)' }}>Squadra</label>
+                            <select 
+                                className="badge"
+                                value={mobileEditUser.team_id || ''} 
+                                onChange={(e) => {
+                                    handleTeamChange(mobileEditUser, e.target.value);
+                                    setMobileEditUser({...mobileEditUser, team_id: e.target.value});
+                                }}
+                                style={{ ...getTeamStyle(mobileEditUser.team_id), width: '100%', padding: '12px', fontSize: '1.1em', textAlign: 'center' }}
+                            >
+                                <option value="" style={{ color: 'initial', background: 'initial' }}>Nessuna</option>
+                                {teams.map(t => (
+                                    <option key={t.id} value={t.id} style={{ color: 'initial', background: 'initial' }}>{t.name}</option>
+                                ))}
+                            </select>
+                        </div>
+
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '1.5rem' }}>
+                            <button
+                                className="btn"
+                                onClick={() => {
+                                    handleResetPassword(mobileEditUser);
+                                    setMobileEditUser(null);
+                                }}
+                                style={{ background: 'var(--color-secondary-light)', color: 'var(--color-primary-dark)', padding: '12px', borderRadius: '8px', border: '1px solid var(--color-border)', fontWeight: 'bold' }}
+                            >
+                                🔑 Reset Pwd
+                            </button>
+
+                            {mobileEditUser.username !== 'admin' ? (
+                                <button
+                                    className="btn"
+                                    onClick={() => {
+                                        handleDelete(mobileEditUser);
+                                        setMobileEditUser(null);
+                                    }}
+                                    style={{ background: 'rgba(220, 38, 38, 0.1)', color: '#ef4444', padding: '12px', borderRadius: '8px', border: '1px solid rgba(220, 38, 38, 0.2)', fontWeight: 'bold' }}
+                                >
+                                    🗑️ Elimina
+                                </button>
+                            ) : <div></div>}
+                        </div>
+
+                        <button
+                            className="btn btn-primary"
+                            onClick={() => setMobileEditUser(null)}
+                            style={{ width: '100%', padding: '14px', borderRadius: '8px', fontSize: '1.1em' }}
+                        >
+                            Fatto
+                        </button>
                     </div>
                 </div>
             )}
