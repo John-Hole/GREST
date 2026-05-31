@@ -10,6 +10,46 @@ import html2canvas from 'html2canvas';
 const MORNING_SLOTS = ['11:00', '11:30', '12:00'];
 const AFTERNOON_SLOTS = ['15:00', '15:30', '16:00'];
 
+const getContrastColor = (hexColor) => {
+    if (!hexColor) return '#1a1a1a';
+    let color = hexColor.replace('#', '');
+    if (color.length === 3) {
+        color = color[0] + color[0] + color[1] + color[1] + color[2] + color[2];
+    }
+    if (color.length !== 6) return '#1a1a1a';
+    const r = parseInt(color.substring(0, 2), 16);
+    const g = parseInt(color.substring(2, 4), 16);
+    const b = parseInt(color.substring(4, 6), 16);
+    // YIQ contrast formula
+    const yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000;
+    return (yiq >= 150) ? '#1a1a1a' : '#ffffff';
+};
+
+const renderTeamBadge = (team) => {
+    if (!team) return null;
+    const bgColor = team.color || '#cccccc';
+    const textColor = getContrastColor(bgColor);
+    return (
+        <span style={{
+            backgroundColor: bgColor,
+            color: textColor,
+            padding: '3px 10px',
+            borderRadius: '12px',
+            fontWeight: '700',
+            fontSize: '0.9rem',
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            border: '1px solid rgba(0, 0, 0, 0.15)',
+            boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
+            letterSpacing: '0.3px',
+            whiteSpace: 'nowrap'
+        }}>
+            {team.name}
+        </span>
+    );
+};
+
 export default function CalendarPage() {
     const { user } = useAuth();
     const { showToast } = useToast();
@@ -362,10 +402,10 @@ export default function CalendarPage() {
                                                 <div style={{ fontWeight: '600', fontSize: '1.1rem' }}>
                                                     {m.gameName || 'Partita'} <span style={{ fontWeight: '400', color: '#666', fontSize: '0.9rem' }}>@ 📍 {m.location || 'Campo non assegnato'}</span>
                                                 </div>
-                                                <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-                                                    <span style={{ color: m.teamHome.color, fontWeight: 'bold' }}>{m.teamHome.name}</span>
-                                                    <span style={{ fontSize: '0.9rem', color: '#999' }}>vs</span>
-                                                    <span style={{ color: m.teamAway.color, fontWeight: 'bold' }}>{m.teamAway.name}</span>
+                                                <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                                                    {renderTeamBadge(m.teamHome)}
+                                                    <span style={{ fontSize: '0.9rem', color: '#999', fontWeight: 'bold' }}>vs</span>
+                                                    {renderTeamBadge(m.teamAway)}
                                                 </div>
                                             </div>
                                         ))}
@@ -398,10 +438,10 @@ export default function CalendarPage() {
                                                 <div style={{ fontWeight: '600', fontSize: '1.1rem' }}>
                                                     {m.gameName || 'Partita'} <span style={{ fontWeight: '400', color: '#666', fontSize: '0.9rem' }}>@ 📍 {m.location || 'Campo non assegnato'}</span>
                                                 </div>
-                                                <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-                                                    <span style={{ color: m.teamHome.color, fontWeight: 'bold' }}>{m.teamHome.name}</span>
-                                                    <span style={{ fontSize: '0.9rem', color: '#999' }}>vs</span>
-                                                    <span style={{ color: m.teamAway.color, fontWeight: 'bold' }}>{m.teamAway.name}</span>
+                                                <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                                                    {renderTeamBadge(m.teamHome)}
+                                                    <span style={{ fontSize: '0.9rem', color: '#999', fontWeight: 'bold' }}>vs</span>
+                                                    {renderTeamBadge(m.teamAway)}
                                                 </div>
                                             </div>
                                         ))}

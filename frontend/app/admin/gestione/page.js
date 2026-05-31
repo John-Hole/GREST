@@ -32,16 +32,12 @@ export default function GestioneTorneo() {
 
     const fetchCompletion = async () => {
         try {
-            const [resDay, resMatches] = await Promise.all([
-                fetch('/api/config/current-day'),
-                fetch('/api/matches')
-            ]);
-            if (resDay.ok && resMatches.ok) {
-                const dayData = await resDay.json();
+            const resMatches = await fetch('/api/matches');
+            if (resMatches.ok) {
                 const matches = await resMatches.json();
-                const currentDay = dayData.realDay || dayData.day || 1;
-                const totalDays = matches.length > 0 ? Math.max(...matches.map(m => m.day)) : 1;
-                setCompletion(Math.round((currentDay / totalDays) * 100));
+                const completedMatches = matches.filter(m => m.status === 'completed').length;
+                const totalMatches = matches.length;
+                setCompletion(totalMatches > 0 ? Math.round((completedMatches / totalMatches) * 100) : 0);
             }
         } catch (error) {
             console.error('Errore nel caricamento della percentuale', error);
@@ -159,7 +155,7 @@ export default function GestioneTorneo() {
 
             <div style={{ 
                 display: 'grid', 
-                gridTemplateColumns: 'repeat(auto-fit, minmax(450px, 1fr))', 
+                gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', 
                 gap: '2rem', 
                 width: '100%',
                 alignItems: 'start'

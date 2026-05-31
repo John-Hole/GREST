@@ -296,14 +296,15 @@ export default function UserManagement() {
                                     <td style={{ padding: '0.8rem 1rem', borderRight: '1px solid var(--color-border)' }}>
                                         {user.username !== 'admin' ? (
                                             <select 
+                                                className={`badge ${getRoleBadgeClass(user.role)}`}
                                                 value={user.role} 
                                                 onChange={(e) => handleUpdateRole(user.id, e.target.value)}
-                                                style={{ padding: '4px', fontSize: '0.85em', border: '1px solid var(--color-border)', borderRadius: '4px', background: 'var(--color-bg-main)' }}
+                                                style={{ border: 'none', cursor: 'pointer', outline: 'none', fontFamily: 'inherit' }}
                                             >
-                                                <option value="animatore">Animatore</option>
-                                                <option value="arbitro">Arbitro</option>
-                                                <option value="admin_giochi">Admin Giochi</option>
-                                                <option value="admin">Admin Totale</option>
+                                                <option value="animatore" style={{ color: 'initial', background: 'initial' }}>Animatore</option>
+                                                <option value="arbitro" style={{ color: 'initial', background: 'initial' }}>Arbitro</option>
+                                                <option value="admin_giochi" style={{ color: 'initial', background: 'initial' }}>Admin Giochi</option>
+                                                <option value="admin" style={{ color: 'initial', background: 'initial' }}>Admin Totale</option>
                                             </select>
                                         ) : (
                                             <span className={`badge ${getRoleBadgeClass(user.role)}`}>

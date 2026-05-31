@@ -59,7 +59,7 @@ export default function ImpostazioniPage() {
                 </div>
             )}
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem', maxWidth: '1200px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '2rem', maxWidth: '1200px' }}>
                 {/* Locations Management */}
                 <div className="card" style={{ padding: '2rem' }}>
                     <h2 style={{ fontSize: '1.3em', marginBottom: '1.5rem', color: 'var(--color-primary-medium)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>

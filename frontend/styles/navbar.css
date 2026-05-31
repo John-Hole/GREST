@@ -149,6 +149,9 @@
     }
 
     .navbar-center {
+        position: static;
+        transform: none;
+        pointer-events: auto;
         gap: var(--spacing-sm);
     }
 }

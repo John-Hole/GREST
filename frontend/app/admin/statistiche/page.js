@@ -177,7 +177,7 @@ export default function StatisticheIncontri() {
             ) : (
                 <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
                     {/* First Row: Distribution and General Stats */}
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '2rem' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '2rem' }}>
                         
                         {/* Distribution Donut */}
                         <div className="card" style={{ padding: '2rem', display: 'flex', flexDirection: 'column', alignItems: 'center', position: 'relative' }}>
@@ -214,7 +214,7 @@ export default function StatisticheIncontri() {
                                         </div>
                                     </div>
                                     
-                                    <div style={{ width: '100%', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.8rem' }}>
+                                    <div style={{ width: '100%', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '0.8rem' }}>
                                         {pieData.map((item, idx) => (
                                             <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', padding: '0.6rem', background: 'var(--color-bg-light)', borderRadius: '10px', border: '1px solid var(--color-border)' }}>
                                                 <div style={{ width: '12px', height: '12px', borderRadius: '4px', backgroundColor: item.color, flexShrink: 0 }}></div>
